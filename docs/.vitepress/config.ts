@@ -73,6 +73,7 @@ export default withTheme({
           { text: "User Guide", link: "/en/guide/" },
           { text: "Developer Guide", link: "/en/developer/" },
           { text: "Gallery", link: "/en/gallery/" },
+          { text: "Editor", link: "/en/editor" },
         ],
         sidebar: {
           "/en/guide/": [
