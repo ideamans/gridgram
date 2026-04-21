@@ -68,6 +68,36 @@ const config: ReturnType<typeof withTheme> = withTheme({
 
   themeConfig: {
     logo: "/logo.svg",
+    search: {
+      provider: "local",
+      options: {
+        locales: {
+          ja: {
+            translations: {
+              button: {
+                buttonText: "検索",
+                buttonAriaLabel: "検索",
+              },
+              modal: {
+                displayDetails: "詳細を表示",
+                resetButtonTitle: "検索をリセット",
+                backButtonTitle: "検索を閉じる",
+                noResultsText: "結果が見つかりません",
+                footer: {
+                  selectText: "選択",
+                  selectKeyAriaLabel: "enter",
+                  navigateText: "移動",
+                  navigateUpKeyAriaLabel: "上矢印",
+                  navigateDownKeyAriaLabel: "下矢印",
+                  closeText: "閉じる",
+                  closeKeyAriaLabel: "escape",
+                },
+              },
+            },
+          },
+        },
+      },
+    },
     socialLinks: [
       { icon: "github", link: "https://github.com/ideamans/gridgram" },
     ],
