@@ -1,0 +1,6 @@
+# Node sizing: default vs sizeScale (relative) vs size (absolute)
+
+icon tabler/user "default"
+icon tabler/user "sizeScale=1.3" sizeScale=1.3
+icon tabler/user "sizeScale=0.7" sizeScale=0.7
+icon tabler/user "size=0.9"      size=0.9

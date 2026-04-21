@@ -1,0 +1,12 @@
+# iconTheme controls whether the icon picks up the node's color
+# (`theme`, default) or keeps its own fills (`native`, for brand
+# logos and multicolor glyphs).
+
+doc {
+  icons: {
+    brand: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#dc2626"/><path d="M7 10 l5 -5 l5 5 l-5 5 z" fill="#f8fafc"/><circle cx="12" cy="15" r="2" fill="#f59e0b"/></svg>',
+  },
+}
+
+icon @A1 brand "theme (wrong)"   color=accent
+icon @B1 brand "native (correct)" color=accent iconTheme=native

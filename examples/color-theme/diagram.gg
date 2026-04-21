@@ -1,0 +1,20 @@
+# Custom theme: override every slot + transparent canvas background
+
+doc {
+  cols: 3,
+  theme: {
+    primary:   '#065f46',
+    secondary: '#0369a1',
+    accent:    '#d97706',
+    text:      '#1f2937',
+    bg:        'transparent',
+  },
+}
+
+icon :a @A1 tabler/server   "primary"
+icon :b @B1 tabler/database "secondary" color=secondary
+icon :c @C1 tabler/bolt     "accent"    color=accent
+
+region @A1:C1 "Theme preview" color=accent
+a --> b "links"
+b --> c "links"

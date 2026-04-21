@@ -1,0 +1,17 @@
+doc { cols: 4, rows: 2 }
+
+region @B1:B2 "Write path" color=accent/30
+region @C1:D2 "Read-only"  color=primary/28
+
+icon :app @A1 tabler/server          "App"
+icon :pri @B1 tabler/database        "Primary" sizeScale=1.4
+icon :r1  @C1 tabler/database-export "r-1"
+icon :r2  @D1 tabler/database-export "r-2"
+
+app --> pri "writes" width=2
+app --> r1  "reads"
+app --> r2  "reads"
+pri --> r1 dash="2 4"
+pri --> r2 dash="2 4"
+
+note @C2 [r1, r2] "Async\nlag ≤ 5s"

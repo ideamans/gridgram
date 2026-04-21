@@ -1,0 +1,15 @@
+# Notes: annotation callouts with optional leader lines to nodes / connectors.
+
+doc { cols: 3, rows: 3 }
+
+icon :user @A2 tabler/user     "User"
+icon :api  @B2 tabler/server   "API"
+icon :db   @C2 tabler/database "DB"
+
+user --> api "login" id=login
+api  --> db  "query" id=query
+
+note @B1 [api]     "Stateless\nauto-scaled"
+note @C1 [query]   "SQL with\njoin + index hints"  color=#15803d
+note @A3 [login]   "Session token\ncarried as Bearer JWT"
+note @C3 [db]      "Read replica\nlagged up to 5s"  color=#b45309

@@ -1,0 +1,19 @@
+doc {
+  cols: 5,
+  theme: { primary: '#0369a1', secondary: '#0284c7', accent: '#f59e0b' },
+}
+
+region @A1:B1 "Build"    color=primary/30
+region @C1:C1 "Staging"  color=secondary/28
+region @D1:E1 "Prod"     color=accent/30
+
+icon :dev    @A1 tabler/user       "Dev"
+icon :ci     @B1 tabler/settings   "CI"      { badges: ['check'] } sizeScale=1.3
+icon :stage  @C1 tabler/server     "staging" { badges: ['check'] }
+icon :gate   @D1 tabler/lock       "Gate"    { badges: ['alert'] }
+icon :prod   @E1 tabler/rocket     "prod"    { badges: ['star'] }  sizeScale=1.4
+
+dev   --> ci    "push"
+ci    --> stage "auto"
+stage --> gate  "ready"
+gate  --> prod  "approve" width=3

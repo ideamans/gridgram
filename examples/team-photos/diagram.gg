@@ -1,0 +1,30 @@
+# Team chart using real photos (picsum.photos free image service).
+# Demonstrates:
+#   - raster photo icons loaded from the public web
+#   - clip=circle for avatar-style round portraits
+#   - iconTheme=native so the photos' original colours render (the
+#     default would tint them with the node color)
+#   - sizeScale=1.4 on the CEO to emphasise hierarchy
+#   - regions for C-level / direct reports bands
+
+doc {
+  cols: 3, rows: 2,
+  icons: {
+    ceo:    'https://tabler.io/avatars/transparent/9d29d4b790d6af68352e2fee61d19842.png',
+    eng:    'https://tabler.io/avatars/transparent/8d3de659bfe593c5a4ef0376bd3d2c07.png',
+    prod:   'https://tabler.io/avatars/transparent/b00e1ebc65fc7f2c53c9a9a955a49be5.png',
+    design: 'https://tabler.io/avatars/transparent/eecd70bbeb08e2fc531ca498b9fc4f0d.png',
+  },
+}
+
+region @A1:C1 "C-level"       color=primary/24
+region @A2:C2 "Direct reports" color=secondary/24
+
+icon :ceo @B1 ceo  "Alex — CEO"     clip=circle iconTheme=native sizeScale=1.4
+icon :e   @A2 eng  "Bea — CTO"      clip=circle iconTheme=native
+icon :p   @B2 prod "Carlos — CPO"   clip=circle iconTheme=native
+icon :d   @C2 design "Dana — CDO"   clip=circle iconTheme=native
+
+ceo --> e
+ceo --> p
+ceo --> d

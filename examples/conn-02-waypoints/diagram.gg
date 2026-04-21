@@ -1,0 +1,7 @@
+icon :a @A1 tabler/world  "Source"
+icon :b @D3 tabler/server "Sink"
+
+# Thread the line through D1 and D2 so it goes right then down.
+a --> b "via" {
+  waypoints: [{ col: 4, row: 1 }, { col: 4, row: 2 }],
+}

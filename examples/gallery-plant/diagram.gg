@@ -1,0 +1,22 @@
+doc { cols: 5, rows: 2 }
+
+region @A1:A2 "Raw"      color=secondary/14
+region @B1:C2 "Fab"      color=primary/14
+region @D1:D2 "Assembly" color=accent/14
+region @E1:E2 "Ship"     color=primary/14
+
+icon :wh    @A2 tabler/building-warehouse "WH"
+icon :cnc   @B2 tabler/tools              "CNC"
+icon :paint @C2 tabler/brush              "Paint"
+icon :asm   @D2 tabler/hammer             "Assemble"
+icon :out   @E2 tabler/truck-delivery     "Out"
+icon :mes   @C1 tabler/device-desktop     "MES" sizeScale=1.2
+
+wh    --> cnc
+cnc   --> paint
+paint --> asm
+asm   --> out
+
+mes --> cnc   "plan" dash="2 4"
+mes --> paint "plan" dash="2 4"
+mes --> asm   "plan" dash="2 4"

@@ -1,0 +1,14 @@
+# Raster asset (Gravatar PNG) + clip variants.
+# PNG / JPEG images are fitted short-edge-to-square and cropped to
+# cover the icon. `clip=` picks the outline: square (default), circle,
+# or none.
+
+doc {
+  icons: {
+    me: 'https://www.gravatar.com/avatar/53ea23014763c68cf72d3d3e65dc0dd6?s=200',
+  },
+}
+
+icon @A1 me "square (default)"
+icon @B1 me "circle"  clip=circle
+icon @C1 me "none"    clip=none

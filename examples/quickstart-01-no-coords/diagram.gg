@@ -1,0 +1,9 @@
+# No @col,row needed — nodes auto-position along row 0.
+icon :user tabler/user     "User"
+icon :web  tabler/world    "Web"
+icon :api  tabler/server   "API"
+icon :db   tabler/database "DB"
+
+user --> web "HTTPS"
+web  <-> api "REST"
+api  <-> db  "SQL"

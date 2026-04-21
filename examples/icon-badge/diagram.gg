@@ -1,0 +1,8 @@
+# Badge presets attached via the trailing { … } JSON5 body.
+
+doc { cols: 4 }
+
+icon    @A1 tabler/server "ok"    { badges: ['check'] }
+icon  @B1 tabler/server "warn"  { badges: ['alert'] }
+icon  @C1 tabler/server "info"  { badges: ['info'] }
+icon @D1 tabler/server "guard" { badges: ['lock'] }

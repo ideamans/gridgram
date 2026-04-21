@@ -1,0 +1,17 @@
+doc { cols: 4, rows: 2 }
+
+region @A1:B2 "Edge"     color=accent/28
+region @C1:D2 "Services" color=primary/24
+
+icon :client  @A1 tabler/device-laptop "Client"
+icon :gw      @A2 tabler/api           "Gateway" sizeScale=1.6
+icon :users   @C1 tabler/users         "Users"   { badges: ['check'] }
+icon :orders  @D1 tabler/shopping-cart "Orders"  { badges: ['check'] }
+icon :notify  @C2 tabler/bell          "Notify"  { badges: ['alert'] }
+icon :billing @D2 tabler/credit-card   "Billing" { badges: ['check'] }
+
+client --> gw
+gw --> users
+gw --> orders
+gw --> notify  dash="2 4"
+gw --> billing

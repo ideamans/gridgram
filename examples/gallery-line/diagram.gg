@@ -1,0 +1,15 @@
+doc { cols: 5, rows: 2 }
+
+icon :raw  @A1 tabler/box                    "Raw"
+icon :cut  @B1 tabler/scissors               "Cut"
+icon :weld @C1 tabler/bolt                   "Weld"
+icon :qa   @D1 tabler/clipboard-check        "QA" { badges: ['star'] }
+icon :pack @E1 tabler/package                "Pack"
+icon :re   @C2 tabler/refresh                "Rework"
+
+raw  --> cut
+cut  --> weld
+weld --> qa
+qa   --> pack "pass"
+qa   --> re   "fail" dash="4 4" color=accent
+re   --> weld

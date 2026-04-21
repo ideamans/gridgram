@@ -1,0 +1,15 @@
+# Connector styles: dash pattern, stroke width, color
+
+icon :a @A1 tabler/circle "a"
+icon :b @C1 tabler/circle "b"
+icon :c @A2 tabler/circle "c"
+icon :d @C2 tabler/circle "d"
+icon :e @A3 tabler/circle "e"
+icon :f @C3 tabler/circle "f"
+icon :g @A4 tabler/circle "g"
+icon :h @C4 tabler/circle "h"
+
+a --> b "default"
+c --> d "width=4"       width=4
+e ..> f "dashed (..>)"
+g --> h "dash=1 3"      dash="1 3"

@@ -1,0 +1,12 @@
+doc { cols: 4 }
+
+icon :orders   @A1 tabler/shopping-cart  "Orders"       { badges: ['check'] }
+icon :queue    @B1 tabler/inbox          "Queue"        sizeScale=1.3
+icon :fulfill  @C1 tabler/truck-delivery "Fulfill"      { badges: ['check'] }
+icon :notify   @D1 tabler/bell           "Notify"       { badges: ['alert'] }
+
+orders  --> queue   "enqueue" width=2
+queue   --> fulfill "consume"
+queue   --> notify  "consume" dash="4 4"
+
+note @B2 [notify] "Lagging —\ninvestigate"

@@ -1,0 +1,15 @@
+doc {
+  cols: 3, rows: 3,
+  theme: { primary: '#6d28d9', secondary: '#7c3aed', accent: '#db2777' },
+}
+
+icon :app   @A2 tabler/server         "App"
+icon :kafka @B2 tabler/arrows-shuffle "Kafka" sizeScale=1.8
+icon :sink  @C1 tabler/database       "DW"
+icon :ml    @C2 tabler/brain          "ML"
+icon :audit @C3 tabler/file-text      "Audit"
+
+app   --> kafka width=2
+kafka --> sink  dash="2 4"
+kafka --> ml    dash="2 4"
+kafka --> audit dash="2 4"

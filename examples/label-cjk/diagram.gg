@@ -1,0 +1,11 @@
+# Labels accept Unicode freely — CJK (Japanese / Chinese / Korean)
+# characters render the same as Latin letters.
+
+icon :user tabler/user     "ユーザー"
+icon :web  tabler/world    "网站"
+icon :api  tabler/server   "API 伺服器"
+icon :db   tabler/database "데이터베이스"
+
+user --> web "HTTPS"
+web  <-> api "要求"
+api  <-> db  "쿼리"

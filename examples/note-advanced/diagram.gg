@@ -1,0 +1,22 @@
+# Notes: standalone callouts, multi-target leaders, and **bold** text.
+
+doc { cols: 4, rows: 3 }
+
+icon :front @A2 tabler/world    "Front"
+icon :api   @B2 tabler/server   "API"
+icon :queue @C2 tabler/bolt     "Queue"
+icon :store @D2 tabler/database "Store"
+
+front --> api   "HTTPS" id=req
+api   --> queue "enqueue"
+api   --> store "write"
+
+# Standalone header / commentary — no `[...]` targets. Use for
+# section labels or general prose.
+note @A1 "**Public** edge"             color=#0369a1
+note @C1 "**Async** path"              color=#7c3aed
+
+# Multi-target: one note points at two elements. Leaders fan out
+# from the note body to each target.
+note @D3 [queue, store] "Both **read** after\nthe request completes"
+note @B3 [req, api]     "Rate-limited"  color=#b45309

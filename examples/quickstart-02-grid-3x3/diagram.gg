@@ -1,0 +1,34 @@
+doc {
+  cols: 3, rows: 3,
+  theme: { primary: '#1e3a5f', accent: '#e8792f' },
+}
+
+# Public layer (top row)
+icon :cdn   @A1 tabler/cloud "CDN"  color=accent
+icon :edge  @B1 tabler/world "Edge" color=accent
+icon :waf   @C1 tabler/lock  "WAF"  color=accent
+
+# Application layer (middle row)
+icon :api   @A2 tabler/server "API GW"
+icon :auth  @B2 tabler/lock   "Auth"
+icon :queue @C2 tabler/bolt   "Queue"
+
+# Data layer (bottom row)
+icon :db    @A3 tabler/database "Postgres"
+icon :cache @B3 tabler/server   "Redis"
+icon :audit @C3 tabler/file     "Audit"
+
+# Background regions group the rows
+region @A1:C1 "Public" color=accent/12
+region @A2:C2 "App"    color=primary/14
+region @A3:C3 "Data"   color=secondary/14
+
+# Vertical & cross flows
+edge  --> waf    "filter"
+waf   --> api    "verify"
+api   <-> auth   "session"
+api   --> queue  "enqueue"
+queue --> cache  "lookup"
+api   --> db     "write"
+api   --> audit  "log"
+cdn   --> edge   "static"

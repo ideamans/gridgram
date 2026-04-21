@@ -1,0 +1,134 @@
+/* Lock DaisyUI's brand tokens to Gridgram's SYSTEM_DEFAULTS palette
+   (src/config.ts). The theme package from node_modules registers the
+   stock `light` / `dark` themes; we override the tokens they set so
+   every DaisyUI component (btn, badge, menu, …) ends up using the
+   Gridgram navy / blue / orange instead of DaisyUI's default indigo
+   / cyan / pink — without having to register a named theme.
+
+   Palette:
+     primary   #1e3a5f   dark navy           (light mode)
+     secondary #3b5a80   muted mid-blue
+     accent    #e8792f   warm orange
+     primary   #a8c7e9   soft sky            (dark mode, legible on dark bg)
+     accent    #f39c55   slightly brighter orange
+
+   DaisyUI stores colours as `oklch(...)` — but any valid CSS colour
+   works here; the components only read via `var(--color-primary)`. */
+:root,
+html[data-theme='light'],
+[data-theme='light'] {
+  --color-primary: #1e3a5f;
+  --color-primary-content: #ffffff;
+  --color-secondary: #3b5a80;
+  --color-secondary-content: #ffffff;
+  --color-accent: #e8792f;
+  --color-accent-content: #ffffff;
+}
+
+html.dark,
+html[data-theme='dark'],
+[data-theme='dark'] {
+  --color-primary: #a8c7e9;
+  --color-primary-content: #0f172a;
+  --color-secondary: #8aa8c8;
+  --color-secondary-content: #0f172a;
+  --color-accent: #f39c55;
+  --color-accent-content: #0f172a;
+}
+
+/* Inline diagrams emitted by the gg-diagram markdown-it plugin.
+   No frame, no checker backdrop — the diagram stands on its own and
+   stretches to the content column. */
+.gg-inline-diagram {
+  margin: 24px 0;
+  display: block;
+}
+.gg-inline-diagram > svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Gallery mode: tabbed "Diagram | Source" viewer (```gg-diagram gallery).
+   CSS-only toggle — two hidden radios drive sibling selectors, so the
+   page stays interactive without any client-side JS. */
+.gg-gallery {
+  position: relative;
+  margin: 24px 0;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.gg-gallery__radio {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+  height: 0;
+}
+.gg-gallery__tabs {
+  display: flex;
+  background: var(--vp-c-bg-soft);
+  border-bottom: 1px solid var(--vp-c-divider);
+}
+.gg-gallery__tab {
+  padding: 8px 14px;
+  font-size: 12px;
+  font-family: var(--vp-font-family-mono, monospace);
+  color: var(--vp-c-text-2);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  user-select: none;
+  transition: color 0.15s, border-color 0.15s;
+}
+.gg-gallery__tab:hover {
+  color: var(--vp-c-text-1);
+}
+.gg-gallery__pane {
+  display: none;
+  min-width: 0;
+}
+.gg-gallery__pane--diagram {
+  padding: 16px 20px;
+}
+.gg-gallery__pane--diagram > svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+/* Shiki emits its own <pre> with theming; kill the default outer margin
+   so the pane's border is flush against the code block. */
+.gg-gallery__pane--source > pre,
+.gg-gallery__pane--source > div > pre {
+  margin: 0;
+  border-radius: 0;
+}
+.gg-gallery__code-fallback {
+  margin: 0;
+  padding: 12px 16px;
+  background: var(--vp-c-bg-soft);
+  font-family: var(--vp-font-family-mono, monospace);
+  font-size: 13px;
+  line-height: 1.55;
+  overflow-x: auto;
+}
+
+/* Diagram tab active (default). */
+.gg-gallery__radio--diagram:checked ~ .gg-gallery__tabs .gg-gallery__tab--diagram,
+.gg-gallery__radio--source:checked ~ .gg-gallery__tabs .gg-gallery__tab--source {
+  color: var(--vp-c-brand-1);
+  border-bottom-color: var(--vp-c-brand-1);
+}
+.gg-gallery__radio--diagram:checked ~ .gg-gallery__pane--diagram,
+.gg-gallery__radio--source:checked ~ .gg-gallery__pane--source {
+  display: block;
+}
+
+/* Keyboard focus: the labels sit over hidden radios, so route the
+   focus ring to the label when its radio is focused. */
+.gg-gallery__radio:focus-visible + .gg-gallery__radio + .gg-gallery__tabs .gg-gallery__tab--diagram,
+.gg-gallery__radio--diagram:focus-visible ~ .gg-gallery__tabs .gg-gallery__tab--diagram,
+.gg-gallery__radio--source:focus-visible ~ .gg-gallery__tabs .gg-gallery__tab--source {
+  outline: 2px solid var(--vp-c-brand-1);
+  outline-offset: -2px;
+}

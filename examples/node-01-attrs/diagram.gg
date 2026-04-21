@@ -1,0 +1,6 @@
+# Icon attributes: size / sizeScale / color / labelScale
+
+icon tabler/user "default"
+icon tabler/user "color=accent"     color=accent
+icon tabler/user "size=0.7"         size=0.7
+icon tabler/user "labelScale=0.7"   labelScale=0.7

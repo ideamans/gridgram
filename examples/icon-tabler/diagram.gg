@@ -1,0 +1,9 @@
+# Tabler built-ins: outline (tabler/<name>) and filled (tabler/filled/<name>).
+
+icon tabler/user          "user"
+icon tabler/world         "world"
+icon tabler/server        "server"
+icon tabler/database      "database"
+icon tabler/bolt          "bolt"
+icon tabler/filled/star   "star"
+icon tabler/filled/heart  "heart"

@@ -1,0 +1,22 @@
+# Region spanning: two ranges joined into a T vs three into an L.
+
+doc { cols: 4, rows: 3 }
+
+icon @A1 tabler/server "a"
+icon @B1 tabler/server "b"
+icon @C1 tabler/server "c"
+icon @D1 tabler/server "d"
+icon @A2 tabler/server "e"
+icon @B2 tabler/server "f"
+icon @C2 tabler/server "g"
+icon @D2 tabler/server "h"
+icon @A3 tabler/server "i"
+icon @B3 tabler/server "j"
+icon @C3 tabler/server "k"
+icon @D3 tabler/server "l"
+
+# Top row + a stem dropping from B → T-shape.
+region @A1:D1 @B1:B2 "Top row" color=accent/14
+
+# 2 ranges joined at an edge → L-shape (single blob outline)
+region @A2:A3 @A3:D3 "L-shape" color=primary/14

@@ -1,0 +1,13 @@
+# Custom icons registered via `doc { icons: … }`.
+# Values can be raw SVG markup, dataURLs, http(s) URLs, or file paths.
+
+doc {
+  icons: {
+    triangle: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3 L22 20 L2 20 Z"/></svg>',
+    diamond:  '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 L22 12 L12 22 L2 12 Z"/></svg>',
+  },
+}
+
+icon triangle     "triangle"
+icon diamond      "diamond"
+icon tabler/bolt  "tabler/bolt"

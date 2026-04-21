@@ -1,0 +1,9 @@
+icon :front @A1 tabler/world    "Frontend"
+icon :api   @B1 tabler/server   "API"
+icon :cache @A2 tabler/database "Cache"
+icon :db    @B2 tabler/database "DB"
+
+front --> api   "REST"
+api   --> cache "lookup"
+cache --> db    "miss"
+api   --> db    "write"

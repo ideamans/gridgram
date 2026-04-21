@@ -1,0 +1,99 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "gg",
+  "scopeName": "source.gg",
+  "fileTypes": ["gg"],
+  "patterns": [
+    { "include": "#comment" },
+    { "include": "#keyword" },
+    { "include": "#arrow" },
+    { "include": "#id-sigil" },
+    { "include": "#pos" },
+    { "include": "#string" },
+    { "include": "#target-list" },
+    { "include": "#attr" },
+    { "include": "#body" },
+    { "include": "#identifier" }
+  ],
+  "repository": {
+    "comment": {
+      "patterns": [
+        { "match": "(?<!\\S)#.*$", "name": "comment.line.number-sign.gg" },
+        { "match": "(?<!\\S)//.*$", "name": "comment.line.double-slash.gg" }
+      ]
+    },
+    "keyword": {
+      "match": "(?<![\\w-])(doc|icon|region|note)(?![\\w-])",
+      "name": "keyword.control.gg"
+    },
+    "arrow": {
+      "match": "(-->|->|<--|<->|---|\\.\\.>|<\\.\\.>|<\\.\\.|\\.\\.\\.)(?=\\s|$|;)",
+      "name": "keyword.operator.arrow.gg"
+    },
+    "id-sigil": {
+      "match": "(:)([A-Za-z_][\\w-]*)",
+      "captures": {
+        "1": { "name": "punctuation.definition.id.gg" },
+        "2": { "name": "entity.name.function.id.gg" }
+      }
+    },
+    "pos": {
+      "match": "@([A-Za-z]+\\d+(?:[:\\-][A-Za-z]+\\d+)?|\\d+,\\d+(?:[:\\-]\\d+,\\d+)?)",
+      "name": "constant.numeric.cell-address.gg"
+    },
+    "string": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.gg",
+          "begin": "\"", "end": "\"",
+          "patterns": [
+            { "match": "\\\\[\"\\\\nt]", "name": "constant.character.escape.gg" }
+          ]
+        },
+        {
+          "name": "string.quoted.single.gg",
+          "begin": "'", "end": "'",
+          "patterns": [
+            { "match": "\\\\['\\\\nt]", "name": "constant.character.escape.gg" }
+          ]
+        }
+      ]
+    },
+    "target-list": {
+      "name": "meta.target-list.gg",
+      "begin": "\\[", "end": "\\]",
+      "beginCaptures": { "0": { "name": "punctuation.section.brackets.begin.gg" } },
+      "endCaptures":   { "0": { "name": "punctuation.section.brackets.end.gg" } },
+      "patterns": [
+        { "match": "[A-Za-z_][\\w-]*", "name": "variable.other.target.gg" },
+        { "match": ",", "name": "punctuation.separator.gg" }
+      ]
+    },
+    "attr": {
+      "patterns": [
+        {
+          "match": "([A-Za-z_][\\w-]*)(=)(\"(?:\\\\.|[^\"\\\\])*\"|'(?:\\\\.|[^'\\\\])*'|[^\\s;{\\[]+)",
+          "captures": {
+            "1": { "name": "entity.other.attribute-name.gg" },
+            "2": { "name": "punctuation.separator.key-value.gg" },
+            "3": { "name": "string.unquoted.attribute-value.gg" }
+          }
+        }
+      ]
+    },
+    "body": {
+      "name": "meta.body.gg",
+      "begin": "\\{", "end": "\\}",
+      "beginCaptures": { "0": { "name": "punctuation.section.body.begin.gg" } },
+      "endCaptures":   { "0": { "name": "punctuation.section.body.end.gg" } },
+      "patterns": [
+        { "include": "source.json5" },
+        { "include": "source.json" }
+      ]
+    },
+    "identifier": {
+      "match": "(?<![:@])\\b[A-Za-z_][\\w/-]*\\b",
+      "name": "entity.name.type.ref.gg"
+    }
+  }
+}

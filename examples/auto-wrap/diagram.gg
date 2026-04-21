@@ -1,0 +1,13 @@
+# Auto-layout with `cols`: icons without @pos stream along row 1 and
+# wrap into row 2 once the column count (here 4) is reached.
+
+doc { cols: 4 }
+
+icon tabler/user     "user"
+icon tabler/world    "web"
+icon tabler/server   "api"
+icon tabler/database "db"
+icon tabler/bolt     "queue"
+icon tabler/cloud    "cdn"
+icon tabler/lock     "auth"
+icon tabler/file     "audit"

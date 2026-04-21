@@ -1,0 +1,15 @@
+doc { cols: 4 }
+
+region @A1:B1 "Public zone"  color=accent/28
+region @C1:D1 "Private zone" color=primary/28
+
+icon :client tabler/device-laptop "Client"
+icon :web    tabler/world         "Web"
+icon :api    tabler/server        "API"   sizeScale=1.2
+icon :db     tabler/database      "DB"
+
+client --> web "HTTPS" width=2
+web    --> api "REST"
+api    --> db  "SQL"
+
+note @C2 [api] "SLA 99.95%\np99 < 200ms"

@@ -1,0 +1,21 @@
+# Region styling: theme keyword vs alpha override vs literal color; corner radius
+
+doc { cols: 4, rows: 2 }
+
+icon @A1 tabler/circle "a"
+icon @B1 tabler/circle "b"
+icon @C1 tabler/circle "c"
+icon @D1 tabler/circle "d"
+icon @A2 tabler/circle "e"
+icon @B2 tabler/circle "f"
+icon @C2 tabler/circle "g"
+icon @D2 tabler/circle "h"
+
+# 'accent' alone auto-tints to ~7%
+region @A1:A2 "accent"    color=accent
+# Explicit alpha bypasses the auto-tint
+region @B1:B2 "accent/30" color=accent/30
+# Literal hex also bypasses the auto-tint
+region @C1:C2 "#d1fae5"   color=#d1fae5
+# Sharper corners via radius=4
+region @D1:D2 "radius=4"  color=primary/12 radius=4

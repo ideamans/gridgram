@@ -1,0 +1,15 @@
+# Connector labels: plain / multi-line / custom font size / colon in text
+
+icon :a @A1 tabler/world  "a"
+icon :b @C1 tabler/server "b"
+icon :c @A2 tabler/world  "c"
+icon :d @C2 tabler/server "d"
+icon :e @A3 tabler/world  "e"
+icon :f @C3 tabler/server "f"
+icon :g @A4 tabler/world  "g"
+icon :h @C4 tabler/server "h"
+
+a --> b "plain"
+c --> d "POST /users\nreturns 201"
+e --> f "big"        labelScale=1.5
+g --> h "emphasized" color=accent

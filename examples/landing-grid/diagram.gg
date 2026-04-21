@@ -1,0 +1,10 @@
+doc { cols: 2, rows: 2 }
+
+icon :user  @A1 tabler/user     "User"
+icon :api   @B1 tabler/server   "API"
+icon :cache @A2 tabler/bolt     "Cache"
+icon :db    @B2 tabler/database "DB"
+
+user --> api   "HTTPS"
+api  <-> cache "read/write"
+api  --> db    "SQL"
