@@ -93,6 +93,9 @@ const config: ReturnType<typeof withTheme> = withTheme({
       // current subpath and just swaps /en/ ↔ /ja/ instead of jumping to
       // the locale root.
       themeConfig: {
+        // Logo click within the EN locale returns to /en/ (not the
+        // global language-picker at /).
+        logoLink: "/en/",
         nav: [
           { text: "User Guide", link: "/en/guide/" },
           { text: "Developer Guide", link: "/en/developer/" },
@@ -269,6 +272,8 @@ const config: ReturnType<typeof withTheme> = withTheme({
       lang: "ja",
       // `link` omitted — see the /en/ entry for the rationale.
       themeConfig: {
+        // Logo click within the JA locale returns to /ja/.
+        logoLink: "/ja/",
         nav: [
           { text: "ユーザーガイド", link: "/ja/guide/" },
           { text: "開発者ガイド", link: "/ja/developer/" },
