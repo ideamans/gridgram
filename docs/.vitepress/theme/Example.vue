@@ -215,6 +215,16 @@ onMounted(async () => {
           { 'has-coords': showCoords, 'has-framing': !!framing },
         ]"
       >
+        <div
+          v-if="framing"
+          class="gg-example__frame-badge"
+          aria-live="polite"
+        >
+          Frame {{ currentFrame }}
+          <span v-if="framing.min !== framing.max" class="gg-example__frame-range">
+            / {{ framing.min }}–{{ framing.max }}
+          </span>
+        </div>
         <div class="gg-example__image-box">
           <img v-if="outputTab === 'svg'" :src="svgUrl" :alt="`${name} (SVG, frame ${currentFrame})`" />
           <img v-else                     :src="pngUrl" :alt="`${name} (PNG, frame ${currentFrame})`" />
@@ -236,27 +246,19 @@ onMounted(async () => {
               >{{ label }}</span>
             </div>
           </template>
-          <template v-if="framing">
-            <div class="gg-example__frame-badge" aria-live="polite">
-              Frame {{ currentFrame }}
-              <span v-if="framing.min !== framing.max" class="gg-example__frame-range">
-                / {{ framing.min }}–{{ framing.max }}
-              </span>
-            </div>
-            <template v-if="framing.min !== framing.max">
-              <button
-                class="gg-example__frame-nav gg-example__frame-nav--prev"
-                :disabled="!canStepBack"
-                @click="stepBack"
-                aria-label="Previous frame"
-              >◀</button>
-              <button
-                class="gg-example__frame-nav gg-example__frame-nav--next"
-                :disabled="!canStepFwd"
-                @click="stepFwd"
-                aria-label="Next frame"
-              >▶</button>
-            </template>
+          <template v-if="framing && framing.min !== framing.max">
+            <button
+              class="gg-example__frame-nav gg-example__frame-nav--prev"
+              :disabled="!canStepBack"
+              @click="stepBack"
+              aria-label="Previous frame"
+            >◀</button>
+            <button
+              class="gg-example__frame-nav gg-example__frame-nav--next"
+              :disabled="!canStepFwd"
+              @click="stepFwd"
+              aria-label="Next frame"
+            >▶</button>
           </template>
         </div>
       </div>
@@ -336,6 +338,16 @@ onMounted(async () => {
         { 'has-coords': showCoords, 'has-framing': !!framing },
       ]"
     >
+      <div
+        v-if="framing"
+        class="gg-example__frame-badge"
+        aria-live="polite"
+      >
+        Frame {{ currentFrame }}
+        <span v-if="framing.min !== framing.max" class="gg-example__frame-range">
+          / {{ framing.min }}–{{ framing.max }}
+        </span>
+      </div>
       <div class="gg-example__image-box">
         <img v-if="singleTab === 'svg'" :src="svgUrl" :alt="`${name} (SVG, frame ${currentFrame})`" />
         <img v-else                     :src="pngUrl" :alt="`${name} (PNG, frame ${currentFrame})`" />
@@ -357,27 +369,19 @@ onMounted(async () => {
             >{{ label }}</span>
           </div>
         </template>
-        <template v-if="framing">
-          <div class="gg-example__frame-badge" aria-live="polite">
-            Frame {{ currentFrame }}
-            <span v-if="framing.min !== framing.max" class="gg-example__frame-range">
-              / {{ framing.min }}–{{ framing.max }}
-            </span>
-          </div>
-          <template v-if="framing.min !== framing.max">
-            <button
-              class="gg-example__frame-nav gg-example__frame-nav--prev"
-              :disabled="!canStepBack"
-              @click="stepBack"
-              aria-label="Previous frame"
-            >◀</button>
-            <button
-              class="gg-example__frame-nav gg-example__frame-nav--next"
-              :disabled="!canStepFwd"
-              @click="stepFwd"
-              aria-label="Next frame"
-            >▶</button>
-          </template>
+        <template v-if="framing && framing.min !== framing.max">
+          <button
+            class="gg-example__frame-nav gg-example__frame-nav--prev"
+            :disabled="!canStepBack"
+            @click="stepBack"
+            aria-label="Previous frame"
+          >◀</button>
+          <button
+            class="gg-example__frame-nav gg-example__frame-nav--next"
+            :disabled="!canStepFwd"
+            @click="stepFwd"
+            aria-label="Next frame"
+          >▶</button>
         </template>
       </div>
     </div>
@@ -429,11 +433,16 @@ onMounted(async () => {
   border-bottom-color: var(--vp-c-brand-1);
 }
 .gg-example__viewport {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   background: repeating-conic-gradient(#f6f6f6 0% 25%, #ffffff 25% 50%) 0 0/20px 20px;
-  padding: 24px;
+  /* 16px vertical, 24px horizontal — narrow enough that the Frame
+     badge (when present) reads as a caption tight to the top edge,
+     wide enough horizontally that the left-edge nav arrow sits just
+     inside the checker. */
+  padding: 16px 24px;
   min-height: 240px;
 }
 .gg-example__viewport img {
@@ -501,23 +510,39 @@ onMounted(async () => {
 
 /* --- Frame-aware viewer bits ------------------------------------- */
 
-/* The frame badge sits inside the image-box so it tracks the image's
-   actual rendered width (not the viewport padding box). Top-left to
-   mimic a figure caption; opaque enough to read against any diagram. */
+/* The frame badge sits in the viewport's padding strip (above the
+   image), on top of the checkered backdrop. White plate with a light
+   border + small radius so it reads as a caption chip without
+   covering any diagram content.
+   Positioning: left edge flush with the viewport's left padding (24px,
+   inside boundary of the padding strip); vertical centre of the badge
+   lines up with the vertical centre of the 24px top-padding strip.
+   Tight line-height + small padding keeps the badge short enough to
+   sit in that strip with visible gaps above and below. */
 .gg-example__frame-badge {
   position: absolute;
-  top: 6px;
-  left: 6px;
-  padding: 3px 10px;
+  /* Top is nudged into the checker backdrop just above the diagram
+     edge so the badge reads as a caption. Left is offset by 2px from
+     the viewport's 24px left padding to account for the extra
+     horizontal padding inside the badge — keeps the text column at
+     the same x as before. translateY(-50%) keeps the text's vertical
+     centre pinned at `top` regardless of the badge's total height,
+     so growing the vertical padding doesn't shift the text. */
+  top: 18px;
+  left: 22px;
+  transform: translateY(-50%);
+  padding: 3px 9px;
   font-size: 12px;
+  line-height: 1;
   font-family: var(--vp-font-family-mono);
   font-weight: 600;
   color: var(--vp-c-text-1);
-  background: var(--vp-c-bg);
+  background: #ffffff;
   border: 1px solid var(--vp-c-divider);
-  border-radius: 999px;
+  border-radius: 4px;
   pointer-events: none;
   user-select: none;
+  z-index: 2;
 }
 .gg-example__frame-range {
   color: var(--vp-c-text-3);
