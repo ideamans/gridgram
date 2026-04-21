@@ -59,9 +59,15 @@ describe('resolveDiagram diagnostics', () => {
     expect(failedAttempt).toBeDefined()
     expect(failedAttempt!.obstacles.length).toBeGreaterThan(0)
 
-    // Final attempt is marked accepted even though it hit obstacles
-    // (the fallback path).
-    expect(d.attempts!.at(-1)!.accepted).toBe(true)
+    // Exactly one attempt is marked accepted — whichever the placer
+    // picked. Under the 'smallest-collision' strategy the accepted
+    // attempt can sit anywhere in the list (it's the candidate with
+    // the fewest hits, not necessarily the last one tried).
+    const acceptedAttempts = d.attempts!.filter((a) => a.accepted)
+    expect(acceptedAttempts).toHaveLength(1)
+    // And because the layout is genuinely crowded, even the accepted
+    // attempt still hits at least one obstacle.
+    expect(acceptedAttempts[0].obstacles.length).toBeGreaterThan(0)
   })
 
   test('obstacle owners carry the right element kind + id', () => {

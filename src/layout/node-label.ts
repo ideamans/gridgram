@@ -43,6 +43,16 @@ export const CORNER_ORDER: Corner[] = [
   'top-center', 'bottom-center',
 ]
 
+/**
+ * Leader-gap multipliers for the tiered search. Tier 1 is the tight
+ * default; tiers 2 and 3 pull the label progressively further from the
+ * node so crowded cells have somewhere to put the callout. Each tier
+ * walks all six corners in CORNER_ORDER before the next tier begins.
+ * If none fit cleanly, the placer falls back to the candidate with the
+ * smallest collision (see `placeLabel`'s 'smallest-collision' strategy).
+ */
+export const LEADER_TIERS = [1, 2, 3] as const
+
 export interface CalloutGeometry {
   labelRect: LabelRect
   edgeX: number
@@ -140,7 +150,21 @@ export interface NodeLabelResult {
   attempts: AttemptRecord[]
 }
 
-/** Pre-compute node label placement. Order: TR → BR → BL → TL → TC → BC */
+/**
+ * Pre-compute node label placement.
+ *
+ * Candidate order:
+ *   tier 1 (leader×1): TR → BR → BL → TL → TC → BC
+ *   tier 2 (leader×2): TR → BR → BL → TL → TC → BC
+ *   tier 3 (leader×3): TR → BR → BL → TL → TC → BC
+ *
+ * 18 positions total. If every tier collides, the placer picks the
+ * candidate with the fewest collision hits (tie-break: earliest in the
+ * list, i.e. tier-1 wins over tier-2 wins over tier-3 on ties), so the
+ * label degrades gracefully instead of always landing in one forced
+ * corner. Slot is still returned as a plain `Corner` — the tier is
+ * encoded only in the attempt description for diagnostics.
+ */
 export function computeNodeLabelRect(
   node: NormalizedNodeDef, layout: GridLayout,
   placedLabels: LabelRect[], connLines: LineSeg[],
@@ -150,18 +174,25 @@ export function computeNodeLabelRect(
   if (!node.label) return null
 
   const m = nodeLabelMetrics(node, layout)
-  const buildRect = (corner: Corner): LabelRect =>
-    computeCallout(m.x, m.y, m.half, SLOTS[corner], m.fs, m.textW, m.textH, m.leaderGap).labelRect
-  const candidates: SlotCandidate<Corner>[] = CORNER_ORDER.map((c) => ({
-    slot: c,
-    rect: buildRect(c),
-    description: c,
-  }))
-  const fallback: SlotCandidate<Corner> = { slot: 'top-left', rect: buildRect('top-left'), description: 'top-left' }
+  const buildRect = (corner: Corner, tier: number): LabelRect =>
+    computeCallout(
+      m.x, m.y, m.half, SLOTS[corner], m.fs, m.textW, m.textH, m.leaderGap * tier,
+    ).labelRect
+  const candidates: SlotCandidate<Corner>[] = []
+  for (const tier of LEADER_TIERS) {
+    for (const c of CORNER_ORDER) {
+      candidates.push({
+        slot: c,
+        rect: buildRect(c, tier),
+        description: tier === 1 ? c : `${c} (leader×${tier})`,
+      })
+    }
+  }
   const result = placeLabel<Corner>(
     candidates,
     { placedLabels, connLines, bounds, iconCircles },
-    fallback,
+    undefined,
+    { noFitStrategy: 'smallest-collision' },
   )!
   return { rect: result.rect, corner: result.slot, error: result.error, attempts: result.attempts }
 }
