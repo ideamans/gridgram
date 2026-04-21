@@ -57,24 +57,7 @@ proj  --> view  "build"
 赤くマークした分岐へデッドレターし、ノートでリトライポリシーを
 記述します。
 
-```gg-diagram gallery
-doc { cols: 4, rows: 2 }
-
-icon :ui    @A1 tabler/user             "UI"
-icon :cmd   @B1 tabler/server           "Command" { badges: ['check'] }
-icon :bus   @C1 tabler/arrows-shuffle   "Bus"
-icon :wdb   @D1 tabler/database         "Write DB"
-icon :dlq   @C2 tabler/alert-triangle   "DLQ"     { badges: ['alert'] }
-icon :rdb   @D2 tabler/database-export  "Read DB"
-
-ui  --> cmd
-cmd --> bus
-bus --> wdb
-bus --> rdb "project" dash="2 4"
-bus --> dlq "fail"    dash="4 4" color=accent
-
-note @B2 (dlq) "Retries: 3×\nbackoff 30s→5m"
-```
+<Example name="frame-gallery-dlq" framing="1-3" layout="single" />
 
 ## サーガのステートマシン
 

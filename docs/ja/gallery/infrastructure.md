@@ -59,26 +59,7 @@ note @C2 (dbr) "Lag ≤ 5s"
 エッジキャッシュとオリジンへのフォールバックです。ミス時の分岐を
 破線にすることで 2 本の経路が一目で見分けられます。
 
-```gg-diagram gallery
-doc { cols: 4 }
-
-region @A1:A1 "Client"  color=accent/24
-region @B1:C1 "Edge"    color=primary/28
-region @D1:D1 "Origin"  color=secondary/24
-
-icon :user   @A1 tabler/user        "User"
-icon :edge   @B1 tabler/cloud-bolt  "CDN"  sizeScale=1.2
-icon :cache  @C1 tabler/bolt        "Cache"
-icon :origin @D1 tabler/server-bolt "Origin"
-
-user   --> edge   "request"
-edge   --> cache  "lookup"
-cache  --> edge   "cached" dash="2 4"
-edge   --> origin "miss"
-origin --> edge   "fill"
-
-note @B2 (cache) "hit rate\ntarget 92%"
-```
+<Example name="frame-gallery-cdn" framing="1-2" layout="single" />
 
 ## アクティブ / パッシブ マルチリージョン
 

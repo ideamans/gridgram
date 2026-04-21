@@ -354,6 +354,10 @@ const config: ReturnType<typeof withTheme> = withTheme({
               items: [{ text: "概要", link: "/ja/guide/note/" }],
             },
             {
+              text: "フレーム",
+              items: [{ text: "概要", link: "/ja/guide/frame/" }],
+            },
+            {
               text: "カラー",
               items: [
                 { text: "概要", link: "/ja/guide/color/" },

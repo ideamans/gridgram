@@ -40,28 +40,7 @@ note @C2 (ret) "Cohort retention\nweek 4: 30%"
 コンバージョンファネル。各ステップは独立したリージョンに配置し、
 最終ステップ（発送）はサイズを大きくして「獲得」を強調します。
 
-```gg-diagram gallery
-doc { cols: 5 }
-
-region @A1:A1 "Land"     color=secondary/24
-region @B1:B1 "Browse"   color=secondary/24
-region @C1:C1 "Cart"     color=primary/28
-region @D1:D1 "Pay"      color=primary/28
-region @E1:E1 "Ship"     color=accent/32
-
-icon :land   @A1 tabler/world         "Landing"
-icon :browse @B1 tabler/search        "Browse"
-icon :cart   @C1 tabler/shopping-cart "Cart"
-icon :pay    @D1 tabler/credit-card   "Pay"
-icon :ship   @E1 tabler/truck-delivery "Ship" sizeScale=1.3
-
-land   --> browse
-browse --> cart
-cart   --> pay
-pay    --> ship
-
-note @C2 (cart) "Abandon rate\n~68%"
-```
+<Example name="frame-gallery-ecommerce" framing="1-4" layout="single" />
 
 ## オンボーディングフロー
 

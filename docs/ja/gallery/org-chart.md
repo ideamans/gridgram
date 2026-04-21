@@ -11,7 +11,7 @@
 `iconTheme=native` でノードのテーマカラーによる色付けを抑え、
 元の写真の色を保持します。
 
-<GgBlock name="team-photos" />
+<Example name="team-photos" layout="single" />
 
 ラスター画像アセットも、他の場所と同じく Tabler アイコンと同様に
 振る舞います ── `pos`、`sizeScale`、リージョン、コネクタは
