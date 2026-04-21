@@ -80,8 +80,9 @@ export default withTheme({
             {
               text: "Getting Started",
               items: [
-                { text: "What is Gridgram?", link: "/en/guide/" },
-                { text: "Quickstart", link: "/en/guide/quickstart" },
+                { text: "Quick start", link: "/en/guide/" },
+                { text: "First Gridgram", link: "/en/guide/first-gridgram" },
+                { text: "Install", link: "/en/guide/install" },
               ],
             },
             {

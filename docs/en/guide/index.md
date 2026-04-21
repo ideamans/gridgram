@@ -1,144 +1,76 @@
-# What is Gridgram?
+# Quick start
 
-Gridgram is a **grid-based diagram generator**. You describe a diagram
-with either a command-first `.gg` file or a TypeScript `DiagramDef`,
-and Gridgram renders it to SVG or PNG.
+Install the `gg` binary and render your first diagram in under a
+minute. If you'd rather not pipe a remote script into a shell, see
+[Install](./install) for manual alternatives.
 
-It targets two kinds of authors:
+## Install
 
-- **Writers** who want diagrams in their docs/wiki and prefer plain
-  text over a drawing app. They use `.gg` files and the `gg` CLI.
-- **Developers** who want to embed Gridgram in their own pipelines —
-  static-site generators, MCP servers, build scripts. They use the
-  TypeScript API.
+Pick the command for your operating system. Both scripts place `gg` on
+your `PATH` automatically.
 
-Both paths share the same rendering pipeline; outputs are guaranteed
-identical.
+### macOS / Linux
 
-## A minimal example
+```sh
+curl -fsSL https://bin.ideamans.com/install/gg.sh | bash
+```
 
-<Example name="basic-01-hello" />
+### Windows (PowerShell)
 
-The diagram is a single icon — note that `@pos` is omitted. Gridgram
-auto-positions icons along row 0 in the order they're declared, so
-simple horizontal flows need no coordinates at all.
+```powershell
+irm https://bin.ideamans.com/install/gg.ps1 | iex
+```
 
-### Two small shorthands
+### Verify
 
-A couple of syntactic shortcuts show up on almost every line, so it's
-worth naming them up front:
+```sh
+gg --help
+```
 
-- **`"…"` or `'…'` — label.** A quoted string attached to an `icon`,
-  `region`, `note`, or connector is the visible label. Both quote
-  styles work the same; pick whichever avoids escaping inside the text.
-- **`:user` — id.** The `:` sigil names a node so other statements can
-  refer to it. You need an id only when something else points at the
-  node — a **connector** (`user --> api`) or a **note target**
-  (`note [user] "…"`). Without references, drop the `:id`; Gridgram
-  auto-assigns an internal one.
+You should see the usage banner. If `gg: command not found`, open a new
+shell (so the updated `PATH` is picked up) or consult
+[Install](./install).
 
-```gg
-icon :user tabler/user   "User"    # :user is the id; "User" is the label
+## Render your first diagram
+
+Write a tiny `.gg` file and render it to SVG and PNG:
+
+```sh
+cat > hello.gg <<'EOF'
+icon :user tabler/user   "User"
 icon :api  tabler/server "API"
-user --> api "login"               # connector references the id
+user --> api "request"
+EOF
+
+gg hello.gg -o hello.svg
+gg hello.gg -o hello.png --width 1024
 ```
 
-## Built-in icons (Tabler)
+Windows (PowerShell) equivalent:
 
-The icon in the example above (`tabler/user`) comes from the built-in
-icon set. Gridgram ships **[Tabler icons](https://tabler.io/icons)** —
-over 5,500 outline icons plus a large filled subset — and references
-them with the `tabler/` namespace:
+```powershell
+@'
+icon :user tabler/user   "User"
+icon :api  tabler/server "API"
+user --> api "request"
+'@ | Set-Content hello.gg
 
-```gg
-icon @A1 tabler/world        "Front"   # outline
-icon @B1 tabler/filled/star  "Hot"     # filled
+gg hello.gg -o hello.svg
+gg hello.gg -o hello.png --width 1024
 ```
 
-<Example name="icon-tabler" />
-
-Browse and search the full set at **<https://tabler.io/icons>** —
-every name there (e.g. `arrow-right`, `cloud-upload`, `database`)
-works after the `tabler/` prefix.
-
-If a filled variant doesn't exist for a given name, the resolver
-flags the node as `iconError` and renders it with a red ring so the
-missing reference is visually obvious. (Tabler's outline set is much
-more comprehensive than its filled set.)
-
-For your own assets (URL / file path / dataURL), register them via
-`doc { icons: … }` or `gridgram.config.ts`. See
-[Icon](./icon/) for the full resolution rules.
-
-## Horizontal flow with auto-positioning
+Open `hello.svg` in any browser or `hello.png` in your image viewer —
+you should see two icons with a labelled arrow between them. That's
+it; the CLI is working.
 
 <Example name="basic-02-multi-node" />
 
-Same principle as the minimal example: every icon is placed
-automatically, columns increment from 0 across row 0. Connectors
-thread between them with the `<id> <arrow> <id>` shape.
-
-### Wrapping into rows
-
-If you set `cols` on the doc but still omit `@pos`, auto-positioned
-icons **wrap** to the next row once the column count fills up:
-
-<Example name="auto-wrap" />
-
-```gg
-doc { cols: 4 }
-
-icon tabler/user     "user"
-icon tabler/world    "web"
-icon tabler/server   "api"
-icon tabler/database "db"
-icon tabler/bolt     "queue"
-icon tabler/cloud    "cdn"
-icon tabler/lock     "auth"
-icon tabler/file     "audit"
-```
-
-Eight icons, four columns → 2 rows. Mix explicit `@pos` with
-implicit ones freely; explicit positions don't advance the
-auto-counter.
-
-## Placing icons on a grid
-
-When you outgrow a single row, write `@col,row` on each icon. The grid
-uses Excel-style **(column, row)** order — same as the `A1` convention
-in spreadsheets. **`cols` / `rows` are auto-inferred** from the
-largest `@col` / `@row` you wrote, so for a 2×2 layout no `doc { }`
-block is needed at all:
-
-<Example name="basic-03-grid-2x2" coords cols="2" rows="2" />
-
-```gg
-icon :front @A1 tabler/world    "Frontend"
-icon :api   @B1 tabler/server   "API"
-icon :cache @A2 tabler/database "Cache"
-icon :db    @B2 tabler/database "DB"
-```
-
-If you do want to fix the grid explicitly (for instance to leave empty
-trailing cells, or to make the inferred size unambiguous), add a
-`doc { cols: N, rows: M }` statement. See
-[Quickstart (.gg)](./quickstart-gg) for an example with regions,
-theming, and an explicit grid.
-
-## Labels accept Unicode (CJK-friendly)
-
-Every label is treated as UTF-8 text, so Japanese, Chinese, Korean, and
-other non-Latin scripts render exactly like Latin letters — no fonts
-to configure, no escaping.
-
-<Example name="label-cjk" />
-
-This also applies to connector labels, note text, and region titles.
-For mixed-script text (`"API 伺服器"`), Gridgram just hands the string
-to SVG `<text>` and lets the browser / rasterizer pick glyphs.
-
 ## Where to next
 
-- [Quickstart (.gg)](./quickstart) — install the CLI, render a diagram
-- [Document](./document/) — `doc { }`, commands, merge rules
-- [Icon](./icon/) — Tabler, paths, aliases, fallbacks
+- **[First Gridgram](./first-gridgram)** — a guided tour of the `.gg`
+  language, one concept at a time.
+- **[Install](./install)** — GitHub Releases, build from source, and
+  other ways to get the binary.
+- **[Editor](/en/editor)** — try `.gg` live in your browser, no install
+  needed.
+- **[CLI reference](./cli)** — every flag and exit code.
