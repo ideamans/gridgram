@@ -25,7 +25,7 @@ app --> r2  "reads"
 pri --> r1 dash="2 4"
 pri --> r2 dash="2 4"
 
-note @C2 [r1, r2] "Async\nlag ≤ 5s"
+note @C2 (r1, r2) "Async\nlag ≤ 5s"
 ```
 
 ## Sharding by key
@@ -50,24 +50,11 @@ router --> s3
 
 ## Read-through cache
 
-Green theme for the cache-happy path; dashed line + note for the
-slow miss. A compact three-node diagram reads quickly.
+Two frames contrast the hot and cold paths. Hover and flip between
+them — frame 1 is the fast round-trip served from cache; frame 2
+is the miss falling back to the DB with a "populate on read" note.
 
-```gg-diagram gallery
-doc {
-  cols: 3,
-  theme: { primary: '#047857', secondary: '#0d9488', accent: '#f59e0b' },
-}
-
-icon :app   @A1 tabler/server   "App"
-icon :cache @B1 tabler/bolt     "Cache" sizeScale=1.3
-icon :db    @C1 tabler/database "DB"
-
-app   <-> cache  "fast"  width=2
-cache --> db     "miss"  dash="4 4" color=accent
-
-note @B2 [cache] "invalidate\non write"
-```
+<Example name="frame-gallery-cache" framing="1-2" layout="single" />
 
 ## CDC → downstream
 

@@ -12,6 +12,32 @@ import type { VNode } from 'preact'
 export type SvgFragment = string | number | VNode | null | undefined | false | SvgFragment[]
 
 // ---------------------------------------------------------------------------
+// Frame selector
+//
+// Frames are *tags*, not timesteps: a render call picks a frame number N
+// and every frame-tagged object whose spec includes N is materialised
+// into the diagram. Objects without a `frames` field are always present
+// (they form the base layer).
+//
+// User-facing shapes:
+//   42                    → only frame 42
+//   [2, 3]                → frames 2 and 3 (two singles)
+//   [[2, 3]]              → range 2..3 inclusive
+//   [[2, 3], 4]           → range 2..3 plus single frame 4
+//   [[5, Infinity]]       → frame 5 and onward (the gg `[5-]` form)
+//   undefined / missing   → matches every frame
+// ---------------------------------------------------------------------------
+
+/** One inclusive frame range `[min, max]`. `max` may be `Infinity`. */
+export type FrameRange = readonly [min: number, max: number]
+
+/**
+ * A frame selector — a single frame, or a list where each item is
+ * either a single frame number or an inclusive `[min, max]` range.
+ */
+export type FrameSpec = number | ReadonlyArray<number | FrameRange>
+
+// ---------------------------------------------------------------------------
 // Grid coordinate system
 // ---------------------------------------------------------------------------
 
@@ -108,6 +134,14 @@ export interface NodeBadge {
 
 export interface NodeDef {
   id: string
+  /**
+   * Frames this node belongs to. When omitted the node is part of
+   * every frame; when set, the node only materialises on render calls
+   * whose `frame` matches. Declarations with the same id across
+   * multiple frame-tagged entries are merged (later declaration wins
+   * per field) — useful for "same icon, different label at frame N".
+   */
+  frames?: FrameSpec
   /**
    * Grid position (column, row) — 0-based.
    *
@@ -208,6 +242,8 @@ export type WayPointInput =
 export interface ConnectorDef {
   /** Optional id used to reference this connector (e.g. from a Note) */
   id?: string
+  /** Frames this connector belongs to. See `NodeDef.frames`. */
+  frames?: FrameSpec
   /** Source node id */
   from: string
   /** Target node id */
@@ -235,6 +271,8 @@ export interface ConnectorDef {
 // ---------------------------------------------------------------------------
 
 export interface RegionDef {
+  /** Frames this region belongs to. See `NodeDef.frames`. */
+  frames?: FrameSpec
   /** Grid cells to fill — can be multiple spans for L-shapes etc. */
   spans: GridSpan[]
   /** Background color (with alpha for semi-transparency) */
@@ -252,6 +290,8 @@ export interface RegionDef {
 // ---------------------------------------------------------------------------
 
 export interface NoteDef {
+  /** Frames this note belongs to. See `NodeDef.frames`. */
+  frames?: FrameSpec
   /** Grid position — the note consumes this single cell */
   pos: GridPosInput
   /** Text content. `\n` makes an explicit line break; long lines wrap within the cell width. */
@@ -269,6 +309,17 @@ export interface NoteDef {
 // ---------------------------------------------------------------------------
 // Diagram (top-level)
 // ---------------------------------------------------------------------------
+
+/**
+ * Frame-scoped settings override (the .gg `doc [N] { … }` form). When
+ * `resolveFrame(def, frame)` runs, each override whose `frames`
+ * includes the current frame is deep-merged into the base settings
+ * on top of the frames-less `doc { … }` block.
+ */
+export interface FrameDocOverride {
+  frames: FrameSpec
+  settings: Omit<DiagramDef, 'nodes' | 'connectors' | 'regions' | 'notes' | 'frameOverrides'>
+}
 
 export interface DiagramDef {
   /** Pixel size of one grid cell in the internal SVG coordinate space (default: 256) */
@@ -289,6 +340,12 @@ export interface DiagramDef {
   connectors?: ConnectorDef[]
   /** Annotation notes with leader lines */
   notes?: NoteDef[]
+  /**
+   * Frame-scoped settings overrides. Populated by the parser from
+   * `doc [N] { … }` statements (or supplied directly in the TS API)
+   * and collapsed into the base settings by `resolveFrame`.
+   */
+  frameOverrides?: FrameDocOverride[]
 }
 
 // ---------------------------------------------------------------------------

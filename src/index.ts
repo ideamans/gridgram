@@ -61,7 +61,19 @@ export type {
   GridPosInput,
   GridSpan,
   SvgFragment,
+  FrameSpec,
+  FrameRange,
+  FrameDocOverride,
 } from './types.js'
+
+// Frame resolution -------------------------------------------------------
+export {
+  resolveFrame,
+  hasFrames,
+  frameMatches,
+  normalizeFrameSpec,
+  parseGgFrameSpec,
+} from './frame.js'
 
 // Tabler icons -----------------------------------------------------------
 export { tabler, tablerOutline, tablerFilled, tablerHas } from './tabler.js'

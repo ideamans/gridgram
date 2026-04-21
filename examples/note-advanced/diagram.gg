@@ -11,12 +11,12 @@ front --> api   "HTTPS" id=req
 api   --> queue "enqueue"
 api   --> store "write"
 
-# Standalone header / commentary — no `[...]` targets. Use for
+# Standalone header / commentary — no `(...)` targets. Use for
 # section labels or general prose.
 note @A1 "**Public** edge"             color=#0369a1
 note @C1 "**Async** path"              color=#7c3aed
 
 # Multi-target: one note points at two elements. Leaders fan out
 # from the note body to each target.
-note @D3 [queue, store] "Both **read** after\nthe request completes"
-note @B3 [req, api]     "Rate-limited"  color=#b45309
+note @D3 (queue, store) "Both **read** after\nthe request completes"
+note @B3 (req, api)     "Rate-limited"  color=#b45309

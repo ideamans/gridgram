@@ -25,20 +25,20 @@ flow:
 ## Syntax
 
 ```
-note @<pos> [<target-list>] "<text>" [attr=value ...] [{ body }]
+note @<pos> (<target-list>) "<text>" [attr=value ...] [{ body }]
 ```
 
 - `@<pos>` is a single cell (`@A1` or `@col,row`). Required.
-- `[a, b, c]` is the optional list of node / connector ids this note
+- `(a, b, c)` is the optional list of node / connector ids this note
   points at. Omit for a standalone callout.
 - `"<text>"` is the note's body text. Required.
 - Trailing `attr=value` or `{ … }` body overrides `bg`, `color`,
   `labelScale`.
 
 ```gg
-note @B1 [api]     "Stateless\nauto-scaled"
-note @A3 [login]   "Session token carried as Bearer JWT"
-note @C3 [db, api] "Multi-target note" color=#b45309
+note @B1 (api)     "Stateless\nauto-scaled"
+note @A3 (login)   "Session token carried as Bearer JWT"
+note @C3 (db, api) "Multi-target note" color=#b45309
 note @D4           "Standalone — no leader line"
 ```
 
@@ -50,7 +50,7 @@ Three patterns show up in the diagram above — all of them are
 regular `note` statements, just using different optional pieces of
 the grammar.
 
-**Standalone** (no `[…]` target list) — useful for section headers
+**Standalone** (no `(…)` target list) — useful for section headers
 or general prose in an empty cell:
 
 ```gg
@@ -62,7 +62,7 @@ note @C1 "**Async** path"    color=#7c3aed
 from the note body, each stopping short of its target:
 
 ```gg
-note @D3 [queue, store] "Both **read** after\nthe request completes"
+note @D3 (queue, store) "Both **read** after\nthe request completes"
 ```
 
 Targets can mix nodes and connectors; duplicates are dropped.
@@ -72,7 +72,7 @@ is the only inline formatting notes parse; there's no italics,
 links, or full Markdown:
 
 ```gg
-note @B3 [req, api] "Rate-limited"  color=#b45309
+note @B3 (req, api) "Rate-limited"  color=#b45309
 ```
 
 `\n` inside the string forces a hard line break; long lines wrap to
@@ -81,7 +81,7 @@ stranded at line-start or line-end).
 
 ## `targets`: what the leader lines point at
 
-Each id inside `[…]` is matched against:
+Each id inside `(…)` is matched against:
 
 - **Node ids** (declared by `icon :name` in DSL or `{ id: 'name' }` in
   JSON)

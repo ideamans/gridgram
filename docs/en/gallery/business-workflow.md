@@ -5,31 +5,12 @@ systems.
 
 ## Purchase approval chain
 
-Amount-dependent approval routing. Small purchases go through on
-manager approval; larger ones escalate. Regions group the approver
-tiers; the note calls out SLA.
+Three frames walk through each approval tier — hover and use ◀ / ▶
+to compare. Frame 1 is a small request the manager auto-approves;
+frame 2 escalates to finance; frame 3 pulls in exec sign-off for a
+six-figure line item.
 
-```gg-diagram gallery
-doc { cols: 5, rows: 2 }
-
-region @B1:B2 "Line"       color=primary/14
-region @C1:D2 "Finance gate" color=accent/14
-
-icon :req  @A1 tabler/user          "Requester"
-icon :mgr  @B1 tabler/user-check    "Manager"
-icon :fin  @C1 tabler/building-bank "Finance"
-icon :exec @D1 tabler/briefcase     "Exec"
-icon :buy  @E1 tabler/shopping-cart "Buy"
-
-req  --> mgr  "submit"
-mgr  --> buy  "< $1k"
-mgr  --> fin  ">= $1k"
-fin  --> exec ">= $10k"
-exec --> buy
-fin  --> buy
-
-note @C2 [fin] "Finance SLA:\n2 biz days"
-```
+<Example name="frame-gallery-approval" framing="1-3" layout="single" />
 
 ## Invoice processing
 

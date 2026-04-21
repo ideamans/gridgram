@@ -25,7 +25,7 @@ client --> web "HTTPS" width=2
 web    --> api "REST"
 api    --> db  "SQL"
 
-note @C2 [api] "SLA 99.95%\np99 < 200ms"
+note @C2 (api) "SLA 99.95%\np99 < 200ms"
 ```
 
 ## Load-balanced backend with read replica
@@ -50,34 +50,16 @@ lb   --> app1
 app1 --> dbw   "write" width=2
 dbw  --> dbr   dash="2 4"
 
-note @C2 [dbr] "Lag ≤ 5s"
+note @C2 (dbr) "Lag ≤ 5s"
 ```
 
 ## CDN + origin + cache
 
-Edge caching with an origin fallback. The miss branch is dashed so
-you can tell the two paths apart at a glance.
+Cold and warm cache split across two frames. Hover and flip between
+them: frame 1 is a cold cache — the miss fans out to origin and
+fills; frame 2 is a warm cache serving the cached reply directly.
 
-```gg-diagram gallery
-doc { cols: 4 }
-
-region @A1:A1 "Client"  color=accent/24
-region @B1:C1 "Edge"    color=primary/28
-region @D1:D1 "Origin"  color=secondary/24
-
-icon :user   @A1 tabler/user        "User"
-icon :edge   @B1 tabler/cloud-bolt  "CDN"  sizeScale=1.2
-icon :cache  @C1 tabler/bolt        "Cache"
-icon :origin @D1 tabler/server-bolt "Origin"
-
-user   --> edge   "request"
-edge   --> cache  "lookup"
-cache  --> edge   "cached" dash="2 4"
-edge   --> origin "miss"
-origin --> edge   "fill"
-
-note @B2 [cache] "hit rate\ntarget 92%"
-```
+<Example name="frame-gallery-cdn" framing="1-2" layout="single" />
 
 ## Active / passive multi-region
 

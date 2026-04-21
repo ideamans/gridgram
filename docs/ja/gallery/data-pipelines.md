@@ -70,8 +70,8 @@ src --> batch
 stream --> serve
 batch  --> hist
 
-note @C1 [stream] "Approximate,\nlow-latency"
-note @C2 [batch]  "Exact,\nreplayable"
+note @C1 (stream) "Approximate,\nlow-latency"
+note @C2 (batch)  "Exact,\nreplayable"
 ```
 
 ## CDC → レイク → カタログ

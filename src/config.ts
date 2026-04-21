@@ -32,6 +32,12 @@ export interface DiagramSettings {
   renderWidth?: number
   /** Suppress the red-tint highlighting for layout errors. */
   suppressErrors?: boolean
+  /**
+   * Frame number to render (default: 1). Only meaningful when the
+   * diagram uses frame-tagged declarations (`icon [2] …`, `doc [3-5] …`,
+   * etc.); otherwise ignored.
+   */
+  frame?: number
 
   /**
    * Asset path aliases. '@brand/aws.svg' resolves under assetAliases.brand.

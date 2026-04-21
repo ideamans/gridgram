@@ -10,28 +10,7 @@
 パイプライン全体を領域に相応しいパレットに寄せ、学習ステージが
 視覚的な重みを担います。
 
-```gg-diagram gallery
-doc {
-  cols: 5,
-  theme: { primary: '#6d28d9', secondary: '#7c3aed', accent: '#db2777' },
-}
-
-region @A1:B1 "Data prep"  color=secondary/24
-region @D1:E1 "Ship"       color=primary/24
-
-icon :data  @A1 tabler/database      "Data"
-icon :feat  @B1 tabler/refresh       "Features"
-icon :train @C1 tabler/brain         "Train"     sizeScale=1.5
-icon :eval  @D1 tabler/chart-dots    "Eval"
-icon :reg   @E1 tabler/package       "Registry"
-
-data  --> feat
-feat  --> train
-train --> eval
-eval  --> reg
-
-note @D2 [eval] "Gate:\naccuracy ≥\nbaseline + 0.5%"
-```
+<Example name="frame-gallery-training-gate" framing="1-3" layout="single" />
 
 ## RAG: 検索拡張生成
 

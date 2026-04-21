@@ -132,4 +132,33 @@ describe('parseGg: error reporting', () => {
     const w = errors.find((e) => e.message.includes('widget'))
     expect(w).toBeDefined()
   })
+
+  test('two nodes at the same cell is a duplicate-cell error', () => {
+    const src = `icon :a @B2 src=user\nicon :b @B2 src=user`
+    const { errors } = parseGg(src)
+    const dup = errors.find((e) => e.message.includes('Duplicate cell'))
+    expect(dup).toBeDefined()
+    expect(dup!.source).toBe('check')
+    expect(dup!.message).toContain('B2')
+    expect(dup!.message).toContain('"a"')
+    expect(dup!.message).toContain('"b"')
+  })
+
+  test('note sharing a cell with a node is a duplicate-cell error', () => {
+    const src = `icon :a @A1 src=user\nnote @A1 "clashing"`
+    const { errors } = parseGg(src)
+    const dup = errors.find((e) => e.message.includes('Duplicate cell'))
+    expect(dup).toBeDefined()
+    expect(dup!.message).toContain('A1')
+  })
+
+  test('auto-positioned nodes that collide are detected', () => {
+    // Two anonymous icons, no explicit pos — both auto-assigned to A1.
+    // The auto-position layer fills them in before the occupancy check.
+    const src = `icon src=user\nicon @A1 src=user`
+    const { errors } = parseGg(src)
+    const dup = errors.find((e) => e.message.includes('Duplicate cell'))
+    expect(dup).toBeDefined()
+    expect(dup!.message).toContain('A1')
+  })
 })

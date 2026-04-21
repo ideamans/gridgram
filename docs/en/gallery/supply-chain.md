@@ -32,7 +32,7 @@ qa   --> dc
 dc   --> cust
 cust --> dc "returns" dash="4 4"
 
-note @C1 [prod] "Lead time\n14 days"
+note @C1 (prod) "Lead time\n14 days"
 ```
 
 ## Multi-tier suppliers
@@ -86,25 +86,9 @@ pick  --> ship
 
 ## Reverse logistics
 
-Returns flow back through inspection → refurbish or recycle → back
-to inventory. Notes call out the branch conditions.
+Returns flow back through inspection, then branch to refurbish or
+recycle. Hover the diagram and scrub — frame 1 is intake and
+inspection, frame 2 takes the serviceable-refurb branch, frame 3
+takes the damaged-recycle branch.
 
-```gg-diagram gallery
-doc { cols: 5, rows: 3 }
-
-icon :cust  @A2 tabler/user               "Customer"
-icon :intake @B2 tabler/truck-return      "Intake"
-icon :insp  @C2 tabler/clipboard-list     "Inspect"
-icon :refurb @D1 tabler/tools             "Refurb"
-icon :recycle @D3 tabler/recycle          "Recycle"
-icon :wh    @E2 tabler/building-warehouse "WH"
-
-cust    --> intake
-intake  --> insp
-insp    --> refurb  "serviceable"
-insp    --> recycle "damaged"
-refurb  --> wh
-recycle --> wh "raw" dash="4 4"
-
-note @B1 [intake] "Within 30 days\nof purchase"
-```
+<Example name="frame-gallery-reverse-logistics" framing="1-3" layout="single" />

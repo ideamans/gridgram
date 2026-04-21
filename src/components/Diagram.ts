@@ -14,6 +14,7 @@ import type { DiagramSettings, ResolvedSettings } from '../config.js'
 import { resolveSettings } from '../config.js'
 import { expandBadges } from '../badges.js'
 import { normalizeDiagramDef } from '../normalize.js'
+import { resolveFrame, hasFrames } from '../frame.js'
 
 /**
  * Back-compat alias: callers that used to pass a loose DiagramOptions
@@ -28,10 +29,17 @@ export type DiagramOptions = DiagramSettings
  * both content (nodes, etc.) and embedded settings (cellSize/theme/…)
  * so we extract those as a document layer on the way in.
  */
-function foldLayers(def: DiagramDef, override: DiagramSettings = {}): {
+function foldLayers(rawDef: DiagramDef, override: DiagramSettings = {}): {
   def: NormalizedDiagramDef
   settings: ResolvedSettings
 } {
+  // 0. Collapse frame-tagged declarations down to a single flat def.
+  //    When the diagram declares no frames, resolveFrame is a no-op;
+  //    skip it so diagrams that never opted in incur zero overhead.
+  //    `doc [N] { … }` overrides are merged on top of the base scalars
+  //    here too, which is why we extract the docLayer AFTER resolution.
+  const frame = override.frame ?? 1
+  const def = hasFrames(rawDef) ? resolveFrame(rawDef, frame) : rawDef
   const docLayer: DiagramSettings = {
     cellSize: def.cellSize,
     padding: def.padding,

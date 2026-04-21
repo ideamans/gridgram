@@ -32,7 +32,7 @@ qa   --> dc
 dc   --> cust
 cust --> dc "returns" dash="4 4"
 
-note @C1 [prod] "Lead time\n14 days"
+note @C1 (prod) "Lead time\n14 days"
 ```
 
 ## 複数階層のサプライヤー
@@ -90,22 +90,4 @@ pick  --> ship
 返品は検品 → リファービッシュまたはリサイクル → 倉庫へ戻ります。
 ノートで分岐条件を示します。
 
-```gg-diagram gallery
-doc { cols: 5, rows: 3 }
-
-icon :cust  @A2 tabler/user               "Customer"
-icon :intake @B2 tabler/truck-return      "Intake"
-icon :insp  @C2 tabler/clipboard-list     "Inspect"
-icon :refurb @D1 tabler/tools             "Refurb"
-icon :recycle @D3 tabler/recycle          "Recycle"
-icon :wh    @E2 tabler/building-warehouse "WH"
-
-cust    --> intake
-intake  --> insp
-insp    --> refurb  "serviceable"
-insp    --> recycle "damaged"
-refurb  --> wh
-recycle --> wh "raw" dash="4 4"
-
-note @B1 [intake] "Within 30 days\nof purchase"
-```
+<Example name="frame-gallery-reverse-logistics" framing="1-3" layout="single" />

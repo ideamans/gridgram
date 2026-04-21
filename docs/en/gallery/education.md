@@ -28,30 +28,11 @@ Chloroplasts absorb light; water and CO₂ become glucose and O₂.
 Regions group inputs vs outputs; a theme override matches the
 standard green/blue/orange chemistry conventions.
 
-```gg-diagram gallery
-doc {
-  cols: 4, rows: 3,
-  theme: { primary: '#065f46', secondary: '#0369a1', accent: '#d97706' },
-}
+Hover and scrub: frame 1 shows the inputs arriving at the leaf,
+frame 2 lights the leaf up with the full formula, frame 3 produces
+O₂ and glucose.
 
-region @B1:B3 "Inputs"  color=primary/14
-region @D1:D3 "Outputs" color=accent/14
-
-icon :sun  @A2 tabler/sun       "Sunlight"
-icon :h2o  @B1 tabler/droplet   "H₂O"
-icon :co2  @B3 tabler/wind      "CO₂"
-icon :leaf @C2 tabler/leaf      "Leaf"
-icon :o2   @D1 tabler/wind      "O₂"
-icon :glu  @D3 tabler/apple     "Glucose"
-
-sun  --> leaf
-h2o  --> leaf
-co2  --> leaf
-leaf --> o2
-leaf --> glu
-
-note @C3 [leaf] "6 CO₂ + 6 H₂O\n→ C₆H₁₂O₆ + 6 O₂"
-```
+<Example name="frame-gallery-photosynthesis" framing="1-3" layout="single" />
 
 ## Historical timeline
 

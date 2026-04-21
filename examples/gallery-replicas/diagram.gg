@@ -14,4 +14,4 @@ app --> r2  "reads"
 pri --> r1 dash="2 4"
 pri --> r2 dash="2 4"
 
-note @C2 [r1, r2] "Async\nlag ≤ 5s"
+note @C2 (r1, r2) "Async\nlag ≤ 5s"

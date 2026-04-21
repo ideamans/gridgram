@@ -9,4 +9,4 @@ orders  --> queue   "enqueue" width=2
 queue   --> fulfill "consume"
 queue   --> notify  "consume" dash="4 4"
 
-note @B2 [notify] "Lagging —\ninvestigate"
+note @B2 (notify) "Lagging —\ninvestigate"

@@ -47,31 +47,17 @@ orders  --> queue   "enqueue" width=2
 queue   --> fulfill "consume"
 queue   --> notify  "consume" dash="4 4"
 
-note @B2 [notify] "Lagging —\ninvestigate"
+note @B2 (notify) "Lagging —\ninvestigate"
 ```
 
 ## Saga: distributed transaction
 
-A three-step saga. The compensating refund path is dashed to
-distinguish it from the forward flow.
+A three-step saga told across three frames — hover the diagram and
+use ◀ / ▶ to step through. Frame 1 is the happy forward path; frame
+2 flags a failed payment; frame 3 draws the compensating refund
+branch.
 
-```gg-diagram gallery
-doc { cols: 4 }
-
-region @A1:D1 "Forward path" color=primary/24
-
-icon :order   @A1 tabler/shopping-cart "Order"
-icon :payment @B1 tabler/credit-card   "Pay"
-icon :ship    @C1 tabler/truck-delivery "Ship"
-icon :done    @D1 tabler/check         "Done"
-
-order   --> payment "charge"
-payment --> ship    "fulfill"
-ship    --> done    "confirm"
-payment --> order   "refund"  dash="4 4" color=accent
-
-note @B2 [payment] "Compensation\nundoes the charge"
-```
+<Example name="frame-gallery-saga" framing="1-3" layout="single" />
 
 ## Service mesh sidecar pattern
 

@@ -47,7 +47,7 @@ orders  --> queue   "enqueue" width=2
 queue   --> fulfill "consume"
 queue   --> notify  "consume" dash="4 4"
 
-note @B2 [notify] "Lagging —\ninvestigate"
+note @B2 (notify) "Lagging —\ninvestigate"
 ```
 
 ## サーガ: 分散トランザクション
@@ -55,23 +55,7 @@ note @B2 [notify] "Lagging —\ninvestigate"
 3 ステップのサーガです。補償的な返金経路を破線にして順方向の
 流れと区別しています。
 
-```gg-diagram gallery
-doc { cols: 4 }
-
-region @A1:D1 "Forward path" color=primary/24
-
-icon :order   @A1 tabler/shopping-cart "Order"
-icon :payment @B1 tabler/credit-card   "Pay"
-icon :ship    @C1 tabler/truck-delivery "Ship"
-icon :done    @D1 tabler/check         "Done"
-
-order   --> payment "charge"
-payment --> ship    "fulfill"
-ship    --> done    "confirm"
-payment --> order   "refund"  dash="4 4" color=accent
-
-note @B2 [payment] "Compensation\nundoes the charge"
-```
+<Example name="frame-gallery-saga" framing="1-3" layout="single" />
 
 ## サービスメッシュのサイドカーパターン
 

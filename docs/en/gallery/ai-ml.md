@@ -4,34 +4,14 @@ Model training, retrieval-augmented generation, agent loops, and
 serving topologies. A purple theme marks the ML domain; the central
 agent / model gets a dramatic sizeScale.
 
-## Training pipeline
+## Training pipeline with a gate
 
-Data → features → train → eval → registry. Theme override pulls
-the whole pipeline into a domain-appropriate palette; the training
-stage carries the visual weight.
+Data → features → train → eval → registry, told as a three-frame
+story. Hover and step through: frame 1 is the pipeline at rest,
+frame 2 clears the eval gate, frame 3 lands the model in the
+registry.
 
-```gg-diagram gallery
-doc {
-  cols: 5,
-  theme: { primary: '#6d28d9', secondary: '#7c3aed', accent: '#db2777' },
-}
-
-region @A1:B1 "Data prep"  color=secondary/24
-region @D1:E1 "Ship"       color=primary/24
-
-icon :data  @A1 tabler/database      "Data"
-icon :feat  @B1 tabler/refresh       "Features"
-icon :train @C1 tabler/brain         "Train"     sizeScale=1.5
-icon :eval  @D1 tabler/chart-dots    "Eval"
-icon :reg   @E1 tabler/package       "Registry"
-
-data  --> feat
-feat  --> train
-train --> eval
-eval  --> reg
-
-note @D2 [eval] "Gate:\naccuracy ≥\nbaseline + 0.5%"
-```
+<Example name="frame-gallery-training-gate" framing="1-3" layout="single" />
 
 ## RAG: retrieval-augmented generation
 
