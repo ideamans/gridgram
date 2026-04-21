@@ -36,32 +36,30 @@ jobs:
       fail-fast: true
       matrix:
         include:
-          - runner: ubuntu-latest
-            target: bun-linux-x64
+          - target: bun-linux-x64
             os: linux
             arch: amd64
             ext: tar.gz
-          - runner: ubuntu-latest
-            target: bun-linux-arm64
+          - target: bun-linux-arm64
             os: linux
             arch: arm64
             ext: tar.gz
-          - runner: macos-13
-            target: bun-darwin-x64
+          - target: bun-darwin-x64
             os: darwin
             arch: amd64
             ext: tar.gz
-          - runner: macos-latest
-            target: bun-darwin-arm64
+          - target: bun-darwin-arm64
             os: darwin
             arch: arm64
             ext: tar.gz
-          - runner: windows-latest
-            target: bun-windows-x64
+          - target: bun-windows-x64
             os: windows
             arch: amd64
             ext: zip
-    runs-on: ${{ matrix.runner }}
+    # sharp/libvips is fetched at runtime by src/cli/sharp-loader.ts, so no
+    # native toolchain is required on the build host — every target
+    # cross-compiles from a single Linux runner.
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -118,7 +116,7 @@ jobs:
           [ -f README.md ] && cp README.md "dist/$NAME/" || true
           cd dist
           if [ "$EXT" = "zip" ]; then
-            7z a -tzip "${NAME}.${EXT}" "$NAME" >/dev/null
+            zip -rq "${NAME}.${EXT}" "$NAME"
           else
             tar -czf "${NAME}.${EXT}" "$NAME"
           fi
