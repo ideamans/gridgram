@@ -39,7 +39,7 @@ describe('tokenize', () => {
   })
 
   test('target-list', () => {
-    const { tokens } = tokenize('note @2,1 [api, db] "text"')
+    const { tokens } = tokenize('note @2,1 (api, db) "text"')
     const tl = tokens.find((t) => t.type === 'target-list') as any
     expect(tl.ids).toEqual(['api', 'db'])
   })
@@ -78,7 +78,7 @@ describe('tokenize', () => {
   })
 
   test('multi-line target-list is allowed', () => {
-    const { tokens } = tokenize('note @1,1 [\n  a,\n  b,\n] "text"')
+    const { tokens } = tokenize('note @1,1 (\n  a,\n  b,\n) "text"')
     const tl = tokens.find((t) => t.type === 'target-list') as any
     expect(tl.ids).toEqual(['a', 'b'])
   })
@@ -233,7 +233,7 @@ describe('parseLine: region', () => {
 
 describe('parseLine: note', () => {
   test('note with pos, targets, and text', () => {
-    const { note } = parseLine('note @2,1 [api] "Stateless"', '', 1)
+    const { note } = parseLine('note @2,1 (api) "Stateless"', '', 1)
     expect(note).toMatchObject({ pos: { col: 2, row: 1 }, targets: ['api'], text: 'Stateless' })
   })
 
@@ -249,12 +249,12 @@ describe('parseLine: note', () => {
   })
 
   test('note without text is an error', () => {
-    const { error } = parseLine('note @1,1 [a]', '', 1)
+    const { error } = parseLine('note @1,1 (a)', '', 1)
     expect(error?.message).toMatch(/text/)
   })
 
   test('color attribute on note', () => {
-    const { note } = parseLine('note @1,1 [a] "txt" color=#b45309', '', 1)
+    const { note } = parseLine('note @1,1 (a) "txt" color=#b45309', '', 1)
     expect(note?.color).toBe('#b45309')
   })
 })

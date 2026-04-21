@@ -47,7 +47,7 @@ orders  --> queue   "enqueue" width=2
 queue   --> fulfill "consume"
 queue   --> notify  "consume" dash="4 4"
 
-note @B2 [notify] "Lagging —\ninvestigate"
+note @B2 (notify) "Lagging —\ninvestigate"
 ```
 
 ## サーガ: 分散トランザクション
@@ -70,7 +70,7 @@ payment --> ship    "fulfill"
 ship    --> done    "confirm"
 payment --> order   "refund"  dash="4 4" color=accent
 
-note @B2 [payment] "Compensation\nundoes the charge"
+note @B2 (payment) "Compensation\nundoes the charge"
 ```
 
 ## サービスメッシュのサイドカーパターン

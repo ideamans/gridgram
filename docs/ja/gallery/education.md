@@ -50,7 +50,7 @@ co2  --> leaf
 leaf --> o2
 leaf --> glu
 
-note @C3 [leaf] "6 CO₂ + 6 H₂O\n→ C₆H₁₂O₆ + 6 O₂"
+note @C3 (leaf) "6 CO₂ + 6 H₂O\n→ C₆H₁₂O₆ + 6 O₂"
 ```
 
 ## 歴史年表

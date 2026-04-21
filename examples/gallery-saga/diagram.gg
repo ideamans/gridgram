@@ -12,4 +12,4 @@ payment --> ship    "fulfill"
 ship    --> done    "confirm"
 payment --> order   "refund"  dash="4 4" color=accent
 
-note @B2 [payment] "Compensation\nundoes the charge"
+note @B2 (payment) "Compensation\nundoes the charge"

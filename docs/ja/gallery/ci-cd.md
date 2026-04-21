@@ -71,7 +71,7 @@ pr      --> preview "deploy" dash="2 4"
 pr      --> merge
 merge   --> main    "promote" width=2
 
-note @B2 [preview] "URL posted\nback to the PR"
+note @B2 (preview) "URL posted\nback to the PR"
 ```
 
 ## デプロイトポロジ

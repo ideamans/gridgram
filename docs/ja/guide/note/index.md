@@ -23,20 +23,20 @@
 ## 構文
 
 ```
-note @<pos> [<target-list>] "<text>" [attr=value ...] [{ body }]
+note @<pos> (<target-list>) "<text>" [attr=value ...] [{ body }]
 ```
 
 - `@<pos>` は単一セル（`@A1` または `@col,row`）。必須。
-- `[a, b, c]` は引き出し線の宛先 ID のリスト（任意）。省略すると
+- `(a, b, c)` は引き出し線の宛先 ID のリスト（任意）。省略すると
   スタンドアロンの吹き出しに。
 - `"<text>"` は本文。必須。
 - 末尾の `attr=value` または `{ … }` ボディで `bg` / `color` /
   `labelScale` を上書き。
 
 ```gg
-note @B1 [api]     "Stateless\nauto-scaled"
-note @A3 [login]   "Session token carried as Bearer JWT"
-note @C3 [db, api] "Multi-target note" color=#b45309
+note @B1 (api)     "Stateless\nauto-scaled"
+note @A3 (login)   "Session token carried as Bearer JWT"
+note @C3 (db, api) "Multi-target note" color=#b45309
 note @D4           "Standalone — no leader line"
 ```
 
@@ -47,7 +47,7 @@ note @D4           "Standalone — no leader line"
 上の図では 3 つのパターンが混在しています。いずれも同じ `note`
 ステートメントで、文法の任意パーツを使い分けているだけ。
 
-**スタンドアロン**（`[…]` なし）— 見出しや単なる解説を空きセルに
+**スタンドアロン**（`(…)` なし）— 見出しや単なる解説を空きセルに
 置きたいときに便利：
 
 ```gg
@@ -59,7 +59,7 @@ note @C1 "**Async** path"    color=#7c3aed
 本体から扇状に出て、それぞれのターゲットの手前で止まります：
 
 ```gg
-note @D3 [queue, store] "Both **read** after\nthe request completes"
+note @D3 (queue, store) "Both **read** after\nthe request completes"
 ```
 
 ノードとコネクタを混ぜられます。重複 ID は 1 本にまとめられます。
@@ -68,7 +68,7 @@ note @D3 [queue, store] "Both **read** after\nthe request completes"
 書式で、イタリック・リンク・フル Markdown はサポートしません：
 
 ```gg
-note @B3 [req, api] "Rate-limited"  color=#b45309
+note @B3 (req, api) "Rate-limited"  color=#b45309
 ```
 
 本文中の `\n` は明示的な改行、長い行はセル幅で自動折り返し
@@ -76,7 +76,7 @@ note @B3 [req, api] "Rate-limited"  color=#b45309
 
 ## `targets`: 引き出し線の指す先
 
-`[…]` 内の各 ID は、以下のどちらかと照合されます：
+`(…)` 内の各 ID は、以下のどちらかと照合されます：
 
 - **ノード ID**（DSL の `icon :name`、または JSON の `{ id: 'name' }`）
 - **コネクタ ID**（DSL の `id=<name>`、JSON の `id: '<name>'` で付与）

@@ -27,7 +27,7 @@ fin  --> exec ">= $10k"
 exec --> buy
 fin  --> buy
 
-note @C2 [fin] "Finance SLA:\n2 biz days"
+note @C2 (fin) "Finance SLA:\n2 biz days"
 ```
 
 ## 請求書処理

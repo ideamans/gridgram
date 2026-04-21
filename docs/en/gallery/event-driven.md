@@ -72,7 +72,7 @@ bus --> wdb
 bus --> rdb "project" dash="2 4"
 bus --> dlq "fail"    dash="4 4" color=accent
 
-note @B2 [dlq] "Retries: 3×\nbackoff 30s→5m"
+note @B2 (dlq) "Retries: 3×\nbackoff 30s→5m"
 ```
 
 ## Saga state machine

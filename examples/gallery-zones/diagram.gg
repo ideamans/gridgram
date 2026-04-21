@@ -12,4 +12,4 @@ client --> web "HTTPS" width=2
 web    --> api "REST"
 api    --> db  "SQL"
 
-note @C2 [api] "SLA 99.95%\np99 < 200ms"
+note @C2 (api) "SLA 99.95%\np99 < 200ms"

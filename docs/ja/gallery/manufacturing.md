@@ -74,7 +74,7 @@ do    --> check
 check --> act
 act   --> plan "next" dash="4 4"
 
-note @A2 [plan] "1 week\ncadence"
+note @A2 (plan) "1 week\ncadence"
 ```
 
 ## OEE ダッシュボードの入力

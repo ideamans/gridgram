@@ -32,7 +32,7 @@ qa   --> dc
 dc   --> cust
 cust --> dc "returns" dash="4 4"
 
-note @C1 [prod] "Lead time\n14 days"
+note @C1 (prod) "Lead time\n14 days"
 ```
 
 ## Multi-tier suppliers
@@ -106,5 +106,5 @@ insp    --> recycle "damaged"
 refurb  --> wh
 recycle --> wh "raw" dash="4 4"
 
-note @B1 [intake] "Within 30 days\nof purchase"
+note @B1 (intake) "Within 30 days\nof purchase"
 ```

@@ -26,7 +26,7 @@ client --> web "HTTPS" width=2
 web    --> api "REST"
 api    --> db  "SQL"
 
-note @C2 [api] "SLA 99.95%\np99 < 200ms"
+note @C2 (api) "SLA 99.95%\np99 < 200ms"
 ```
 
 ## リードレプリカ付きのロードバランス構成
@@ -51,7 +51,7 @@ lb   --> app1
 app1 --> dbw   "write" width=2
 dbw  --> dbr   dash="2 4"
 
-note @C2 [dbr] "Lag ≤ 5s"
+note @C2 (dbr) "Lag ≤ 5s"
 ```
 
 ## CDN + オリジン + キャッシュ
@@ -77,7 +77,7 @@ cache  --> edge   "cached" dash="2 4"
 edge   --> origin "miss"
 origin --> edge   "fill"
 
-note @B2 [cache] "hit rate\ntarget 92%"
+note @B2 (cache) "hit rate\ntarget 92%"
 ```
 
 ## アクティブ / パッシブ マルチリージョン

@@ -4,6 +4,7 @@
  *   - Note targets reference known node or connector ids
  *   - Region spans fit within cols×rows
  *   - Region spans form a single 4-connected shape (no diagonal-only joins)
+ *   - Cell occupancy: at most one node-or-note per cell after auto-layout
  *
  * At this point the DiagramDef carries the raw user-input coordinates
  * (1-based / A1 forms). We normalize a temporary copy here so the
@@ -13,7 +14,7 @@
  * Duplicate-node-id detection happens in parser.ts because it needs to
  * see source attribution (DSL vs JSON) at parse time.
  */
-import type { DiagramDef } from '../types.js'
+import type { DiagramDef, NormalizedDiagramDef } from '../types.js'
 import type { GgError } from './errors.js'
 import { buildBlob, DisjointRegionError } from '../geometry/blob.js'
 import { computeLayout } from '../geometry/grid.js'
@@ -61,7 +62,7 @@ export function checkIntegrity(def: DiagramDef): GgError[] {
   }
 
   // Coord-bearing checks: work against a normalized copy.
-  let normalized: DiagramDef
+  let normalized: NormalizedDiagramDef
   try {
     normalized = normalizeDiagramDef(def)
   } catch (e: any) {
@@ -69,6 +70,41 @@ export function checkIntegrity(def: DiagramDef): GgError[] {
     // citing the offending address.
     errors.push({ message: e?.message ?? String(e), line: 0, source: 'check' })
     return errors
+  }
+
+  // Cell-occupancy check — nodes and notes each claim a single cell.
+  // A second claim on the same cell is almost always a coordinate
+  // mistake, so surface it as an integrity error that points at both
+  // occupants (identified by id for nodes, by A1 address for notes,
+  // since notes are anonymous).
+  const occupants = new Map<string, string>()  // "col,row" -> description
+  const describeNode = (id: string) => id.startsWith('__n') ? 'icon' : `icon "${id}"`
+  for (const n of normalized.nodes) {
+    const key = `${n.pos.col},${n.pos.row}`
+    const me = describeNode(n.id)
+    const prev = occupants.get(key)
+    if (prev) {
+      errors.push({
+        message: `Duplicate cell ${cellAddress(n.pos.col + 1, n.pos.row + 1)}: ${prev} and ${me}`,
+        line: 0, source: 'check',
+      })
+    } else {
+      occupants.set(key, me)
+    }
+  }
+  for (const note of normalized.notes ?? []) {
+    const key = `${note.pos.col},${note.pos.row}`
+    const addr = cellAddress(note.pos.col + 1, note.pos.row + 1)
+    const me = `note at ${addr}`
+    const prev = occupants.get(key)
+    if (prev) {
+      errors.push({
+        message: `Duplicate cell ${addr}: ${prev} and ${me}`,
+        line: 0, source: 'check',
+      })
+    } else {
+      occupants.set(key, me)
+    }
   }
 
   // Region bounds + connectivity check

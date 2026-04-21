@@ -30,7 +30,7 @@ span            := '@' A1_ADDR RANGE_SEP A1_ADDR
                  | '@' INT ',' INT RANGE_SEP INT ',' INT
 RANGE_SEP       := ':' | '-'                 # ':' (Excel) preferred
 label           := DQ_STRING | SQ_STRING
-target-list     := '[' IDENT (',' IDENT)* ']'
+target-list     := '(' IDENT (',' IDENT)* ')'
 attr            := IDENT '=' (BARE_WORD | DQ_STRING)
 body            := '{' <balanced JSON5 object> '}'
 arrow           := '-->' | '->' | '<--' | '<->' | '---'
@@ -40,7 +40,7 @@ arrow           := '-->' | '->' | '<--' | '<->' | '---'
 A1_ADDR         := [A-Za-z]+ [0-9]+          # "A1", "aa100", "AAA9999"
 INT             := [0-9]+
 IDENT           := [A-Za-z_] [A-Za-z0-9_-]*
-BARE_WORD       := any run of non-whitespace, non-';', '{', '[', '"', "'"
+BARE_WORD       := any run of non-whitespace, non-';', '{', '(', '"', "'"
 DQ_STRING       := '"' (. | '\\n' | '\\"' | '\\\\' | '\\t')* '"'
 SQ_STRING       := "'" (. | '\\n' | '\\'' | '\\\\' | '\\t')* "'"
 STMT_END        := '\n' (at depth 0) | ';' (at depth 0)
@@ -53,7 +53,7 @@ STMT_END        := '\n' (at depth 0) | ';' (at depth 0)
 
 このため `icon` / `region` / `note` / `doc` は **行頭の識別子** として予約されていますが、それ以外の役割（アイコン参照、コネクタ内のノード ID、ラベル本文、属性値など）ではそのまま自由に使えます。
 
-**コマンド語以降の引数は順不同** です。各引数は自身の接頭記号（`:` / `@` / `"` / `[` / `=`）を持つので、トークナイザは位置に依存せず役割を割り当てられます。
+**コマンド語以降の引数は順不同** です。各引数は自身の接頭記号（`:` / `@` / `"` / `(` / `=`）を持つので、トークナイザは位置に依存せず役割を割り当てられます。
 
 ## 2. 座標系
 

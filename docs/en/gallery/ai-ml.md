@@ -30,7 +30,7 @@ feat  --> train
 train --> eval
 eval  --> reg
 
-note @D2 [eval] "Gate:\naccuracy ≥\nbaseline + 0.5%"
+note @D2 (eval) "Gate:\naccuracy ≥\nbaseline + 0.5%"
 ```
 
 ## RAG: retrieval-augmented generation

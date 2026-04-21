@@ -18,7 +18,7 @@
  *   pos         := '@' INT ',' INT
  *   span        := '@' INT ',' INT '-' INT ',' INT
  *   label       := '"' ... '"' | "'" ... "'"
- *   target-list := '[' IDENT (',' IDENT)* ']'
+ *   target-list := '(' IDENT (',' IDENT)* ')'
  *   attr        := IDENT '=' (BARE-WORD | quoted-string)
  *   body        := '{' ... balanced JSON5 ... '}'
  *   arrow       := '-->' | '->' | '<--' | '<->' | '---' | '..>' | '<..' | '<..>' | '...'
@@ -26,6 +26,9 @@
  * Statement separator: newline OR ';' at depth 0 (outside body / target-list /
  * strings). Inside a `body` / `target-list` / quoted string, newlines are
  * ordinary whitespace, so those forms can span multiple lines.
+ *
+ * Note: `[ … ]` is reserved for a future frame-selector syntax and is **not**
+ * accepted as a token outside `body`.
  *
  * Comments: `#` or `//` to end-of-line, at a whitespace boundary, not inside
  * a string. Inside `body` the JSON5 parser handles its own comments.
@@ -161,9 +164,9 @@ function readOneToken(ctx: Ctx): boolean {
     return true
   }
 
-  // Target list — [ id, id, ... ]
-  if (ch === '[') {
-    const m = readBalanced(ctx, '[', ']')
+  // Target list — ( id, id, ... )
+  if (ch === '(') {
+    const m = readBalanced(ctx, '(', ')')
     if (m === null) return false
     const inner = m.slice(1, -1).trim()
     const ids = inner === ''
@@ -289,7 +292,7 @@ function readOneToken(ctx: Ctx): boolean {
       while (end < ctx.src.length) {
         const c = ctx.src[end]
         if (c === ' ' || c === '\t' || c === '\n' || c === '\r') break
-        if (c === ';' || c === '{' || c === '[') break
+        if (c === ';' || c === '{' || c === '(') break
         end++
       }
       value = ctx.src.slice(ctx.pos, end)
@@ -304,12 +307,12 @@ function readOneToken(ctx: Ctx): boolean {
   }
 
   // Bare word / identifier (or icon-ref like `tabler/server`, `./foo.svg`).
-  // Read until whitespace, `;`, `{`, `[`, `"`, `'`.
+  // Read until whitespace, `;`, `{`, `(`, `"`, `'`.
   let end = ctx.pos
   while (end < ctx.src.length) {
     const c = ctx.src[end]
     if (c === ' ' || c === '\t' || c === '\n' || c === '\r') break
-    if (c === ';' || c === '{' || c === '[' || c === '"' || c === "'") break
+    if (c === ';' || c === '{' || c === '(' || c === '"' || c === "'") break
     end++
   }
   if (end === ctx.pos) {
@@ -353,11 +356,11 @@ function readString(ctx: Ctx, quote: '"' | "'"): string | null {
 }
 
 /**
- * Read a balanced bracketed region (e.g. `{ … }` or `[ … ]`). Respects
+ * Read a balanced bracketed region (e.g. `{ … }` or `( … )`). Respects
  * strings and nested brackets. Returns the matched text (including outer
  * brackets) and advances ctx.pos past it; or null on unclosed.
  */
-function readBalanced(ctx: Ctx, open: '{' | '[', close: '}' | ']'): string | null {
+function readBalanced(ctx: Ctx, open: '{' | '(', close: '}' | ')'): string | null {
   const startLine = ctx.line
   const startPos = ctx.pos
   let depth = 0
@@ -660,7 +663,7 @@ function describeToken(t: Token): string {
     case 'pos':         return `position @${t.col},${t.row}`
     case 'span':        return `span @${t.from.col},${t.from.row}-${t.to.col},${t.to.row}`
     case 'label':       return `label "${t.value}"`
-    case 'target-list': return `target-list [${t.ids.join(', ')}]`
+    case 'target-list': return `target-list (${t.ids.join(', ')})`
     case 'attr':        return `attribute ${t.key}=${t.value}`
     case 'arrow':       return `arrow ${t.spec.ends}/${t.spec.dashed ? 'dashed' : 'solid'}`
     case 'body':        return `{ … } body`

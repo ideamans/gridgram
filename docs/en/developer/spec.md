@@ -36,7 +36,7 @@ span            := '@' A1_ADDR RANGE_SEP A1_ADDR
                  | '@' INT ',' INT RANGE_SEP INT ',' INT
 RANGE_SEP       := ':' | '-'                 # ':' (Excel) preferred
 label           := DQ_STRING | SQ_STRING
-target-list     := '[' IDENT (',' IDENT)* ']'
+target-list     := '(' IDENT (',' IDENT)* ')'
 attr            := IDENT '=' (BARE_WORD | DQ_STRING)
 body            := '{' <balanced JSON5 object> '}'
 arrow           := '-->' | '->' | '<--' | '<->' | '---'
@@ -46,7 +46,7 @@ arrow           := '-->' | '->' | '<--' | '<->' | '---'
 A1_ADDR         := [A-Za-z]+ [0-9]+          # "A1", "aa100", "AAA9999"
 INT             := [0-9]+
 IDENT           := [A-Za-z_] [A-Za-z0-9_-]*
-BARE_WORD       := any run of non-whitespace, non-';', '{', '[', '"', "'"
+BARE_WORD       := any run of non-whitespace, non-';', '{', '(', '"', "'"
 DQ_STRING       := '"' (. | '\\n' | '\\"' | '\\\\' | '\\t')* '"'
 SQ_STRING       := "'" (. | '\\n' | '\\'' | '\\\\' | '\\t')* "'"
 STMT_END        := '\n' (at depth 0) | ';' (at depth 0)
@@ -62,7 +62,7 @@ That's why `icon` / `region` / `note` / `doc` are reserved as
 (icon ref, node id in a connector, label text, attribute value, …).
 
 **Arguments after the command keyword are order-independent.** Each
-arg carries its own prefix (`:`, `@`, `"`, `[`, `=`), so the tokenizer
+arg carries its own prefix (`:`, `@`, `"`, `(`, `=`), so the tokenizer
 can assign roles without relying on position.
 
 ## 2. Coordinate system

@@ -32,7 +32,7 @@ act --> ret "day-7"
 ret --> ref "NPS ≥ 9"
 ref --> rev "conv"
 
-note @C2 [ret] "Cohort retention\nweek 4: 30%"
+note @C2 (ret) "Cohort retention\nweek 4: 30%"
 ```
 
 ## EC の購入フロー
@@ -60,7 +60,7 @@ browse --> cart
 cart   --> pay
 pay    --> ship
 
-note @C2 [cart] "Abandon rate\n~68%"
+note @C2 (cart) "Abandon rate\n~68%"
 ```
 
 ## オンボーディングフロー
