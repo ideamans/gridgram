@@ -18,13 +18,13 @@
  *
  * Pure: the input def is not mutated.
  */
-import type { DiagramDef, NormalizedDiagramDef } from './types'
+import type { DiagramDef, NormalizedDiagramDef } from './types.js'
 import {
   assignAutoPositions,
   normalizeConnectorWaypoints,
   normalizeNotes,
   normalizeRegions,
-} from './auto-position'
+} from './auto-position.js'
 
 export function normalizeDiagramDef(def: DiagramDef): NormalizedDiagramDef {
   return {

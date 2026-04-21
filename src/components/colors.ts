@@ -21,7 +21,7 @@
  * Literals and keyword-with-alpha forms pass through unchanged — the user
  * is presumed to have chosen the opacity explicitly.
  */
-import type { DiagramTheme, ThemeColorKey } from '../types'
+import type { DiagramTheme, ThemeColorKey } from '../types.js'
 
 export const KEYS: ThemeColorKey[] = ['primary', 'secondary', 'accent', 'text', 'muted', 'bg']
 

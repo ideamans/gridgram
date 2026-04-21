@@ -8,8 +8,8 @@
  */
 import type {
   DiagramTheme, NodeDef, ConnectorDef, RegionDef, NoteDef,
-} from './types'
-import { DEFAULT_CELL_SIZE } from './geometry/grid'
+} from './types.js'
+import { DEFAULT_CELL_SIZE } from './geometry/grid.js'
 
 // ---------------------------------------------------------------------------
 // Types

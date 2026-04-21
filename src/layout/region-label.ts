@@ -5,13 +5,13 @@
  * bounding box, skipping any whose representative cell sits outside
  * the cell-union (so labels don't float in empty L-shape gaps).
  */
-import type { RegionDef } from '../types'
-import type { GridLayout } from '../geometry/grid'
-import type { LabelRect, LineSeg, CanvasBounds, Circle } from '../geometry/collision'
-import { fontSize, regionInset, regionDefaultRadius } from '../geometry/metrics'
-import { placeLabel, type SlotCandidate, type AttemptRecord } from '../geometry/label-placer'
-import { buildBlob, isCellFilled } from '../geometry/blob'
-import type { Blob } from '../geometry/blob'
+import type { RegionDef } from '../types.js'
+import type { GridLayout } from '../geometry/grid.js'
+import type { LabelRect, LineSeg, CanvasBounds, Circle } from '../geometry/collision.js'
+import { fontSize, regionInset, regionDefaultRadius } from '../geometry/metrics.js'
+import { placeLabel, type SlotCandidate, type AttemptRecord } from '../geometry/label-placer.js'
+import { buildBlob, isCellFilled } from '../geometry/blob.js'
+import type { Blob } from '../geometry/blob.js'
 
 export type RegionPosition =
   | 'top-left' | 'top-right' | 'bottom-right' | 'bottom-left'

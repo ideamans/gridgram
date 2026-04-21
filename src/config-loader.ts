@@ -13,7 +13,7 @@ import { existsSync, readFileSync } from 'fs'
 import { join, dirname, resolve as pathResolve, isAbsolute } from 'path'
 import { pathToFileURL } from 'url'
 import JSON5 from 'json5'
-import type { DiagramSettings } from './config'
+import type { DiagramSettings } from './config.js'
 
 const CONFIG_FILENAMES = [
   'gridgram.config.ts',

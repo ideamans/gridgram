@@ -15,16 +15,16 @@
  */
 import { readFileSync, readdirSync, statSync } from 'fs'
 import { join, basename, extname, isAbsolute } from 'path'
-import type { DiagramDef } from '../types'
+import type { DiagramDef } from '../types.js'
 import {
   stripSvgWrapper,
   collectPathRefs,
   TABLER_PREFIX,
   TABLER_FILLED_PREFIX,
   type IconContext,
-} from './icons'
-import type { GgError } from './errors'
-import { ICON_VIEWPORT } from '../constants'
+} from './icons.js'
+import type { GgError } from './errors.js'
+import { ICON_VIEWPORT } from '../constants.js'
 
 const iconError = (message: string): GgError => ({ message, line: 0, source: 'icon' })
 

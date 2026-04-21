@@ -13,8 +13,8 @@
  * (see CollisionHit). The pipeline turns those into PlacementDiagnostic
  * records that agents / humans read to debug a tight layout.
  */
-import type { LabelRect, LineSeg, CanvasBounds, Circle, CollisionHit } from './collision'
-import { findCollisions } from './collision'
+import type { LabelRect, LineSeg, CanvasBounds, Circle, CollisionHit } from './collision.js'
+import { findCollisions } from './collision.js'
 
 export interface CollisionContext {
   placedLabels: LabelRect[]

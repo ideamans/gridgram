@@ -12,28 +12,28 @@
 import type {
   NormalizedConnectorDef, NormalizedDiagramDef, NormalizedNodeDef,
   NormalizedNoteDef, NormalizedRegionDef,
-} from '../types'
-import { computeLayout, gridToPixel, resolveNodeSizeFrac } from '../geometry/grid'
-import type { GridLayout } from '../geometry/grid'
-import type { LabelRect, LineSeg, Circle, CollisionHit } from '../geometry/collision'
+} from '../types.js'
+import { computeLayout, gridToPixel, resolveNodeSizeFrac } from '../geometry/grid.js'
+import type { GridLayout } from '../geometry/grid.js'
+import type { LabelRect, LineSeg, Circle, CollisionHit } from '../geometry/collision.js'
 import {
   resolveConnectorPath, polylineToSegments, rawMidpoint, type Pixel,
-} from '../geometry/connector-path'
-import { connectorCrossesNode, findCrossingNodes, intPtKey, routeAroundNodes } from '../geometry/router'
-import type { IntPt } from '../geometry/router'
-import type { AttemptRecord } from '../geometry/label-placer'
+} from '../geometry/connector-path.js'
+import { connectorCrossesNode, findCrossingNodes, intPtKey, routeAroundNodes } from '../geometry/router.js'
+import type { IntPt } from '../geometry/router.js'
+import type { AttemptRecord } from '../geometry/label-placer.js'
 import type {
   ElementRef, Obstacle, PlacementAttempt, PlacementDiagnostic,
-} from '../gg/diagnostics'
-import { toCellRef, toSpanRef } from '../gg/diagnostics'
-import { computeNodeLabelRect } from './node-label'
-import type { NodeLabelResult } from './node-label'
-import { computeConnectorLabelRect } from './connector-label'
-import type { ConnectorLabelResult } from './connector-label'
-import { computeRegionLabelRect } from './region-label'
-import type { RegionLabelResult } from './region-label'
-import { computeNoteLayout, computeNoteLeaders } from './note-layout'
-import type { NoteLayout, LeaderTarget } from './note-layout'
+} from '../gg/diagnostics.js'
+import { toCellRef, toSpanRef } from '../gg/diagnostics.js'
+import { computeNodeLabelRect } from './node-label.js'
+import type { NodeLabelResult } from './node-label.js'
+import { computeConnectorLabelRect } from './connector-label.js'
+import type { ConnectorLabelResult } from './connector-label.js'
+import { computeRegionLabelRect } from './region-label.js'
+import type { RegionLabelResult } from './region-label.js'
+import { computeNoteLayout, computeNoteLeaders } from './note-layout.js'
+import type { NoteLayout, LeaderTarget } from './note-layout.js'
 
 export interface ResolvedConnector {
   conn: NormalizedConnectorDef

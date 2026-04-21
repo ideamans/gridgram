@@ -28,8 +28,8 @@ import type {
   ConnectorDef, GridPos, GridPosInput, NodeDef, NoteDef, RegionDef,
   NormalizedConnectorDef, NormalizedNodeDef, NormalizedNoteDef, NormalizedRegionDef,
   WayPoint, WayPointInput,
-} from './types'
-import { parseA1 } from './a1'
+} from './types.js'
+import { parseA1 } from './a1.js'
 
 /**
  * Coerce any `GridPosInput` to its canonical 0-based `{col, row}`

@@ -6,7 +6,7 @@
  * place silently shifted relative balance vs. the others. Routing every
  * font-size and inset through this module keeps the relationships explicit.
  */
-import type { GridLayout } from './grid'
+import type { GridLayout } from './grid.js'
 
 /** Highlight color for layout errors (label collision, failed routing). */
 export const ERROR_COLOR = '#e02020'

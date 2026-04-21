@@ -1,11 +1,11 @@
 import { h } from 'preact'
 import type { VNode } from 'preact'
-import type { NormalizedConnectorDef, NormalizedNodeDef, DiagramTheme } from '../types'
-import type { GridLayout } from '../geometry/grid'
-import type { LabelRect } from '../geometry/collision'
-import { resolveConnectorPath, type Pixel } from '../geometry/connector-path'
-import { ERROR_COLOR, fontSize } from '../geometry/metrics'
-import { resolveColor, isTransparent } from './colors'
+import type { NormalizedConnectorDef, NormalizedNodeDef, DiagramTheme } from '../types.js'
+import type { GridLayout } from '../geometry/grid.js'
+import type { LabelRect } from '../geometry/collision.js'
+import { resolveConnectorPath, type Pixel } from '../geometry/connector-path.js'
+import { ERROR_COLOR, fontSize } from '../geometry/metrics.js'
+import { resolveColor, isTransparent } from './colors.js'
 
 export interface ConnectorProps {
   connector: NormalizedConnectorDef

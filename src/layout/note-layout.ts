@@ -3,10 +3,10 @@
  * truncation, and final rect/font metrics. The Note component consumes
  * a NoteLayout and only renders SVG.
  */
-import type { NoteDef } from '../types'
-import type { GridLayout } from '../geometry/grid'
-import type { LabelRect } from '../geometry/collision'
-import { fontSize as kindFontSize } from '../geometry/metrics'
+import type { NoteDef } from '../types.js'
+import type { GridLayout } from '../geometry/grid.js'
+import type { LabelRect } from '../geometry/collision.js'
+import { fontSize as kindFontSize } from '../geometry/metrics.js'
 
 export interface LineSegment {
   text: string

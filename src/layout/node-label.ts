@@ -8,12 +8,12 @@
  *
  * Kept React-free so it can be tested without a renderer.
  */
-import type { NormalizedNodeDef } from '../types'
-import type { GridLayout } from '../geometry/grid'
-import { gridToPixel, resolveNodeSizeFrac } from '../geometry/grid'
-import type { LabelRect, LineSeg, CanvasBounds, Circle } from '../geometry/collision'
-import { fontSize } from '../geometry/metrics'
-import { placeLabel, type SlotCandidate, type AttemptRecord } from '../geometry/label-placer'
+import type { NormalizedNodeDef } from '../types.js'
+import type { GridLayout } from '../geometry/grid.js'
+import { gridToPixel, resolveNodeSizeFrac } from '../geometry/grid.js'
+import type { LabelRect, LineSeg, CanvasBounds, Circle } from '../geometry/collision.js'
+import { fontSize } from '../geometry/metrics.js'
+import { placeLabel, type SlotCandidate, type AttemptRecord } from '../geometry/label-placer.js'
 
 export type Corner =
   | 'top-right' | 'bottom-right' | 'bottom-left' | 'top-left'

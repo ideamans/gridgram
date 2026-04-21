@@ -1,13 +1,42 @@
 {
   "name": "gridgram",
   "version": "0.1.0",
-  "description": "Grid-based diagram rendering library (SVG / PNG) built on React SSR",
+  "description": "Grid-based diagram rendering library — authored as a DiagramDef or a .gg file, rendered to SVG via Preact SSR.",
   "type": "module",
-  "main": "src/index.ts",
-  "types": "src/index.ts",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
   },
+  "files": [
+    "dist",
+    "README.md",
+    "THIRD_PARTY_LICENSES.md"
+  ],
+  "sideEffects": false,
+  "keywords": [
+    "diagram",
+    "svg",
+    "preact",
+    "ssr",
+    "grid",
+    "visualization",
+    "dsl",
+    "architecture-diagram"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ideamans/gridgram.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ideamans/gridgram/issues"
+  },
+  "homepage": "https://github.com/ideamans/gridgram#readme",
+  "license": "MIT",
   "scripts": {
     "gg": "bun run src/cli/gg.ts",
     "compile": "bun build --compile --minify --sourcemap=external --external sharp --external '@img/*' src/cli/gg.ts --outfile gg",
@@ -15,6 +44,9 @@
     "test": "bun test",
     "sync-tabler": "bun scripts/sync-tabler-icons.ts",
     "sync-licenses": "bun scripts/sync-licenses.ts",
+    "clean:dist": "rm -rf dist",
+    "build:lib": "bun run clean:dist && bun run sync-tabler && tsc -p tsconfig.build.json && mkdir -p dist/data && cp src/data/tabler-outline.json src/data/tabler-filled.json dist/data/",
+    "prepublishOnly": "bun run build:lib",
     "docs:examples": "bun scripts/build-docs-examples.ts",
     "docs:logo": "bun scripts/pick-monthly-logo.ts",
     "docs:logos:export": "bun scripts/export-logos.ts",
@@ -23,20 +55,20 @@
     "docs:preview": "vitepress preview docs"
   },
   "dependencies": {
-    "@tabler/icons": "^3.41.1",
     "json5": "^2.2.3",
     "preact": "^10.29.1",
-    "preact-render-to-string": "^6.6.7",
-    "sharp": "^0.33.2",
-    "vitepress-daisyui-theme": "^0.2.0"
+    "preact-render-to-string": "^6.6.7"
   },
   "devDependencies": {
+    "@tabler/icons": "^3.41.1",
     "@tailwindcss/vite": "^4.2.2",
     "@types/bun": "latest",
     "daisyui": "^5.5.19",
+    "sharp": "^0.33.2",
     "tailwindcss": "^4.2.2",
     "typescript": "~6.0.2",
     "vitepress": "^1.6.4",
+    "vitepress-daisyui-theme": "^0.2.0",
     "vue": "^3.5.32"
   }
 }

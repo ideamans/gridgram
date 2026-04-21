@@ -4,12 +4,12 @@
  * Builds candidate label rects for every sub-segment of the (resolved)
  * polyline, ordered middle-segment-outward, then delegates to placeLabel.
  */
-import type { NormalizedConnectorDef, NormalizedNodeDef } from '../types'
-import type { GridLayout } from '../geometry/grid'
-import type { LabelRect, LineSeg, CanvasBounds, Circle } from '../geometry/collision'
-import { fontSize } from '../geometry/metrics'
-import { placeLabel, type SlotCandidate, type AttemptRecord } from '../geometry/label-placer'
-import { resolveConnectorPath, type Pixel } from '../geometry/connector-path'
+import type { NormalizedConnectorDef, NormalizedNodeDef } from '../types.js'
+import type { GridLayout } from '../geometry/grid.js'
+import type { LabelRect, LineSeg, CanvasBounds, Circle } from '../geometry/collision.js'
+import { fontSize } from '../geometry/metrics.js'
+import { placeLabel, type SlotCandidate, type AttemptRecord } from '../geometry/label-placer.js'
+import { resolveConnectorPath, type Pixel } from '../geometry/connector-path.js'
 
 export interface ConnectorLabelResult {
   rect: LabelRect

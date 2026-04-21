@@ -11,18 +11,18 @@
  */
 import { readFileSync, writeFileSync, mkdirSync } from 'fs'
 import { dirname, extname, resolve as pathResolve } from 'path'
-import { parseGg } from '../gg/parser'
-import { formatError, type GgError } from '../gg/errors'
-import { resolveDiagramIcons } from '../gg/icons'
-import { buildIconContext } from '../gg/icon-loader'
-import { renderDiagram, computeRenderDimensions } from '../components/Diagram'
-import type { DiagramDef } from '../types'
-import type { DiagramSettings } from '../config'
-import { resolveSettings } from '../config'
-import { loadProjectConfig } from '../config-loader'
-import { loadSharp } from './sharp-loader'
+import { parseGg } from '../gg/parser.js'
+import { formatError, type GgError } from '../gg/errors.js'
+import { resolveDiagramIcons } from '../gg/icons.js'
+import { buildIconContext } from '../gg/icon-loader.js'
+import { renderDiagram, computeRenderDimensions } from '../components/Diagram.js'
+import type { DiagramDef } from '../types.js'
+import type { DiagramSettings } from '../config.js'
+import { resolveSettings } from '../config.js'
+import { loadProjectConfig } from '../config-loader.js'
+import { loadSharp } from './sharp-loader.js'
 import licensesText from '../data/licenses.txt' with { type: 'text' }
-import type { PlacementDiagnostic } from '../gg/diagnostics'
+import type { PlacementDiagnostic } from '../gg/diagnostics.js'
 
 interface Args {
   input?: string

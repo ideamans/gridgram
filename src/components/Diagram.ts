@@ -1,18 +1,19 @@
 import { h } from 'preact'
+import type { VNode } from 'preact'
 import { renderToString } from 'preact-render-to-string'
-import type { DiagramDef, NormalizedDiagramDef } from '../types'
-import type { PlacementDiagnostic } from '../gg/diagnostics'
-import { Region } from './Region'
-import { DiagramNode } from './Node'
-import { Connector } from './Connector'
-import { Note } from './Note'
-import { resolveDiagram } from '../layout/pipeline'
-import { computeLayout } from '../geometry/grid'
-import { isTransparent } from './colors'
-import type { DiagramSettings, ResolvedSettings } from '../config'
-import { resolveSettings } from '../config'
-import { expandBadges } from '../badges'
-import { normalizeDiagramDef } from '../normalize'
+import type { DiagramDef, NormalizedDiagramDef } from '../types.js'
+import type { PlacementDiagnostic } from '../gg/diagnostics.js'
+import { Region } from './Region.js'
+import { DiagramNode } from './Node.js'
+import { Connector } from './Connector.js'
+import { Note } from './Note.js'
+import { resolveDiagram } from '../layout/pipeline.js'
+import { computeLayout } from '../geometry/grid.js'
+import { isTransparent } from './colors.js'
+import type { DiagramSettings, ResolvedSettings } from '../config.js'
+import { resolveSettings } from '../config.js'
+import { expandBadges } from '../badges.js'
+import { normalizeDiagramDef } from '../normalize.js'
 
 /**
  * Back-compat alias: callers that used to pass a loose DiagramOptions
@@ -164,6 +165,25 @@ function buildDiagramInternal(rawDef: DiagramDef, opts: DiagramOptions = {}): In
  *  — use `renderDiagram` instead if you need them. */
 export function buildDiagramTree(rawDef: DiagramDef, opts: DiagramOptions = {}): any {
   return buildDiagramInternal(rawDef, opts).tree
+}
+
+/** Props accepted by the `<Diagram>` Preact component. */
+export interface DiagramProps extends DiagramOptions {
+  def: DiagramDef
+}
+
+/**
+ * Preact functional component wrapper around `buildDiagramTree` — embed a
+ * diagram directly in your JSX:
+ *
+ *   import { Diagram } from 'gridgram'
+ *   <Diagram def={myDef} renderWidth={1024} />
+ *
+ * For plain SVG string output (no Preact host), use `renderDiagram` instead.
+ */
+export function Diagram(props: DiagramProps): VNode {
+  const { def, ...opts } = props
+  return buildDiagramTree(def, opts)
 }
 
 /** Render result carrying the SVG alongside any placement / route

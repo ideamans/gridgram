@@ -29,11 +29,11 @@
  *   4. Otherwise: iconError = true (the node renders with the red
  *      missing-icon ring).
  */
-import type { DiagramDef, NodeBadge, NodeDef } from '../types'
-import type { BadgeSpec } from '../badges'
-import { tabler } from '../tabler'
-import type { GgError } from './errors'
-import type { ElementRef, PlacementDiagnostic } from './diagnostics'
+import type { DiagramDef, NodeBadge, NodeDef } from '../types.js'
+import type { BadgeSpec } from '../badges.js'
+import { tabler } from '../tabler.js'
+import type { GgError } from './errors.js'
+import type { ElementRef, PlacementDiagnostic } from './diagnostics.js'
 
 export interface IconContext {
   /** Resolved icon map: id → already-loaded SVG content (post URL/dataURL/path resolution). */

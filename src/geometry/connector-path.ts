@@ -6,10 +6,10 @@
  * so that the rendered line and its computed metadata stay in lockstep.
  */
 
-import type { NormalizedConnectorDef, NormalizedNodeDef } from '../types'
-import type { GridLayout } from './grid'
-import { gridToPixel, gridFracToPixel, resolveNodeSizeFrac } from './grid'
-import type { LineSeg } from './collision'
+import type { NormalizedConnectorDef, NormalizedNodeDef } from '../types.js'
+import type { GridLayout } from './grid.js'
+import { gridToPixel, gridFracToPixel, resolveNodeSizeFrac } from './grid.js'
+import type { LineSeg } from './collision.js'
 
 export interface Pixel {
   x: number

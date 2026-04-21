@@ -1,14 +1,14 @@
 import { h } from 'preact'
 import type { VNode } from 'preact'
-import type { NormalizedNodeDef, DiagramTheme } from '../types'
-import type { GridLayout } from '../geometry/grid'
-import { gridToPixel, resolveNodeSizeFrac } from '../geometry/grid'
-import { ERROR_COLOR } from '../geometry/metrics'
-import { SLOTS, computeCallout, nodeLabelMetrics, type Corner } from '../layout/node-label'
-import { hFragment } from './svg-fragment'
-import type { NodeBadge } from '../types'
-import { resolveColor, NODE_RING_FILL_ALPHA } from './colors'
-import { ICON_VIEWPORT } from '../constants'
+import type { NormalizedNodeDef, DiagramTheme } from '../types.js'
+import type { GridLayout } from '../geometry/grid.js'
+import { gridToPixel, resolveNodeSizeFrac } from '../geometry/grid.js'
+import { ERROR_COLOR } from '../geometry/metrics.js'
+import { SLOTS, computeCallout, nodeLabelMetrics, type Corner } from '../layout/node-label.js'
+import { hFragment } from './svg-fragment.js'
+import type { NodeBadge } from '../types.js'
+import { resolveColor, NODE_RING_FILL_ALPHA } from './colors.js'
+import { ICON_VIEWPORT } from '../constants.js'
 
 const ICON_VIEWBOX = `0 0 ${ICON_VIEWPORT} ${ICON_VIEWPORT}`
 

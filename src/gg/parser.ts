@@ -10,10 +10,10 @@
  * No more `%%{…}%%` directives — all scalars / theme / icons come from
  * `doc { … }` statements.
  */
-import type { ConnectorDef, DiagramDef, NodeDef, NoteDef, RegionDef } from '../types'
-import { tokenize, parseStatements } from './dsl'
-import { checkIntegrity } from './integrity'
-import type { GgError } from './errors'
+import type { ConnectorDef, DiagramDef, NodeDef, NoteDef, RegionDef } from '../types.js'
+import { tokenize, parseStatements } from './dsl.js'
+import { checkIntegrity } from './integrity.js'
+import type { GgError } from './errors.js'
 
 export interface ParseResult {
   def: DiagramDef

@@ -1,8 +1,8 @@
 import { h } from 'preact'
-import type { NoteDef, DiagramTheme } from '../types'
-import type { GridLayout } from '../geometry/grid'
-import { computeNoteLayout, computeNoteLeaders, type LeaderTarget } from '../layout/note-layout'
-import { resolveColor } from './colors'
+import type { NoteDef, DiagramTheme } from '../types.js'
+import type { GridLayout } from '../geometry/grid.js'
+import { computeNoteLayout, computeNoteLeaders, type LeaderTarget } from '../layout/note-layout.js'
+import { resolveColor } from './colors.js'
 
 export interface NoteProps {
   note: NoteDef

@@ -15,8 +15,8 @@
  *     emits an SVG path `d` attribute with rounded corners.
  */
 
-import type { GridSpan } from '../types'
-import type { GridLayout } from './grid'
+import type { GridSpan } from '../types.js'
+import type { GridLayout } from './grid.js'
 
 export interface BlobBBox {
   minCol: number

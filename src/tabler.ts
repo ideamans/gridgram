@@ -13,8 +13,8 @@
  * The .gg parser uses this same resolver via the '@tabler/<name>' and
  * '@tabler-filled/<name>' identifier prefixes.
  */
-import outlineData from './data/tabler-outline.json'
-import filledData from './data/tabler-filled.json'
+import outlineData from './data/tabler-outline.json' with { type: 'json' }
+import filledData from './data/tabler-filled.json' with { type: 'json' }
 
 type IconNode = [string, Record<string, string | number>]
 type NodeMap = Record<string, IconNode[]>

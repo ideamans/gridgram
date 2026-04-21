@@ -1,6 +1,6 @@
 import { h } from 'preact'
 import type { VNode } from 'preact'
-import type { SvgFragment } from '../types'
+import type { SvgFragment } from '../types.js'
 
 /**
  * Build a `<tag>` element that holds an SvgFragment as its inner content.

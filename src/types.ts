@@ -167,7 +167,7 @@ export interface NodeDef {
    * (earlier = bottom). Presets that need this (e.g. a white disc under
    * a tabler filled icon) use that stacking internally.
    */
-  badges?: import('./badges').BadgeSpec[]
+  badges?: import('./badges.js').BadgeSpec[]
   /**
    * Marks the icon as failed to resolve (e.g. a string identifier that
    * couldn't be looked up in the icon registry). When true and errors

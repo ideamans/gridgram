@@ -19,8 +19,8 @@
  * `tablerFilled` at module init), so they pass through the icon
  * resolver untouched.
  */
-import type { NodeBadge, BadgePosition, SvgFragment } from './types'
-import { tablerFilled } from './tabler'
+import type { NodeBadge, BadgePosition, SvgFragment } from './types.js'
+import { tablerFilled } from './tabler.js'
 
 // ---------------------------------------------------------------------------
 // Types

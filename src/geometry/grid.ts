@@ -1,4 +1,4 @@
-import type { DiagramDef, GridPos, NodeDef, NoteDef, ConnectorDef, RegionDef } from '../types'
+import type { DiagramDef, GridPos, NodeDef, NoteDef, ConnectorDef, RegionDef } from '../types.js'
 
 /** Default node diameter as fraction of cell size */
 export const DEFAULT_NODE_SIZE = 0.45

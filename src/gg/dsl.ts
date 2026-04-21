@@ -31,9 +31,9 @@
  * a string. Inside `body` the JSON5 parser handles its own comments.
  */
 import JSON5 from 'json5'
-import type { ConnectorDef, DiagramDef, NodeDef, NoteDef, RegionDef, ArrowEnd } from '../types'
-import { parseA1 } from '../a1'
-import type { GgError } from './errors'
+import type { ConnectorDef, DiagramDef, NodeDef, NoteDef, RegionDef, ArrowEnd } from '../types.js'
+import { parseA1 } from '../a1.js'
+import type { GgError } from './errors.js'
 
 // ---------------------------------------------------------------------------
 // Tokens

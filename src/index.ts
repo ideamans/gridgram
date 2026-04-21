@@ -6,19 +6,19 @@
  * and metrics are not re-exported — import from the subtrees in tests
  * or advanced integrations if you need them.
  */
-export { renderDiagram, renderDiagramSvg, buildDiagramTree } from './components/Diagram'
-export type { DiagramOptions, RenderResult } from './components/Diagram'
+export { Diagram, renderDiagram, renderDiagramSvg, buildDiagramTree } from './components/Diagram.js'
+export type { DiagramOptions, DiagramProps, RenderResult } from './components/Diagram.js'
 export type {
   PlacementDiagnostic, PlacementAttempt, Obstacle, ElementRef,
   DiagnosticKind, GridCellRef, GridSpanRef, PixelRect, PixelLine, PixelCircle,
-} from './gg/diagnostics'
-export { defineConfig, resolveSettings, SYSTEM_DEFAULTS } from './config'
+} from './gg/diagnostics.js'
+export { defineConfig, resolveSettings, SYSTEM_DEFAULTS } from './config.js'
 export type {
   DiagramSettings,
   ResolvedSettings,
   DiagramContent,
   OutputTarget,
-} from './config'
+} from './config.js'
 export type {
   DiagramDef,
   DiagramTheme,
@@ -33,7 +33,7 @@ export type {
   GridPos,
   GridSpan,
   SvgFragment,
-} from './types'
-export { tabler, tablerOutline, tablerFilled, tablerHas } from './tabler'
-export { BADGE_PRESETS, expandBadges } from './badges'
-export type { BadgeSpec, BadgePresetRef } from './badges'
+} from './types.js'
+export { tabler, tablerOutline, tablerFilled, tablerHas } from './tabler.js'
+export { BADGE_PRESETS, expandBadges } from './badges.js'
+export type { BadgeSpec, BadgePresetRef } from './badges.js'

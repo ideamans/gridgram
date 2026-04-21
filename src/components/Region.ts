@@ -1,14 +1,14 @@
 import { h } from 'preact'
 import type { VNode } from 'preact'
-import type { RegionDef, DiagramTheme } from '../types'
-import type { GridLayout } from '../geometry/grid'
-import { buildBlob, blobPathD } from '../geometry/blob'
-import { ERROR_COLOR, regionInset, regionDefaultRadius } from '../geometry/metrics'
+import type { RegionDef, DiagramTheme } from '../types.js'
+import type { GridLayout } from '../geometry/grid.js'
+import { buildBlob, blobPathD } from '../geometry/blob.js'
+import { ERROR_COLOR, regionInset, regionDefaultRadius } from '../geometry/metrics.js'
 import {
   bboxInPixels, computeRegionSlot, regionLabelMetrics,
   type RegionPosition,
-} from '../layout/region-label'
-import { resolveRegionFill } from './colors'
+} from '../layout/region-label.js'
+import { resolveRegionFill } from './colors.js'
 
 export interface RegionProps {
   region: RegionDef

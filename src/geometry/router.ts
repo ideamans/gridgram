@@ -6,11 +6,11 @@
  * Tracks used intersections to prefer fresh paths.
  */
 
-import type { NormalizedNodeDef, NormalizedConnectorDef } from '../types'
-import type { GridLayout } from './grid'
-import { gridToPixel, gridFracToPixel, resolveNodeSizeFrac } from './grid'
-import { lineIntersectsCircle } from './collision'
-import { MinHeap } from './heap'
+import type { NormalizedNodeDef, NormalizedConnectorDef } from '../types.js'
+import type { GridLayout } from './grid.js'
+import { gridToPixel, gridFracToPixel, resolveNodeSizeFrac } from './grid.js'
+import { lineIntersectsCircle } from './collision.js'
+import { MinHeap } from './heap.js'
 
 export interface IntPt {
   i: number

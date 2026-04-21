@@ -13,12 +13,12 @@
  * Duplicate-node-id detection happens in parser.ts because it needs to
  * see source attribution (DSL vs JSON) at parse time.
  */
-import type { DiagramDef } from '../types'
-import type { GgError } from './errors'
-import { buildBlob, DisjointRegionError } from '../geometry/blob'
-import { computeLayout } from '../geometry/grid'
-import { normalizeDiagramDef } from '../normalize'
-import { cellAddress } from './diagnostics'
+import type { DiagramDef } from '../types.js'
+import type { GgError } from './errors.js'
+import { buildBlob, DisjointRegionError } from '../geometry/blob.js'
+import { computeLayout } from '../geometry/grid.js'
+import { normalizeDiagramDef } from '../normalize.js'
+import { cellAddress } from './diagnostics.js'
 
 /** Format a normalized 0-based span as `A1-C3` using A1 addresses —
  *  agents and humans read this directly without having to adjust
