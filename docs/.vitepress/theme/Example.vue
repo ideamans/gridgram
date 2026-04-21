@@ -18,6 +18,15 @@ interface Props {
   coords?: boolean
   cols?: number | string
   rows?: number | string
+  /**
+   * Frame selector for diagrams that use `frames` tags. Accepts either
+   *   framing="2"     — fixed: show only that frame
+   *   framing="1-3"   — range: show frame 1 first, reveal ◀ / ▶ buttons
+   *                     on hover to step through 1..3.
+   * Always displays a `[Frame N]` badge in the top-left corner so the
+   * reader knows which merged view they're looking at.
+   */
+  framing?: string | number
 }
 const props = withDefaults(defineProps<Props>(), { output: 'svg', source: 'gg', coords: false })
 
@@ -46,8 +55,46 @@ const rowLabels = computed(() =>
 const outputTab = ref<'svg' | 'png'>(props.output)
 const sourceTab = ref<'gg' | 'ts'>(props.source)
 
-const svgUrl = computed(() => `/examples/${props.name}.svg`)
-const pngUrl = computed(() => `/examples/${props.name}.png`)
+// Frame selector — parses the `framing` prop once, then drives both
+// the asset URLs and the hover navigation. `null` frameMin means the
+// example is not in frame-mode (no badge, no arrows, single file).
+interface FrameRangeUi { min: number; max: number; start: number }
+function parseFraming(raw: Props['framing']): FrameRangeUi | null {
+  if (raw === undefined || raw === null || raw === '') return null
+  const s = String(raw).trim()
+  const range = /^(\d+)\s*-\s*(\d+)$/.exec(s)
+  if (range) {
+    const min = Number(range[1])
+    const max = Number(range[2])
+    if (!Number.isFinite(min) || !Number.isFinite(max) || min > max) return null
+    return { min, max, start: min }
+  }
+  const single = /^\d+$/.exec(s)
+  if (single) {
+    const n = Number(single[0])
+    return { min: n, max: n, start: n }
+  }
+  return null
+}
+const framing = computed<FrameRangeUi | null>(() => parseFraming(props.framing))
+const currentFrame = ref<number>(framing.value?.start ?? 1)
+// Keep currentFrame pinned inside the new range when the prop changes
+// (hot-reload friendliness; normally it never fires).
+watch(framing, (f) => { currentFrame.value = f?.start ?? 1 })
+const canStepBack = computed(() => !!framing.value && framing.value.min !== framing.value.max && currentFrame.value > framing.value.min)
+const canStepFwd  = computed(() => !!framing.value && framing.value.min !== framing.value.max && currentFrame.value < framing.value.max)
+function stepBack(): void { if (canStepBack.value) currentFrame.value-- }
+function stepFwd():  void { if (canStepFwd.value)  currentFrame.value++ }
+
+// When framing is set, images come from the per-frame files the build
+// script emits (`<name>-f<N>.svg/.png`). Otherwise fall back to the
+// default single-frame files, matching pre-frame behaviour exactly.
+const svgUrl = computed(() => framing.value
+  ? `/examples/${props.name}-f${currentFrame.value}.svg`
+  : `/examples/${props.name}.svg`)
+const pngUrl = computed(() => framing.value
+  ? `/examples/${props.name}-f${currentFrame.value}.png`
+  : `/examples/${props.name}.png`)
 const ggUrl  = computed(() => `/examples/${props.name}.gg`)
 const tsUrl  = computed(() => `/examples/${props.name}.ts`)
 
@@ -140,11 +187,14 @@ onMounted(async () => {
         >PNG</button>
       </div>
       <div
-        :class="['gg-example__viewport', { 'has-coords': showCoords }]"
+        :class="[
+          'gg-example__viewport',
+          { 'has-coords': showCoords, 'has-framing': !!framing },
+        ]"
       >
         <div class="gg-example__image-box">
-          <img v-if="outputTab === 'svg'" :src="svgUrl" :alt="`${name} (SVG)`" />
-          <img v-else                     :src="pngUrl" :alt="`${name} (PNG)`" />
+          <img v-if="outputTab === 'svg'" :src="svgUrl" :alt="`${name} (SVG, frame ${currentFrame})`" />
+          <img v-else                     :src="pngUrl" :alt="`${name} (PNG, frame ${currentFrame})`" />
           <template v-if="showCoords">
             <!-- Column letters above the image, positioned at the centre
                  of each grid column as a percentage of the image width.
@@ -167,6 +217,34 @@ onMounted(async () => {
                 :style="{ top: `${((i + 0.5) / coordRows) * 100}%` }"
               >{{ label }}</span>
             </div>
+          </template>
+          <template v-if="framing">
+            <!-- Always-visible frame badge. Sits in the top-left of
+                 the image so it reads as a caption without covering
+                 the diagram body. -->
+            <div class="gg-example__frame-badge" aria-live="polite">
+              Frame {{ currentFrame }}
+              <span v-if="framing.min !== framing.max" class="gg-example__frame-range">
+                / {{ framing.min }}–{{ framing.max }}
+              </span>
+            </div>
+            <!-- Hover-revealed prev/next controls, only meaningful in
+                 range mode. Keyboard users reach them with Tab (they
+                 stay visible on focus via :focus-within). -->
+            <template v-if="framing.min !== framing.max">
+              <button
+                class="gg-example__frame-nav gg-example__frame-nav--prev"
+                :disabled="!canStepBack"
+                @click="stepBack"
+                aria-label="Previous frame"
+              >◀</button>
+              <button
+                class="gg-example__frame-nav gg-example__frame-nav--next"
+                :disabled="!canStepFwd"
+                @click="stepFwd"
+                aria-label="Next frame"
+              >▶</button>
+            </template>
           </template>
         </div>
       </div>
@@ -314,5 +392,63 @@ onMounted(async () => {
 .gg-example__code {
   margin: 0 !important;
   border-radius: 0 !important;
+}
+
+/* --- Frame-aware viewer bits ------------------------------------- */
+
+/* The frame badge sits inside the image-box so it tracks the image's
+   actual rendered width (not the viewport padding box). Top-left to
+   mimic a figure caption; opaque enough to read against any diagram. */
+.gg-example__frame-badge {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  padding: 3px 10px;
+  font-size: 12px;
+  font-family: var(--vp-font-family-mono);
+  font-weight: 600;
+  color: var(--vp-c-text-1);
+  background: var(--vp-c-bg);
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 999px;
+  pointer-events: none;
+  user-select: none;
+}
+.gg-example__frame-range {
+  color: var(--vp-c-text-3);
+  font-weight: 400;
+  margin-left: 4px;
+}
+
+/* Arrows are invisible until the viewport is hovered or a nav button
+   itself is focused. Positioned outside the image on the viewport's
+   inner edge so they don't occlude diagram content. */
+.gg-example__frame-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  font-size: 14px;
+  line-height: 1;
+  color: var(--vp-c-text-1);
+  background: var(--vp-c-bg);
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 120ms ease-out;
+}
+.gg-example__frame-nav--prev { left: -18px; }
+.gg-example__frame-nav--next { right: -18px; }
+.gg-example__frame-nav:disabled {
+  cursor: default;
+  color: var(--vp-c-text-3);
+}
+.gg-example__viewport.has-framing:hover .gg-example__frame-nav,
+.gg-example__viewport.has-framing:focus-within .gg-example__frame-nav {
+  opacity: 1;
 }
 </style>

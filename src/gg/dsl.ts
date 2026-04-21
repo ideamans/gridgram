@@ -5,12 +5,18 @@
  *
  *   file        := statement*
  *
- *   statement   := doc-stmt | icon-stmt | region-stmt | note-stmt | connector-stmt
+ *   statement   := frame-spec? (doc-stmt | icon-stmt | region-stmt |
+ *                                note-stmt | connector-stmt)
  *   doc-stmt    := 'doc'    body
  *   icon-stmt   := 'icon'   arg* body?
  *   region-stmt := 'region' arg* body?
  *   note-stmt   := 'note'   arg* body?
  *   connector-stmt := IDENT arrow IDENT arg* body?
+ *
+ *   # A leading `[frame-spec]` is equivalent to the inline arg form — it
+ *   # just lets the frame selector line up in column 1 across a block of
+ *   # related statements. Specifying both leading and inline on the same
+ *   # statement is a parse error.
  *
  *   arg         := id-sigil | pos | span | label | target-list | frame-spec | attr
  *
@@ -451,25 +457,68 @@ export function parseStatements(tokens: Token[]): ParsedStatements {
 function parseStatement(toks: Token[]): ParseLineResult {
   const line = toks[0].line
 
-  // Connector dispatch: word arrow word ...
-  if (toks.length >= 3 && toks[0].type === 'word' && toks[1].type === 'arrow' && toks[2].type === 'word') {
-    return parseConnector(toks)
+  // Optional leading `[frame-spec]` — peel it off, dispatch as if it
+  // weren't there, then stamp the spec onto whatever def the body
+  // produced. This lets authors write
+  //
+  //     [2] icon :api tabler/server "API" color=accent
+  //     [2] user --> api "login"
+  //     [2] doc { theme: { primary: '#fff' } }
+  //
+  // so the frame spec can line up in column 1 across a block of
+  // related statements. The inline form (`icon [2] :api …`) still
+  // works; supplying both the leading form AND an inline one on the
+  // same statement is flagged as an error.
+  let leadingFrames: FrameSpec | undefined
+  let body: Token[] = toks
+  if (body.length > 0 && body[0].type === 'frame-spec') {
+    leadingFrames = (body[0] as Extract<Token, { type: 'frame-spec' }>).spec
+    body = body.slice(1)
+    if (body.length === 0) {
+      return { error: { message: 'Leading `[frame-spec]` must be followed by a statement', line, source: 'dsl' } }
+    }
   }
 
-  // Command dispatch
-  if (toks[0].type === 'word') {
-    const cmd = (toks[0] as { value: string }).value
-    const rest = toks.slice(1)
+  let result: ParseLineResult
+
+  // Connector dispatch: word arrow word ...
+  if (body.length >= 3 && body[0].type === 'word' && body[1].type === 'arrow' && body[2].type === 'word') {
+    result = parseConnector(body)
+  } else if (body[0].type === 'word') {
+    // Command dispatch
+    const cmd = (body[0] as { value: string }).value
+    const rest = body.slice(1)
     switch (cmd) {
-      case 'doc':    return parseDoc(rest, line)
-      case 'icon':   return parseIcon(rest, line)
-      case 'region': return parseRegion(rest, line)
-      case 'note':   return parseNote(rest, line)
+      case 'doc':    result = parseDoc(rest, line); break
+      case 'icon':   result = parseIcon(rest, line); break
+      case 'region': result = parseRegion(rest, line); break
+      case 'note':   result = parseNote(rest, line); break
       default:
         return { error: { message: `Unknown statement: \`${cmd}\`. Expected one of: icon, region, note, doc, or \`<id> <arrow> <id>\` connector.`, line, source: 'dsl' } }
     }
+  } else {
+    return { error: { message: 'Unexpected statement-leading token', line, source: 'dsl' } }
   }
-  return { error: { message: `Unexpected statement-leading token`, line, source: 'dsl' } }
+
+  // Attach the leading frame spec, if any, to whichever carrier the
+  // body parser produced. A body that also set its own `frames` via
+  // an inline `[N]` is a clash — flag it rather than silently pick
+  // one, since the two could specify different frames.
+  if (leadingFrames !== undefined && !result.error) {
+    const carrier = result.node ?? result.connector ?? result.region ?? result.note
+    if (carrier) {
+      if (carrier.frames !== undefined) {
+        return { error: { message: '`[frame-spec]` specified twice (leading and inline); pick one form', line, source: 'dsl' } }
+      }
+      carrier.frames = leadingFrames
+    } else if (result.doc) {
+      if (result.docFrames !== undefined) {
+        return { error: { message: '`[frame-spec]` specified twice (leading and inline); pick one form', line, source: 'dsl' } }
+      }
+      result.docFrames = leadingFrames
+    }
+  }
+  return result
 }
 
 // ---------------------------------------------------------------------------

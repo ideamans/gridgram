@@ -115,6 +115,113 @@ icon [2] :b @A1 src=x`)
   })
 })
 
+describe('leading [frame-spec]: column-1 form', () => {
+  test('[N] icon — leading spec attaches to NodeDef', () => {
+    const { def, errors } = parseGg(`icon :u @A1 tabler/user "U"
+[2] icon :u tabler/filled/user "Session"`)
+    expect(errors.filter((e) => e.source !== 'check')).toEqual([])
+    expect(def.nodes.length).toBe(2)
+    expect(def.nodes[0].frames).toBeUndefined()
+    expect(def.nodes[1].frames).toBe(2)
+  })
+
+  test('[range] connector — leading spec attaches to ConnectorDef', () => {
+    const { def, errors } = parseGg(`icon :a @A1 src=x
+icon :b @B1 src=x
+[2-4] a --> b "only at 2..4"`)
+    expect(errors.filter((e) => e.source !== 'check')).toEqual([])
+    expect(def.connectors?.[0].frames).toEqual([[2, 4]])
+    expect(def.connectors?.[0].label).toBe('only at 2..4')
+  })
+
+  test('[N] region — leading spec attaches to RegionDef', () => {
+    const { def, errors } = parseGg(`icon :a @A1 src=x
+[2-] region @A1-B2 "spotlight"`)
+    expect(errors.filter((e) => e.source !== 'check')).toEqual([])
+    expect(def.regions?.[0].frames).toEqual([[2, Infinity]])
+  })
+
+  test('[N] note — leading spec attaches to NoteDef', () => {
+    const { def, errors } = parseGg(`icon :a @A1 src=x
+[2] note @B1 (a) "visible at 2"`)
+    expect(errors.filter((e) => e.source !== 'check')).toEqual([])
+    expect(def.notes?.[0].frames).toBe(2)
+    expect(def.notes?.[0].targets).toEqual(['a'])
+  })
+
+  test('[N] doc — leading spec lands in frameOverrides', () => {
+    const { def } = parseGg(`doc { theme: { primary: '#111' } }
+[2] doc { theme: { primary: '#fff' } }
+icon :u @A1 src=x`)
+    expect(def.theme?.primary).toBe('#111')
+    expect(def.frameOverrides?.length).toBe(1)
+    expect(def.frameOverrides![0].frames).toBe(2)
+    expect((def.frameOverrides![0].settings as any).theme).toEqual({ primary: '#fff' })
+  })
+
+  test('leading and inline produce identical DefDef output', () => {
+    const a = parseGg(`icon :u @A1 src=x
+icon [2] :u src=y`).def
+    const b = parseGg(`icon :u @A1 src=x
+[2] icon :u src=y`).def
+    // Both should have same shape: two nodes, same ids, second tagged frames=2.
+    expect(a.nodes.length).toBe(b.nodes.length)
+    for (let i = 0; i < a.nodes.length; i++) {
+      expect(a.nodes[i].id).toBe(b.nodes[i].id)
+      expect(a.nodes[i].frames).toEqual(b.nodes[i].frames)
+      expect((a.nodes[i] as any).src).toEqual((b.nodes[i] as any).src)
+    }
+  })
+
+  test('clash: leading + inline on the same statement is a parse error', () => {
+    const { errors } = parseGg(`icon :u @A1 src=x
+[2] icon [3] :u src=y`)
+    const clash = errors.find((e) => e.message.includes('specified twice'))
+    expect(clash).toBeDefined()
+    expect(clash!.source).toBe('dsl')
+  })
+
+  test('clash detection also works for connectors', () => {
+    const src = `icon :a @A1 src=x
+icon :b @B1 src=x
+[2] a --> b [3]`
+    const { errors } = parseGg(src)
+    const clash = errors.find((e) => e.message.includes('specified twice'))
+    expect(clash).toBeDefined()
+  })
+
+  test('clash detection also works for doc', () => {
+    const { errors } = parseGg(`[2] doc [3] { theme: { primary: '#f00' } }
+icon :u @A1 src=x`)
+    const clash = errors.find((e) => e.message.includes('specified twice'))
+    expect(clash).toBeDefined()
+  })
+
+  test('orphan leading `[N]` (no statement after) is an error', () => {
+    const { errors } = parseGg('[2]\nicon :u @A1 src=x')
+    const orphan = errors.find((e) => e.message.includes('must be followed by a statement'))
+    expect(orphan).toBeDefined()
+  })
+
+  test('leading form composes with other args — order still free', () => {
+    // Argument order after the command remains unconstrained; the
+    // leading form only reserves position 0.
+    const { def, errors } = parseGg('[2] icon "Late arrival" @A1 :u tabler/user')
+    expect(errors.filter((e) => e.source !== 'check')).toEqual([])
+    expect(def.nodes[0]).toMatchObject({ id: 'u', label: 'Late arrival', frames: 2 })
+  })
+
+  test('leading form integrates with render pipeline end-to-end', () => {
+    const { def } = parseGg(`icon :u @A1 tabler/user "Base"
+[2] icon :u tabler/user "Frame-2 label"`)
+    const f1 = renderDiagram(def, { frame: 1 }).svg
+    const f2 = renderDiagram(def, { frame: 2 }).svg
+    expect(f1).toContain('Base')
+    expect(f1).not.toContain('Frame-2 label')
+    expect(f2).toContain('Frame-2 label')
+  })
+})
+
 describe('render pipeline: frame opt selects which frame renders', () => {
   test('renderDiagram without opts.frame renders the base (frame 1)', () => {
     const { def } = parseGg(`icon :u @A1 tabler/user "Base"

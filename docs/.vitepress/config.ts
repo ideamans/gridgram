@@ -174,6 +174,10 @@ const config: ReturnType<typeof withTheme> = withTheme({
               items: [{ text: "Overview", link: "/en/guide/note/" }],
             },
             {
+              text: "Frame",
+              items: [{ text: "Overview", link: "/en/guide/frame/" }],
+            },
+            {
               text: "Color",
               items: [
                 { text: "Overview", link: "/en/guide/color/" },

@@ -1,0 +1,25 @@
+# Same diagram, three frames — an auth flow told as a short story.
+#
+# Frame 1: the three actors sit idle, no commentary.
+# Frame 2: the login round-trip is drawn + annotated.
+# Frame 3: the session is established (filled user icon, accent color,
+#          query connector + note pointing at the DB).
+
+doc { cols: 3, rows: 3 }
+
+icon :user @A2 tabler/user     "User"
+icon :api  @B2 tabler/server   "API"
+icon :db   @C2 tabler/database "DB"
+
+# Frame 2: login request lands, API recoloured, stateless note appears.
+# (The leading `[2]` aligns every frame-2 statement in column 1 so
+#  the frame structure is scannable at a glance.)
+[2] icon :api tabler/server "API" color=accent
+[2] user --> api "login" id=login
+[2] note @B1 (api) "Stateless,\nauto-scaled"
+
+# Frame 3: session is live — user icon becomes filled/accent,
+# the database is queried, and a note explains the query.
+[3] icon :user tabler/filled/user "User" color=accent
+[3] api  --> db "query" id=query
+[3] note @C3 (query) "SQL with\nindex hints"

@@ -30,8 +30,9 @@ import { parseGg } from '../src/gg/parser'
 import { resolveDiagramIcons } from '../src/gg/icons'
 import { buildIconContext } from '../src/gg/icon-loader'
 import { renderDiagramSvg, computeRenderDimensions } from '../src/components/Diagram'
-import type { DiagramDef } from '../src/types'
+import type { DiagramDef, FrameSpec, FrameRange } from '../src/types'
 import type { IconContext } from '../src/gg/icons'
+import { hasFrames, normalizeFrameSpec } from '../src/frame'
 
 const EXAMPLES_DIR = pathResolve('examples')
 const OUT_DIR      = pathResolve('docs/public/examples')
@@ -43,6 +44,12 @@ interface ExampleSources {
   tsPath?: string
   ggSource?: string
   tsSource?: string
+}
+
+interface PreparedDef {
+  /** The fully resolved, icon-expanded DiagramDef — ready to render at
+   *  any frame the examples asks for. */
+  def: DiagramDef
 }
 
 interface RenderResult {
@@ -59,6 +66,38 @@ interface ManifestEntry {
   hasTs: boolean
   width: number
   height: number
+  /** Declared frame numbers when the example uses frame tags.
+   *  Always starts with 1 and is sorted ascending. Absent for
+   *  non-frame examples. */
+  frames?: number[]
+}
+
+/**
+ * Extract every finite frame number mentioned anywhere in the def:
+ * node / connector / region / note `frames`, plus `doc [N]` overrides.
+ * Frame 1 is always included so the base layer is covered. Open-ended
+ * ranges `[n, Infinity]` contribute their lower endpoint — anything
+ * above behaves identically (everything in the range-to-infinity set
+ * matches uniformly).
+ */
+function collectDeclaredFrames(def: DiagramDef): number[] {
+  const set = new Set<number>([1])
+  const visit = (spec: FrameSpec | undefined): void => {
+    if (spec === undefined) return
+    let ranges: FrameRange[] | undefined
+    try { ranges = normalizeFrameSpec(spec) } catch { return }
+    if (!ranges) return
+    for (const [lo, hi] of ranges) {
+      if (Number.isFinite(lo)) set.add(lo)
+      if (Number.isFinite(hi)) set.add(hi)
+    }
+  }
+  for (const n of def.nodes) visit(n.frames)
+  for (const c of def.connectors ?? []) visit(c.frames)
+  for (const r of def.regions ?? []) visit(r.frames)
+  for (const n of def.notes ?? []) visit(n.frames)
+  for (const o of def.frameOverrides ?? []) visit(o.frames)
+  return Array.from(set).sort((a, b) => a - b)
 }
 
 // ---------------------------------------------------------------------------
@@ -82,7 +121,7 @@ function discoverExamples(): ExampleSources[] {
 }
 
 // ---------------------------------------------------------------------------
-async function renderFromGg(ex: ExampleSources): Promise<RenderResult> {
+async function prepareFromGg(ex: ExampleSources): Promise<PreparedDef> {
   const { def: rawDef, errors, icons: rawIcons } = parseGg(ex.ggSource!)
   const fatal = errors.filter((e) => e.source !== 'check')
   if (fatal.length > 0) {
@@ -99,21 +138,24 @@ async function renderFromGg(ex: ExampleSources): Promise<RenderResult> {
     aliasDir: process.cwd(),
   })
   const def = resolveDiagramIcons(rawDef, ctx).def
-  const svg = renderDiagramSvg(def)
-  const dims = computeRenderDimensions(def)
-  return { svg, width: dims.width, height: dims.height }
+  return { def }
 }
 
 // ---------------------------------------------------------------------------
-async function renderFromTs(ex: ExampleSources): Promise<RenderResult> {
+async function prepareFromTs(ex: ExampleSources): Promise<PreparedDef> {
   // Dynamic import — Bun handles .ts natively.
   const mod = await import(pathToFileURL(ex.tsPath!).href)
   const def: DiagramDef | undefined = mod.def ?? mod.default
   if (!def) {
     throw new Error(`[${ex.name}] diagram.ts must export \`def\` or default-export the DiagramDef`)
   }
-  const svg = renderDiagramSvg(def)
-  const dims = computeRenderDimensions(def)
+  return { def }
+}
+
+function renderAtFrame(def: DiagramDef, frame: number | undefined): RenderResult {
+  const opts = frame !== undefined ? { frame } : {}
+  const svg = renderDiagramSvg(def, opts)
+  const dims = computeRenderDimensions(def, opts)
   return { svg, width: dims.width, height: dims.height }
 }
 
@@ -130,47 +172,77 @@ function categoryOf(name: string): string {
 }
 
 async function buildOne(ex: ExampleSources): Promise<ManifestEntry> {
-  let chosen: RenderResult
+  // Prepare the DiagramDef (parse + icon resolve) from each available
+  // source. For parity-checked examples, both sources must produce
+  // identical SVG at frame 1 (the default).
+  let def: DiagramDef
   if (ex.ggPath && ex.tsPath) {
-    const ggR = await renderFromGg(ex)
-    const tsR = await renderFromTs(ex)
-    if (ggR.svg !== tsR.svg) {
-      // Compose a small unified-diff hint pointing to the first divergence.
-      const i = firstDiff(ggR.svg, tsR.svg)
-      const window = (s: string) => s.slice(Math.max(0, i - 60), i + 60)
-      throw new Error(
-        `[${ex.name}] .gg and .ts produce different SVG output (first diff at index ${i})\n` +
-        `  .gg: …${window(ggR.svg)}…\n` +
-        `  .ts: …${window(tsR.svg)}…`
-      )
+    const ggDef = (await prepareFromGg(ex)).def
+    const tsDef = (await prepareFromTs(ex)).def
+    // Parity-check every frame the example declares (and frame 1 for
+    // frame-less examples). A divergence at any frame breaks the docs
+    // contract, not just at the default render.
+    const parityFrames = hasFrames(ggDef) || hasFrames(tsDef)
+      ? Array.from(new Set([...collectDeclaredFrames(ggDef), ...collectDeclaredFrames(tsDef)])).sort((a, b) => a - b)
+      : [undefined as number | undefined]
+    for (const f of parityFrames) {
+      const ggSvg = renderAtFrame(ggDef, f).svg
+      const tsSvg = renderAtFrame(tsDef, f).svg
+      if (ggSvg !== tsSvg) {
+        const i = firstDiff(ggSvg, tsSvg)
+        const window = (s: string) => s.slice(Math.max(0, i - 60), i + 60)
+        throw new Error(
+          `[${ex.name}] .gg and .ts produce different SVG output${f !== undefined ? ` at frame ${f}` : ''} (first diff at index ${i})\n` +
+          `  .gg: …${window(ggSvg)}…\n` +
+          `  .ts: …${window(tsSvg)}…`
+        )
+      }
     }
-    chosen = ggR
+    def = ggDef
   } else if (ex.ggPath) {
-    chosen = await renderFromGg(ex)
+    def = (await prepareFromGg(ex)).def
     console.warn(`  ${ex.name}: only .gg source — TS parity not verified`)
   } else if (ex.tsPath) {
-    chosen = await renderFromTs(ex)
+    def = (await prepareFromTs(ex)).def
     console.warn(`  ${ex.name}: only .ts source — gg expressibility not verified`)
   } else {
     throw new Error(`[${ex.name}] no diagram.gg or diagram.ts found in ${ex.dir}`)
   }
 
-  // Write outputs
-  const svgPath = join(OUT_DIR, `${ex.name}.svg`)
-  writeFileSync(svgPath, `<?xml version="1.0" encoding="UTF-8"?>\n${chosen.svg}`)
-  const png = await rasterize(chosen.svg, chosen.width, chosen.height)
-  writeFileSync(join(OUT_DIR, `${ex.name}.png`), png)
+  // Default-frame render — always written as `<name>.svg/.png` so
+  // non-frame-aware consumers (existing <Example /> callers, external
+  // links) keep working unchanged.
+  const defaultR = renderAtFrame(def, undefined)
+  writeFileSync(join(OUT_DIR, `${ex.name}.svg`), `<?xml version="1.0" encoding="UTF-8"?>\n${defaultR.svg}`)
+  writeFileSync(join(OUT_DIR, `${ex.name}.png`), await rasterize(defaultR.svg, defaultR.width, defaultR.height))
   if (ex.ggSource) writeFileSync(join(OUT_DIR, `${ex.name}.gg`), ex.ggSource)
   if (ex.tsSource) writeFileSync(join(OUT_DIR, `${ex.name}.ts`), ex.tsSource)
 
-  console.log(`  ✓ ${ex.name}  (${Math.round(chosen.width)}×${Math.round(chosen.height)})`)
+  // Per-frame renders — only when the example actually uses frame tags.
+  // Written as `<name>-f<N>.svg/.png` so the <Example framing=…> viewer
+  // can flip between them. Frame 1 mirrors the default render but is
+  // still emitted under the -f1 name so the viewer has a uniform URL
+  // pattern to follow.
+  let framesList: number[] | undefined
+  if (hasFrames(def)) {
+    framesList = collectDeclaredFrames(def)
+    for (const n of framesList) {
+      const r = renderAtFrame(def, n)
+      writeFileSync(join(OUT_DIR, `${ex.name}-f${n}.svg`), `<?xml version="1.0" encoding="UTF-8"?>\n${r.svg}`)
+      writeFileSync(join(OUT_DIR, `${ex.name}-f${n}.png`), await rasterize(r.svg, r.width, r.height))
+    }
+  }
+
+  const tag = framesList ? ` [frames: ${framesList.join(',')}]` : ''
+  console.log(`  ✓ ${ex.name}  (${Math.round(defaultR.width)}×${Math.round(defaultR.height)})${tag}`)
   return {
     name: ex.name,
     category: categoryOf(ex.name),
     hasGg: !!ex.ggPath,
     hasTs: !!ex.tsPath,
-    width: Math.round(chosen.width),
-    height: Math.round(chosen.height),
+    width: Math.round(defaultR.width),
+    height: Math.round(defaultR.height),
+    frames: framesList,
   }
 }
 
