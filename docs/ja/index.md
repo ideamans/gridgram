@@ -37,6 +37,15 @@ landing:
     ggLabel: .gg (DSL)
     tsLabel: TypeScript
 
+  architecture:
+    title: しくみ
+    intro: 2 つの入力パス（gg CLI が読む .gg ファイル / gridgram npm パッケージが受け取る DiagramDef）が、同じレンダリングパイプラインに合流します。どちらのパスでも同一の SVG を生成し、PNG は CLI からのみ、sharp / libvips を初回実行時に取得して変換します。
+    name: gridgram-flow
+
+  acknowledgments:
+    title: オープンソースへの感謝
+    intro: Gridgram は以下の OSS プロジェクトの上に成り立っています。全文は THIRD_PARTY_LICENSES.md および gg --license で確認できます。
+
   finalCta:
     title: 試してみませんか
     text: サインアップ不要・API キー不要。すべてローカルで動きます。

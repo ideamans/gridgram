@@ -4,6 +4,12 @@ Patterns for embedding Gridgram in a host system. None of these are
 separate packages — they're conventions that compose the primitive
 API into whatever shape your host needs.
 
+> **Import boundary reminder:** the pure pipeline (`parseGg`,
+> `resolveDiagramIcons`, `renderDiagram`, …) comes from `'gridgram'`
+> and runs anywhere. Filesystem / HTTP helpers (`buildIconContext`,
+> `loadProjectConfig`) come from `'gridgram/node'` and only work in a
+> Node runtime.
+
 ## HTTP endpoint
 
 A minimal service that accepts `.gg` source and returns SVG +
@@ -11,9 +17,8 @@ diagnostics:
 
 ```ts
 import { serve } from 'bun'
-import {
-  parseGg, buildIconContext, resolveDiagramIcons, renderDiagram,
-} from 'gridgram'
+import { parseGg, resolveDiagramIcons, renderDiagram } from 'gridgram'
+import { buildIconContext } from 'gridgram/node'
 
 serve({
   port: 3000,
@@ -57,9 +62,8 @@ Skeleton:
 
 ```ts
 import { Server } from '@modelcontextprotocol/sdk/server'
-import {
-  parseGg, buildIconContext, resolveDiagramIcons, renderDiagram,
-} from 'gridgram'
+import { parseGg, resolveDiagramIcons, renderDiagram } from 'gridgram'
+import { buildIconContext } from 'gridgram/node'
 
 const server = new Server({ name: 'gridgram', version: '0.1.0' }, {
   capabilities: { tools: {} },
@@ -101,11 +105,10 @@ In a static-site generator or CI job, process every `.gg` file in a
 directory:
 
 ```ts
-import { readdir, readFile, writeFile } from 'fs/promises'
-import { join, dirname } from 'path'
-import {
-  parseGg, buildIconContext, resolveDiagramIcons, renderDiagram,
-} from 'gridgram'
+import { readdir, readFile, writeFile } from 'node:fs/promises'
+import { join, dirname } from 'node:path'
+import { parseGg, resolveDiagramIcons, renderDiagram } from 'gridgram'
+import { buildIconContext } from 'gridgram/node'
 
 async function buildAll(dir: string): Promise<void> {
   for (const entry of await readdir(dir, { recursive: true })) {
@@ -138,9 +141,9 @@ rasterization via `sharp` and a `.gg` / `.ts` parity check).
 
 ## PNG rasterization
 
-Gridgram doesn't ship `sharp` as a direct dependency — many callers
-render SVG only, and `sharp` is a heavy optional. Install it when
-you need PNG:
+Gridgram doesn't ship `sharp` as a dependency — the TS API renders
+SVG only, and `sharp` is a heavy native module that belongs to the
+host. Install it when you need PNG:
 
 ```sh
 npm install sharp
@@ -159,28 +162,36 @@ await sharp(Buffer.from(svg))
   .toFile('out.png')
 ```
 
-`computeRenderDimensions` and `renderDiagram` both take the same
+`computeRenderDimensions` and `renderDiagram` take the same
 `DiagramOptions`, so the aspect ratio lines up.
 
-## Preact app embedding
+Alternative — the `gg` CLI bundles sharp (lazy-loaded into
+`~/.cache/gridgram/` on first PNG render). If your pipeline already
+has access to the binary, shelling out to `gg -o out.png` is often
+simpler than wiring sharp into your app.
 
-If your host is a Preact application and you want the diagram as a
-live VNode tree (no intermediate string):
+## Preact / browser embedding
+
+If your host is a Preact application (or any ES-module browser app
+bundled by Vite / Rspack / esbuild), use the `<Diagram>` component:
 
 ```tsx
-import { h } from 'preact'
-import { buildDiagramTree } from 'gridgram'
+import { Diagram } from 'gridgram'
+import type { DiagramDef } from 'gridgram'
 
 export function DiagramView({ def }: { def: DiagramDef }) {
-  return buildDiagramTree(def)
+  return <Diagram def={def} renderWidth={1024} />
 }
 ```
 
-`buildDiagramTree` is the internal path `renderDiagram` uses before
-`renderToString`. If you want diagnostics too, use `renderDiagram`
-and parse the SVG back with a DOM library — or wait for a planned
-`renderDiagramVNodes` that returns `{ tree, diagnostics }` (see the
-[roadmap](https://github.com/ideamans/gridgram/issues) for progress).
+Or drop to the raw VNode tree with `buildDiagramTree` if you want to
+wrap it yourself. Only the pure entry point (`'gridgram'`) is used —
+safe to ship to browsers.
+
+`parseGg` and `resolveDiagramIcons` are pure too, so a browser-side
+live editor only needs those plus the rendering functions. See the
+[docs/.vitepress/theme/Editor.vue](https://github.com/ideamans/gridgram/blob/main/docs/.vitepress/theme/Editor.vue)
+source for a complete example.
 
 ## Workers / worker threads
 

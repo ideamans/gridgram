@@ -1,9 +1,9 @@
 # `renderDiagram` and friends
 
-The render module is the top of the public API — three functions
-that take a `DiagramDef` and return either an SVG string, a VNode
-tree, or both alongside placement diagnostics. All three share the
-same internal pipeline; the only difference is what you want back.
+The render module is the top of the public API — three functions and
+one Preact component, all taking the same `DiagramDef` shape and
+sharing one internal pipeline. The difference is only what you want
+back: an SVG string, a VNode tree, or an inlined JSX element.
 
 ## `renderDiagram(def, opts?)`
 
@@ -43,26 +43,34 @@ instance inside a build step that already knows the input is clean.
 Internally it's just `renderDiagram(def, opts).svg`; there's no
 performance difference.
 
+## `<Diagram def={…} />` — Preact component
+
+```tsx
+import { Diagram } from 'gridgram'
+import type { DiagramProps } from 'gridgram'
+
+<Diagram def={myDef} renderWidth={1024} />
+```
+
+A Preact functional component wrapping `buildDiagramTree`. Every
+`DiagramOptions` field is accepted as a prop (e.g. `renderWidth`,
+`theme`, `suppressErrors`, `cellSize`). Use this when your host
+already renders Preact — no intermediate string, no double parse.
+
+`DiagramProps` is `DiagramOptions & { def: DiagramDef }`.
+
 ## `buildDiagramTree(def, opts?)`
 
 ```ts
 function buildDiagramTree(def: DiagramDef, opts?: DiagramOptions): any
 ```
 
-Returns the Preact VNode tree for the diagram's root `<svg>`. Useful
-for:
+Returns the raw Preact VNode tree for the diagram's root `<svg>`.
+`<Diagram>` is a thin wrapper around this. Reach for it directly when:
 
-- Embedding directly in a Preact app without re-stringifying:
-  ```tsx
-  import { h } from 'preact'
-  import { buildDiagramTree } from 'gridgram'
-
-  export function Diagram(props: { def: DiagramDef }) {
-    return buildDiagramTree(props.def)
-  }
-  ```
-- Streaming through a custom renderer (a non-SSR Preact renderer, a
-  vdom-to-canvas adapter, etc.).
+- You want to manipulate the tree before Preact mounts it.
+- You're streaming through a custom renderer (a non-SSR Preact
+  renderer, a vdom-to-canvas adapter, etc.).
 
 The return type is `any` because Preact's `VNode` import isn't part
 of Gridgram's API surface; cast at the call site if you prefer.
@@ -120,8 +128,9 @@ Every field is optional. `DiagramOptions` is an alias for
 - The pipeline is synchronous and free of wall-clock / random
   inputs. Same `DiagramDef` ⇒ same bytes, every run, every platform.
 - Icon resolution (network fetches, filesystem reads) happens
-  upstream in `buildIconContext` / `resolveDiagramIcons`. After that
-  step the def is self-contained — render is pure.
+  upstream in `buildIconContext` (`gridgram/node`) / `resolveDiagramIcons`
+  (`gridgram`). After that step the def is self-contained — render is
+  pure.
 - Preact SSR doesn't re-order attributes; label-placement candidate
   order is fixed per element kind. Any attribute-order drift between
   runs would be a renderer bug.

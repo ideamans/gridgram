@@ -1,4 +1,4 @@
-# Team chart using real photos (picsum.photos free image service).
+# Team chart using real photos (Tabler's transparent avatar CDN).
 # Demonstrates:
 #   - raster photo icons loaded from the public web
 #   - clip=circle for avatar-style round portraits
@@ -17,14 +17,14 @@ doc {
   },
 }
 
-region @A1:C1 "C-level"       color=primary/24
+region @A1:C1 "C-level"        color=primary/24
 region @A2:C2 "Direct reports" color=secondary/24
 
-icon :ceo @B1 ceo  "Alex — CEO"     clip=circle iconTheme=native sizeScale=1.4
-icon :e   @A2 eng  "Bea — CTO"      clip=circle iconTheme=native
-icon :p   @B2 prod "Carlos — CPO"   clip=circle iconTheme=native
-icon :d   @C2 design "Dana — CDO"   clip=circle iconTheme=native
+icon :ceo @B1 ceo    "Alex (CEO)"   clip=circle iconTheme=native sizeScale=1.4 labelScale=0.8
+icon :cto @A2 eng    "Bea (CTO)"    clip=circle iconTheme=native                labelScale=0.8
+icon :cpo @B2 prod   "Clara (CPO)"  clip=circle iconTheme=native                labelScale=0.8
+icon :cdo @C2 design "Dan (CDO)"    clip=circle iconTheme=native                labelScale=0.8
 
-ceo --> e
-ceo --> p
-ceo --> d
+ceo --> cto
+ceo --> cpo
+ceo --> cdo

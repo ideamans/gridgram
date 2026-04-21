@@ -71,6 +71,4 @@ it; the CLI is working.
   language, one concept at a time.
 - **[Install](./install)** — GitHub Releases, build from source, and
   other ways to get the binary.
-- **[Editor](/en/editor)** — try `.gg` live in your browser, no install
-  needed.
 - **[CLI reference](./cli)** — every flag and exit code.

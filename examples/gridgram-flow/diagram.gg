@@ -1,0 +1,20 @@
+# How Gridgram produces diagrams.
+# Two authoring paths (a .gg file via the CLI, or a DiagramDef via the
+# npm package) converge on one rendering pipeline, which emits SVG.
+# PNG is CLI-only (via sharp + libvips, fetched on demand).
+
+doc { cols: 4, rows: 2 }
+
+icon :gg   @A1 tabler/file-code        ".gg file"        labelScale=0.9
+icon :cli  @B1 tabler/terminal-2       "gg CLI"          labelScale=0.9
+icon :svg  @C1 tabler/file-type-svg    "SVG"             labelScale=0.9
+icon :png  @D1 tabler/photo            "PNG"             labelScale=0.9
+
+icon :ts   @A2 tabler/brand-typescript "DiagramDef"      labelScale=0.9
+icon :lib  @B2 tabler/brand-npm        "gridgram (npm)"  labelScale=0.9
+
+gg  --> cli
+ts  --> lib
+cli --> svg
+lib --> svg
+svg --> png "sharp"

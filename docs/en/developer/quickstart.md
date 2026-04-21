@@ -1,7 +1,7 @@
 # Quickstart (TS API)
 
-The TypeScript API is a regular npm package. Install it, import
-`renderDiagram`, hand it a `DiagramDef`, and get SVG back.
+The TypeScript API is published to npm as ESM. Install it, import what
+you need, hand `renderDiagram` a `DiagramDef`, and get SVG back.
 
 ## Install
 
@@ -15,22 +15,30 @@ yarn add gridgram
 
 Runtime requirements:
 
-- **Node.js ≥ 18** or **Bun ≥ 1.0**. Preact SSR is the renderer; it
-  has no browser or DOM dependency at render time.
-- **`sharp`** is only needed if you want PNG output. The library
-  imports it lazily — SVG-only callers can skip installing it.
+- **ESM only.** `"type": "module"` is required in your `package.json`
+  (or equivalent bundler setup).
+- **Node ≥ 22** for native ESM + JSON import attributes. Any version of
+  Bun works. Modern browsers work through any ES-module-aware bundler
+  (Vite, Rspack, esbuild, Rollup, webpack 5+).
+- **Preact** and **preact-render-to-string** are regular dependencies,
+  resolved through your bundler. If your host already has a different
+  Preact version, you'll get two copies — the output is identical either
+  way (we pin nothing globally).
+- **No `sharp` in the TS API.** The library renders SVG only; PNG
+  rasterization is done by the `gg` CLI at the edge, or by the host if
+  it chooses to (see [Integrations](./integrations)).
 
 ## Your first render
 
 ```ts
-import { renderDiagram } from 'gridgram'
+import { renderDiagram, tablerOutline } from 'gridgram'
 import type { DiagramDef } from 'gridgram'
 
 const def: DiagramDef = {
   nodes: [
-    { id: 'user', pos: 'A1', label: 'User' },
-    { id: 'api',  pos: 'B1', label: 'API' },
-    { id: 'db',   pos: 'C1', label: 'DB'  },
+    { id: 'user', pos: 'A1', src: tablerOutline('user'),    label: 'User' },
+    { id: 'api',  pos: 'B1', src: tablerOutline('server'),  label: 'API'  },
+    { id: 'db',   pos: 'C1', src: tablerOutline('database'),label: 'DB'   },
   ],
   connectors: [
     { from: 'user', to: 'api', label: 'HTTPS' },
@@ -45,8 +53,26 @@ console.log(diagnostics)   // [] for a clean layout
 ```
 
 No coordinates? No icon sources? All fine — `renderDiagram` fills in
-sensible defaults (auto-position along row 0, placeholder icons) and
+sensible defaults (auto-position across row 0, placeholder rings) and
 reports anything noteworthy via `diagnostics`.
+
+## Using the Preact component
+
+If your host is a Preact app, skip the string round-trip and embed the
+VNode tree directly:
+
+```tsx
+import { Diagram } from 'gridgram'
+import type { DiagramDef } from 'gridgram'
+
+export function Architecture({ def }: { def: DiagramDef }) {
+  return <Diagram def={def} renderWidth={1024} />
+}
+```
+
+`<Diagram>` accepts every `DiagramOptions` field as a prop (e.g.
+`renderWidth`, `suppressErrors`, `theme`, `cellSize`). Internally it's
+a thin wrapper around `buildDiagramTree`.
 
 ## Building a `DiagramDef`
 
@@ -67,8 +93,8 @@ Coordinates accept three forms — A1 strings, 1-based tuples, 1-based
 objects:
 
 ```ts
-pos: 'A1'          // column 1, row 1 (top-left)
-pos: [1, 1]        // same thing
+pos: 'A1'                 // column 1, row 1 (top-left)
+pos: [1, 1]               // same thing
 pos: { col: 1, row: 1 }
 ```
 
@@ -79,91 +105,96 @@ The pipeline normalizes them all to the canonical 0-based
 ## Adding an icon
 
 The default node has no icon — it renders as a ring with a label.
-For icons, set `src` to a Tabler name:
+Usual forms for `src`:
 
 ```ts
-{ id: 'user', pos: 'A1', label: 'User', src: 'tabler/user' }
+import { tablerOutline, tablerFilled } from 'gridgram'
+
+{ id: 'user', pos: 'A1', src: tablerOutline('user'), label: 'User' }
+{ id: 'star', pos: 'B1', src: tablerFilled('star'),  label: 'Hot'  }
+{ id: 'raw',  pos: 'C1', src: '<g>…</g>',            label: 'Raw'  }
 ```
 
-Or a raw SVG string, or a URL (see [Parser](./parser) for the full
-`resolveDiagramIcons` flow + `buildIconContext` for URL / filesystem
-loaders).
+`tablerOutline(name)` / `tablerFilled(name)` return the inline SVG
+fragment for any of the 5,500+ Tabler icons. Safer than a string
+identifier — the TypeScript compiler won't catch a typo'd name, but
+a missing icon at runtime is obvious (the node gets a red ring).
 
-```ts
-import { tablerOutline } from 'gridgram'
-
-{ id: 'user', pos: 'A1', label: 'User', src: tablerOutline('user') }
-```
-
-`tablerOutline(name)` returns the inline SVG fragment for any of the
-5,500+ Tabler icons. Safer than a string identifier when you want
-the TypeScript compiler to fail on typos.
+For URL / file-path icons, either pre-resolve them yourself (set `src`
+to the final SVG string) or run the `.gg` icon loader (see
+[Integrations](./integrations) and the `gridgram/node` subpath).
 
 ## Writing to a file
 
 ```ts
 import { renderDiagram } from 'gridgram'
-import { writeFileSync } from 'fs'
+import { writeFileSync } from 'node:fs'
 
 const { svg } = renderDiagram(def)
 writeFileSync('out.svg', `<?xml version="1.0" encoding="UTF-8"?>\n${svg}`)
 ```
 
-For PNG, use `computeRenderDimensions` for the native canvas size,
-then run it through `sharp`:
+For PNG, see the [PNG rasterization](./integrations#png-rasterization)
+pattern — you bring `sharp`, we give you `computeRenderDimensions` for
+the canvas size.
 
-```ts
-import { renderDiagram, computeRenderDimensions } from 'gridgram'
-import sharp from 'sharp'
+## From a `.gg` source
 
-const { svg } = renderDiagram(def)
-const { width, height } = computeRenderDimensions(def)
-await sharp(Buffer.from(svg)).resize(width, height).png().toFile('out.png')
-```
-
-## From a .gg source
-
-When the diagram is authored as a `.gg` file, parse it first:
+When the diagram is authored as text, parse it first. `parseGg` and
+`resolveDiagramIcons` are pure (no filesystem), so they work in any
+ESM host:
 
 ```ts
 import {
-  renderDiagram,
   parseGg,
-  buildIconContext,
   resolveDiagramIcons,
+  renderDiagram,
+  formatError,
 } from 'gridgram'
 
-const source = readFileSync('hello.gg', 'utf-8')
-const { def: rawDef, errors, icons } = parseGg(source)
+const source = `
+icon :user @A1 tabler/user   "User"
+icon :api  @B1 tabler/server "API"
+user --> api "HTTPS"
+`
 
+const { def: rawDef, errors, icons } = parseGg(source)
 if (errors.length > 0) {
-  // Parse / integrity failures — bail or report.
-  throw new Error(errors.map((e) => e.message).join('\n'))
+  throw new Error(errors.map((e) => formatError(e, 'inline.gg')).join('\n'))
 }
 
-// Optional: resolve icon references (tabler/, URLs, paths) to
-// inline SVG. Skip if your def already has inline src values.
+// With `inline`, the resolver handles Tabler built-ins + any inline
+// SVG strings from `doc { icons: { … } }`. For URL / file-path refs,
+// pre-load them via `buildIconContext` (Node only) — see below.
+const { def, diagnostics: iconDiagnostics } = resolveDiagramIcons(rawDef, {
+  inline: icons,
+})
+
+const { svg, diagnostics: layoutDiagnostics } = renderDiagram(def)
+const allDiagnostics = [...iconDiagnostics, ...layoutDiagnostics]
+```
+
+For filesystem / HTTP icon references (`./foo.svg`, `@brand/aws.svg`,
+`https://…`), import the async loader from the Node subpath:
+
+```ts
+import { buildIconContext } from 'gridgram/node'
+
 const ctx = await buildIconContext({
   jsonIconsMap: icons,
   def: rawDef,
-  docDir: dirname(sourcePath),
+  docDir: '/path/to/project',
 })
-const { def, diagnostics: iconDiagnostics } = resolveDiagramIcons(rawDef, ctx)
-
-// Render
-const { svg, diagnostics } = renderDiagram(def)
-
-// Combine both diagnostic streams so agents see everything in one list.
-const allDiagnostics = [...iconDiagnostics, ...diagnostics]
+const { def } = resolveDiagramIcons(rawDef, ctx)
 ```
 
-See [Parser](./parser) for the parse pipeline in depth, and
-[Diagnostics](./diagnostics) for what the `diagnostics` arrays
-carry.
+See [Parser](./parser) for the full pipeline and
+[Diagnostics](./diagnostics) for what the `diagnostics` arrays carry.
 
 ## Next
 
 - [`renderDiagram` & friends](./render) — options, return shapes,
-  `buildDiagramTree` for Preact embedding.
+  `Diagram` and `buildDiagramTree` for Preact embedding.
 - [Types](./types) — every field on every diagram-def type.
+- [Parser](./parser) — `.gg` → `DiagramDef` in depth.
 - [Diagnostics](./diagnostics) — agent-facing feedback stream.

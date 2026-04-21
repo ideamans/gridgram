@@ -11,7 +11,7 @@ Swaps the silhouette icons for actual headshots (placeholders via
 disc; `iconTheme=native` preserves the original photo colours instead
 of tinting them with the node's theme colour.
 
-<Example name="team-photos" />
+<GgBlock name="team-photos" />
 
 Raster assets behave the same as Tabler icons everywhere else —
 `pos`, `sizeScale`, regions, and connectors work unchanged. The

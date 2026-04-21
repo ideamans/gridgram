@@ -163,5 +163,13 @@ no npm install required.
 
 ## License
 
-MIT. See [`THIRD_PARTY_LICENSES.md`](./THIRD_PARTY_LICENSES.md) for
-bundled third-party notices (Tabler icons, Preact, etc.).
+MIT — see [`LICENSE`](./LICENSE). Bundled third-party notices (Tabler
+icons, Preact, json5, sharp, …) are reproduced in
+[`THIRD_PARTY_LICENSES.md`](./THIRD_PARTY_LICENSES.md), and the `gg`
+binary prints the same text via `gg --license`.
+
+PNG output is CLI-only and depends on **[libvips](https://github.com/libvips/libvips)**
+(LGPL-2.1-or-later). The `gg` binary does not bundle it: on first PNG
+render, `sharp` and a prebuilt libvips for your platform are fetched
+from the npm registry into `~/.cache/gridgram/` and loaded dynamically,
+so the LGPL library remains user-replaceable.

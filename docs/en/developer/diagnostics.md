@@ -219,6 +219,9 @@ feedback.
 ## Writing an agent loop
 
 ```ts
+import { parseGg, resolveDiagramIcons, renderDiagram } from 'gridgram'
+import { buildIconContext } from 'gridgram/node'
+
 async function autoFixDiagram(source: string, maxAttempts = 5): Promise<string> {
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     const { def, errors, icons } = parseGg(source)

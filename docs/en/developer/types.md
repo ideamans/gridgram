@@ -6,9 +6,14 @@ from the package root:
 ```ts
 import type {
   DiagramDef, NodeDef, ConnectorDef, RegionDef, NoteDef,
-  GridPos, GridPosInput, WayPoint, WayPointInput,
+  GridPos, GridPosInput, GridSpan, WayPoint, WayPointInput,
   DiagramTheme, NodeBadge, BadgePosition, BadgeSpec,
   SvgFragment,
+  DiagramOptions, DiagramProps, RenderResult,
+  DiagramSettings, ResolvedSettings,
+  PlacementDiagnostic, PlacementAttempt, Obstacle, ElementRef,
+  ParseResult, GgError, GgErrorSource,
+  IconContext,
 } from 'gridgram'
 ```
 
@@ -179,7 +184,7 @@ interface DiagramTheme {
 }
 ```
 
-`SYSTEM_DEFAULTS.theme` in `gridgram/config` has sane defaults.
+`SYSTEM_DEFAULTS.theme` from `'gridgram'` has sane defaults.
 `DiagramOptions.theme` accepts a partial — omitted keys inherit from
 the layer below.
 

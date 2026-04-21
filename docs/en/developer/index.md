@@ -1,48 +1,62 @@
 # Developer Guide
 
-You're here because you want to drive Gridgram from code — an
-application that generates diagrams at runtime, an agent that edits
-and re-renders them in a loop, a build step that processes `.gg`
-files in CI, or an MCP tool exposing diagramming to an LLM.
+You're here because you want to drive Gridgram from code — a Preact or
+plain-ESM browser app, a Node server that renders on demand, an agent
+that edits `.gg` and re-renders in a loop, a build step in CI, or an
+MCP tool exposing diagramming to an LLM.
 
-The [User Guide](/en/guide/) covers authoring: writing `.gg` files
-and running the CLI. This side covers the TypeScript API, the parse
-→ layout → render pipeline's public entry points, and the structured
-feedback surface AI agents consume.
+The [User Guide](/en/guide/) covers authoring: writing `.gg` files and
+running the `gg` CLI. This side covers the TypeScript API — what the
+npm package exports, what runs where, and the structured feedback
+surface agents consume.
 
-## What you get from the library
+## Two entry points
 
-Gridgram's public API is small by design. Three entry points cover
-every integration pattern:
+```ts
+// Browser-safe. Pure — no fs, no path, no network.
+import { renderDiagram, parseGg, Diagram /* … */ } from 'gridgram'
 
-| Function                  | When to use it |
-|---------------------------|----------------|
-| `renderDiagram(def, opts)` | Most callers. Returns `{ svg, diagnostics }` — the rendered SVG string plus any layout feedback the pipeline produced. |
-| `renderDiagramSvg(def, opts)` | Back-compat / no-diagnostics form. Returns just the SVG string. |
-| `buildDiagramTree(def, opts)` | The raw Preact VNode tree — embed directly in a Preact app, or stream through a custom renderer. |
+// Node-only. Reads the filesystem (and optionally fetches over HTTP).
+import { buildIconContext, loadProjectConfig } from 'gridgram/node'
+```
 
-All three ultimately take a `DiagramDef`. You can construct one
-programmatically or produce one from a `.gg` source via `parseGg`.
+The main entry point works in every ESM host — modern browsers (via
+Vite / Rspack / esbuild / any bundler), Node ≥ 22, Bun, Deno. The
+`gridgram/node` subpath is only safe inside a Node runtime; browser
+bundles that accidentally import it will fail to build.
+
+## Rendering primitives
+
+Four entry points cover every integration pattern:
+
+| Import                         | Shape                                                   | When to reach for it                                            |
+|--------------------------------|---------------------------------------------------------|------------------------------------------------------------------|
+| `renderDiagram(def, opts)`     | `(DiagramDef, opts?) => { svg, diagnostics }`           | Default choice. SVG string plus layout/icon feedback.           |
+| `renderDiagramSvg(def, opts)`  | `(DiagramDef, opts?) => string`                         | SVG only — the caller already knows the input is clean.         |
+| `Diagram`                      | Preact FC — `<Diagram def={…} …opts />`                 | Embedding inline in a Preact app.                               |
+| `buildDiagramTree(def, opts)`  | `(DiagramDef, opts?) => VNode`                          | A raw Preact VNode tree for custom renderers / SSR pipelines.   |
+
+All four ultimately take a `DiagramDef`. You can construct one
+programmatically or produce one from `.gg` source via `parseGg`.
 
 ## Reading order
 
 1. **[Quickstart (TS API)](./quickstart)** — install, render your
    first diagram from code.
-2. **[`renderDiagram` & friends](./render)** — the three entry
-   points in depth, including `RenderResult` and `computeRenderDimensions`.
-3. **[Types](./types)** — `DiagramDef` and its members. Normalized
-   vs raw-input shapes.
-4. **[Configuration](./config)** — how the layered settings system
-   (system → project → document → render override) composes across
-   CLI / HTTP / MCP surfaces.
-5. **[Parser](./parser)** — turning `.gg` source into a
-   `DiagramDef`. `parseGg`, `buildIconContext`, icon resolution,
-   `GgError`.
+2. **[`renderDiagram` & friends](./render)** — the four entry points
+   in depth, including `<Diagram>`, `RenderResult`, and
+   `computeRenderDimensions`.
+3. **[Types](./types)** — `DiagramDef` and its members. Normalized vs
+   raw-input shapes.
+4. **[Configuration](./config)** — the layered settings system
+   (system → project → document → render override) and how every
+   surface composes it.
+5. **[Parser](./parser)** — `.gg` source to `DiagramDef`. `parseGg`,
+   icon resolution, `GgError`, `checkIntegrity`.
 6. **[Diagnostics](./diagnostics)** — the `PlacementDiagnostic`
-   stream. Essential for AI agent workflows; optional but useful for
-   humans running the CLI.
+   stream. Essential for agent workflows; useful for human authors too.
 7. **[Integrations](./integrations)** — HTTP endpoint, MCP tool,
-   headless rendering in CI.
+   headless rendering in CI, Preact embedding, PNG.
 8. **[Specification](./spec)** — the reference: token grammar,
    resolution pipeline, determinism guarantees.
 
@@ -54,9 +68,9 @@ same icon sources — the pipeline produces **byte-identical SVG**
 output across surfaces and runs. Agents rely on this:
 
 - Commit the `.gg` source to git. Every AI edit reads as a diff.
-- Pin an SVG baseline in CI. A regression in rendering shows up as
-  a visible change.
-- Skip the icon loader by pre-resolving `src` to inline SVG, and
-  the renderer is fully pure.
+- Pin an SVG baseline in CI. A rendering regression shows up as a
+  visible change.
+- Skip the icon loader by pre-resolving `src` to inline SVG, and the
+  renderer is fully pure — no I/O at all.
 
 The [Specification](./spec) page covers the invariants formally.

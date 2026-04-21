@@ -55,6 +55,12 @@ export default withTheme({
     socialLinks: [
       { icon: "github", link: "https://github.com/ideamans/gridgram" },
     ],
+    // Site-wide footer. The daisyui theme's Footer.vue reads
+    // themeConfig.footer.{message, copyright} and renders both on every
+    // layout (Home / Page / Doc). Credit only — no need to translate.
+    footer: {
+      copyright: "© ideaman's Inc.",
+    },
   },
 
   locales: {
@@ -67,13 +73,16 @@ export default withTheme({
     en: {
       label: "English",
       lang: "en",
-      link: "/en/",
+      // `link` is intentionally omitted so the LangSwitch preserves the
+      // current subpath and just swaps /en/ ↔ /ja/ instead of jumping to
+      // the locale root.
       themeConfig: {
         nav: [
           { text: "User Guide", link: "/en/guide/" },
           { text: "Developer Guide", link: "/en/developer/" },
           { text: "Gallery", link: "/en/gallery/" },
-          { text: "Editor", link: "/en/editor" },
+          // Editor page exists at /en/editor but is hidden from nav for now.
+          // { text: "Editor", link: "/en/editor" },
         ],
         sidebar: {
           "/en/guide/": [
@@ -220,7 +229,7 @@ export default withTheme({
     ja: {
       label: "日本語",
       lang: "ja",
-      link: "/ja/",
+      // `link` omitted — see the /en/ entry for the rationale.
       themeConfig: {
         nav: [
           { text: "ガイド", link: "/ja/guide/" },

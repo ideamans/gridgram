@@ -7,17 +7,24 @@ separate function you can call directly:
   .gg source
       │
       ▼
-  parseGg(source)             → { def, errors, icons }
-      │                          (includes integrity checks)
+  parseGg(source)               → { def, errors, icons }
+      │                            (includes integrity checks)
       ▼
-  buildIconContext({ … })     → IconContext
-      │                          (filesystem / network reads for icon refs)
+  buildIconContext({ … })       → IconContext           (gridgram/node)
+      │                            (filesystem / network reads)
       ▼
-  resolveDiagramIcons(def,ctx) → { def, diagnostics }
+  resolveDiagramIcons(def, ctx) → { def, diagnostics }
       │
       ▼
-  renderDiagram(def)           → { svg, diagnostics }
+  renderDiagram(def)            → { svg, diagnostics }
 ```
+
+**Browser vs Node**: `parseGg`, `resolveDiagramIcons`, `checkIntegrity`,
+`formatError`, and the icon classification helpers (`isPathRef`,
+`collectPathRefs`, `stripSvgWrapper`) are all pure and exported from
+`'gridgram'` — they work in every ESM host. The filesystem / HTTP icon
+loader (`buildIconContext` and friends) lives on the `'gridgram/node'`
+subpath and is Node-only.
 
 ## `parseGg(source)`
 
@@ -63,7 +70,7 @@ interface GgError {
 Use `formatError` for a readable string:
 
 ```ts
-import { formatError } from 'gridgram/gg/errors'
+import { formatError } from 'gridgram'
 
 for (const e of errors) console.error(formatError(e, filename))
 // Error: Unknown statement "icn"
@@ -87,53 +94,11 @@ icon @B1 brand "You"
 ```
 
 `parseGg` returns those as `icons: Record<string, string>` alongside
-the def. The resolver consumes it via `buildIconContext`'s
-`jsonIconsMap`. Keeps the source-time icon references off the
-`DiagramDef` type (which models the rendered diagram, not its
-provenance).
-
-## `buildIconContext(opts)`
-
-```ts
-import { buildIconContext } from 'gridgram'
-
-function buildIconContext(opts: {
-  iconsDir?: string
-  jsonIconsMap?: Record<string, string>
-  aliases?: Record<string, string>
-  def?: DiagramDef
-  docDir: string      // for cwd-relative paths AND for the icons map
-  aliasDir?: string   // defaults to docDir
-}): Promise<IconContext>
-```
-
-Walks the def for every external-path icon reference and pre-reads
-it (filesystem or HTTP). Returns an `IconContext` the resolver
-consumes. Non-fatal per-icon failures end up on `ctx.errors` (as
-`GgError`) and `ctx.failedSources` (map keyed by the DSL identifier).
-
-```ts
-const ctx = await buildIconContext({
-  iconsDir: settings.iconsDir,            // --icons <dir>
-  jsonIconsMap: parseResult.icons,        // from parseGg
-  aliases: settings.assetAliases,         // from project config
-  def: rawDef,
-  docDir: dirname(sourcePath),
-  aliasDir: process.cwd(),
-})
-
-// Surface per-icon loader errors early
-for (const err of ctx.errors ?? []) console.error(formatError(err, sourcePath))
-```
-
-### Path reference resolution
-
-| DSL form              | Where it resolves |
-|-----------------------|-------------------|
-| `'@brand/aws.svg'`    | `aliases.brand + '/aws.svg'` (absolute if `aliases.brand` is absolute; else joined with `aliasDir`) |
-| `'./foo.svg'`         | `docDir + '/foo.svg'` |
-| `'/abs/path.svg'`     | as-is |
-| `'foo.svg'`           | `docDir + '/foo.svg'` |
+the def. The resolver consumes it via `IconContext.inline` (for raw
+SVG strings) or via `buildIconContext`'s `jsonIconsMap` for URL /
+file / dataURL values that need loading. Keeps the source-time icon
+references off the `DiagramDef` type (which models the rendered
+diagram, not its provenance).
 
 ## `resolveDiagramIcons(def, ctx)`
 
@@ -165,6 +130,11 @@ const rendered = renderDiagram(iconResolve.def)
 const allDiagnostics = [...iconResolve.diagnostics, ...rendered.diagnostics]
 ```
 
+Pure, synchronous, browser-safe. `ctx` is just a plain object — you
+can construct it by hand (typical for in-browser use where only
+Tabler built-ins and pre-loaded inline SVG are in play) or let
+`buildIconContext` populate it for you in Node.
+
 ## `IconContext`
 
 ```ts
@@ -178,15 +148,63 @@ interface IconContext {
 }
 ```
 
-You can construct one by hand if your pipeline doesn't use
-`buildIconContext` (e.g. a build that already has every icon
-inlined). As long as the keys / values line up, the resolver doesn't
-care how the map was populated.
+Every field is optional. The simplest valid context — `{}` — resolves
+Tabler built-ins only and flags every other `src` as `iconError`.
+
+## `buildIconContext(opts)` — Node only
+
+```ts
+import { buildIconContext } from 'gridgram/node'
+
+function buildIconContext(opts: {
+  iconsDir?: string
+  jsonIconsMap?: Record<string, string>
+  aliases?: Record<string, string>
+  def?: DiagramDef
+  docDir: string      // for cwd-relative paths AND for the icons map
+  aliasDir?: string   // defaults to docDir
+}): Promise<IconContext>
+```
+
+Walks the def for every external-path icon reference and pre-reads
+it (filesystem or HTTP). Returns an `IconContext` the resolver
+consumes. Non-fatal per-icon failures end up on `ctx.errors` (as
+`GgError`) and `ctx.failedSources` (map keyed by the DSL identifier).
+
+```ts
+import { buildIconContext } from 'gridgram/node'
+
+const ctx = await buildIconContext({
+  iconsDir: settings.iconsDir,            // --icons <dir>
+  jsonIconsMap: parseResult.icons,        // from parseGg
+  aliases: settings.assetAliases,         // from project config
+  def: rawDef,
+  docDir: dirname(sourcePath),
+  aliasDir: process.cwd(),
+})
+
+// Surface per-icon loader errors early
+for (const err of ctx.errors ?? []) console.error(formatError(err, sourcePath))
+```
+
+This import fails in browser bundles. In the browser, either skip
+external icon references entirely (Tabler only) or pre-load them in
+your host code and hand the result to `resolveDiagramIcons` via
+`ctx.inline` / `ctx.paths`.
+
+### Path reference resolution
+
+| DSL form              | Where it resolves |
+|-----------------------|-------------------|
+| `'@brand/aws.svg'`    | `aliases.brand + '/aws.svg'` (absolute if `aliases.brand` is absolute; else joined with `aliasDir`) |
+| `'./foo.svg'`         | `docDir + '/foo.svg'` |
+| `'/abs/path.svg'`     | as-is |
+| `'foo.svg'`           | `docDir + '/foo.svg'` |
 
 ## `checkIntegrity(def)`
 
 ```ts
-import { checkIntegrity } from 'gridgram/gg/integrity'
+import { checkIntegrity } from 'gridgram'
 
 function checkIntegrity(def: DiagramDef): GgError[]
 ```
@@ -199,11 +217,31 @@ Post-parse checks that `parseGg` runs for you automatically:
 - Region spans form a single 4-connected shape
 - Coordinate malformations (bad A1, col < 1, …)
 
-Exposed separately so programmatic callers who build a
-`DiagramDef` from scratch (skipping `parseGg`) can still validate
-it. Error messages use 1-based A1 coordinates — "`A1-J10 exceeds
-A1-B2 grid`" — so agents don't need to decode the internal
-0-based form.
+Exposed separately so programmatic callers who build a `DiagramDef`
+from scratch (skipping `parseGg`) can still validate it. Error
+messages use 1-based A1 coordinates — "`A1-J10 exceeds A1-B2 grid`"
+— so agents don't need to decode the internal 0-based form.
+
+## Icon classification helpers
+
+Also exported from `'gridgram'` and safe in the browser:
+
+```ts
+import { isPathRef, collectPathRefs, stripSvgWrapper } from 'gridgram'
+
+isPathRef('@brand/aws.svg')       // true  — needs external loading
+isPathRef('tabler/user')          // false — Tabler built-in
+isPathRef('logo')                 // false — bare name → icon map
+
+collectPathRefs(def)              // string[] of every node.src / badge.icon
+                                  // that looks like an external path
+stripSvgWrapper('<svg …>…</svg>') // '…'    — keep the inner fragment
+```
+
+`collectPathRefs` is what `buildIconContext` uses to discover every
+external file it needs to pre-read. Reach for it if you're implementing
+your own async loader (e.g. resolving paths through a storage adapter
+instead of `fs`).
 
 ## See also
 

@@ -30,6 +30,57 @@ const DEPS: DepEntry[] = [
   { name: 'sharp',                   path: 'sharp',                   spdx: 'Apache-2.0', homepage: 'https://sharp.pixelplumbing.com' },
 ]
 
+// Extra notices appended verbatim after the auto-generated DEPS section.
+// Used for libraries that are referenced but NOT bundled in the gg binary
+// or the npm package — sharp + libvips are fetched at runtime into
+// ~/.cache/gridgram on first PNG render (see src/cli/sharp-loader.ts).
+const EXTRA_MD = `## libvips (LGPL-2.1-or-later) — dynamically fetched, not bundled
+<https://github.com/libvips/libvips>
+
+PNG output in the \`gg\` CLI uses **libvips** via \`sharp\`. Neither the
+\`gg\` single-binary nor the \`gridgram\` npm package bundles libvips or
+\`sharp\` itself; \`src/cli/sharp-loader.ts\` fetches the prebuilt
+\`@img/sharp-libvips-<platform>\` package from the npm registry on first
+PNG render and extracts it to \`~/.cache/gridgram/\`, where it is loaded
+as a shared library.
+
+Because the LGPL shared library lives in a user-owned cache directory,
+users remain free to replace it with a modified or rebuilt libvips
+without touching the \`gg\` binary, satisfying the LGPL's requirements
+around relinking and user replacement.
+
+Source code for libvips is available at
+<https://github.com/libvips/libvips>. Prebuilt binaries and their build
+manifests are published at
+<https://www.npmjs.com/package/@img/sharp-libvips-dev>.
+
+The full text of the GNU Lesser General Public License v2.1 is available
+at <https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt>.
+`
+
+const EXTRA_PLAIN = `------------------------------------------------------------------------
+libvips — LGPL-2.1-or-later (dynamically fetched, not bundled)
+https://github.com/libvips/libvips
+------------------------------------------------------------------------
+
+PNG output in the \`gg\` CLI uses libvips via sharp. Neither the gg
+single-binary nor the gridgram npm package bundles libvips or sharp
+itself; src/cli/sharp-loader.ts fetches the prebuilt
+@img/sharp-libvips-<platform> package from the npm registry on first
+PNG render and extracts it to ~/.cache/gridgram/, where it is loaded
+as a shared library.
+
+Because the LGPL shared library lives in a user-owned cache directory,
+users remain free to replace it with a modified or rebuilt libvips
+without touching the gg binary, satisfying the LGPL's requirements
+around relinking and user replacement.
+
+Source code for libvips is available at
+https://github.com/libvips/libvips. The full text of the GNU Lesser
+General Public License v2.1 is available at
+https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt.
+`
+
 const LICENSE_FILENAMES = ['LICENSE', 'LICENSE.md', 'LICENSE.txt', 'license', 'license.md']
 
 function readLicenseFile(pkgDir: string): string {
@@ -78,6 +129,9 @@ function build(): { md: string; plain: string } {
     plain.push(text)
     plain.push('')
   }
+
+  md.push(EXTRA_MD)
+  plain.push(EXTRA_PLAIN)
 
   return {
     md: md.join('\n'),

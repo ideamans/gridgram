@@ -311,3 +311,26 @@ third-party archives.
    limitations under the License.
 ```
 
+## libvips (LGPL-2.1-or-later) — dynamically fetched, not bundled
+<https://github.com/libvips/libvips>
+
+PNG output in the `gg` CLI uses **libvips** via `sharp`. Neither the
+`gg` single-binary nor the `gridgram` npm package bundles libvips or
+`sharp` itself; `src/cli/sharp-loader.ts` fetches the prebuilt
+`@img/sharp-libvips-<platform>` package from the npm registry on first
+PNG render and extracts it to `~/.cache/gridgram/`, where it is loaded
+as a shared library.
+
+Because the LGPL shared library lives in a user-owned cache directory,
+users remain free to replace it with a modified or rebuilt libvips
+without touching the `gg` binary, satisfying the LGPL's requirements
+around relinking and user replacement.
+
+Source code for libvips is available at
+<https://github.com/libvips/libvips>. Prebuilt binaries and their build
+manifests are published at
+<https://www.npmjs.com/package/@img/sharp-libvips-dev>.
+
+The full text of the GNU Lesser General Public License v2.1 is available
+at <https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt>.
+

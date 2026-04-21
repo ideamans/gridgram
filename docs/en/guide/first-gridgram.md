@@ -139,4 +139,3 @@ to SVG `<text>` and lets the browser / rasterizer pick glyphs.
 - [Install](./install) — alternative install methods and manual setup
 - [Document](./document/) — `doc { }`, commands, merge rules
 - [Icon](./icon/) — Tabler, paths, aliases, fallbacks
-- [Editor](/en/editor) — try `.gg` live in the browser

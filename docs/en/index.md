@@ -37,6 +37,15 @@ landing:
     ggLabel: .gg (DSL)
     tsLabel: TypeScript
 
+  architecture:
+    title: How it works
+    intro: Two authoring paths converge on one rendering pipeline. The gg CLI reads .gg files; the gridgram npm package takes a DiagramDef directly. Both emit the same SVG. PNG is produced by the CLI only, via sharp / libvips fetched on first use.
+    name: gridgram-flow
+
+  acknowledgments:
+    title: Built on open source
+    intro: Gridgram stands on the shoulders of these projects. Licenses and notices are reproduced in THIRD_PARTY_LICENSES.md and gg --license.
+
   finalCta:
     title: Ready to try it?
     text: No signup, no API key — everything runs locally.

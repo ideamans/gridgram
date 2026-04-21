@@ -10,11 +10,16 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./node": {
+      "types": "./dist/node.d.ts",
+      "import": "./dist/node.js"
     }
   },
   "files": [
     "dist",
     "README.md",
+    "LICENSE",
     "THIRD_PARTY_LICENSES.md"
   ],
   "sideEffects": false,

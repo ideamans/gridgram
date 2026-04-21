@@ -102,8 +102,12 @@ export default defineConfig({ … })
 
 ### Loading a config from code
 
+`loadProjectConfig` reads the filesystem, so it lives on the
+`'gridgram/node'` subpath:
+
 ```ts
-import { loadProjectConfig, resolveSettings } from 'gridgram'
+import { loadProjectConfig } from 'gridgram/node'
+import { resolveSettings } from 'gridgram'
 
 const found = await loadProjectConfig({ cwd: process.cwd() })
 const projectLayer = found?.settings ?? {}
@@ -111,9 +115,12 @@ const projectLayer = found?.settings ?? {}
 const resolved = resolveSettings([projectLayer, renderOverride])
 ```
 
-Pass `explicitPath` to skip walk-up discovery, or omit it for
-`findProjectConfig`'s default behaviour. Returns `null` if no
+Pass `explicitPath` to skip walk-up discovery. Returns `null` if no
 config is found (no error — projects without one are fine).
+
+In a browser bundle this import will fail. If you want per-project
+defaults in a browser app, serialize them into a plain `DiagramSettings`
+object at build time and import it as regular data.
 
 ## The `doc { }` layer
 
