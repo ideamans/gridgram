@@ -11,35 +11,7 @@ console. Hover the diagram and use ◀ / ▶ to scrub through the three
 frames — frame 1 is a cold pipeline, frame 2 is CI / staging green,
 frame 3 is the gate released and prod lit.
 
-```gg-diagram gallery framing=1-3
-doc {
-  cols: 5,
-  theme: { primary: '#0369a1', secondary: '#0284c7', accent: '#f59e0b' },
-}
-
-region @A1:B1 "Build"   color=primary/30
-region @C1:C1 "Staging" color=secondary/28
-region @D1:E1 "Prod"    color=accent/30
-
-icon :dev   @A1 tabler/user     "Dev"
-icon :ci    @B1 tabler/settings "CI"      sizeScale=1.3
-icon :stage @C1 tabler/server   "staging"
-icon :gate  @D1 tabler/lock     "Gate"
-icon :prod  @E1 tabler/rocket   "prod"    sizeScale=1.4
-
-dev   --> ci    "push"
-ci    --> stage "auto"
-stage --> gate  "ready"
-gate  --> prod  "approve"
-
-# Frame 2+: CI and staging pass.
-[2-] icon :ci    color=accent { badges: ['check'] }
-[2-] icon :stage { badges: ['check'] }
-
-# Frame 3: gate released, prod lit.
-[3] icon :gate tabler/lock-open color=accent { badges: ['check'] }
-[3] icon :prod color=accent { badges: ['star'] }
-```
+<Example name="frame-gallery-cicd-pipeline" framing="1-3" layout="single" />
 
 ## Matrix build
 

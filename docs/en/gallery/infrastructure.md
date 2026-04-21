@@ -59,31 +59,7 @@ Cold and warm cache split across two frames. Hover and flip between
 them: frame 1 is a cold cache — the miss fans out to origin and
 fills; frame 2 is a warm cache serving the cached reply directly.
 
-```gg-diagram gallery framing=1-2
-doc { cols: 4 }
-
-region @A1:A1 "Client" color=accent/24
-region @B1:C1 "Edge"   color=primary/28
-region @D1:D1 "Origin" color=secondary/24
-
-icon :user   @A1 tabler/user        "User"
-icon :edge   @B1 tabler/cloud       "CDN"  sizeScale=1.2
-icon :cache  @C1 tabler/bolt        "Cache"
-icon :origin @D1 tabler/server      "Origin"
-
-user --> edge  "request"
-edge --> cache "lookup"
-
-# Frame 1: cold cache — miss, fetch from origin, fill.
-[1] cache  --> edge   "miss" dash="2 4"
-[1] edge   --> origin "fetch"
-[1] origin --> edge   "fill"
-[1] icon :cache color=#dc2626 { badges: ['alert'] }
-
-# Frame 2: warm cache — cached response served.
-[2] cache --> edge "cached" width=2
-[2] icon :cache color=accent { badges: ['check'] }
-```
+<Example name="frame-gallery-cdn" framing="1-2" layout="single" />
 
 ## Active / passive multi-region
 

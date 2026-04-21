@@ -32,31 +32,7 @@ Hover and scrub: frame 1 shows the inputs arriving at the leaf,
 frame 2 lights the leaf up with the full formula, frame 3 produces
 O₂ and glucose.
 
-```gg-diagram gallery framing=1-3
-doc {
-  cols: 4, rows: 3,
-  theme: { primary: '#047857', secondary: '#16a34a', accent: '#f59e0b' },
-}
-
-icon :h2o  @A1 tabler/droplet    "H₂O"
-icon :co2  @A3 tabler/air        "CO₂"
-icon :leaf @B2 tabler/leaf       "Leaf"    sizeScale=1.4
-icon :o2   @D1 tabler/wind       "O₂"
-icon :glu  @D3 tabler/circle-dot "Glucose"
-
-h2o --> leaf
-co2 --> leaf
-
-# Frame 2+: the leaf is lit up and the formula note is displayed.
-[2-] icon :leaf color=accent sizeScale=1.5
-[2-] note @C2 (leaf) "6 CO₂ + 6 H₂O\n→ C₆H₁₂O₆ + 6 O₂"
-
-# Frame 3: products emerge.
-[3] leaf --> o2
-[3] leaf --> glu
-[3] icon :o2  color=accent { badges: ['check'] }
-[3] icon :glu color=accent { badges: ['star'] }
-```
+<Example name="frame-gallery-photosynthesis" framing="1-3" layout="single" />
 
 ## Historical timeline
 

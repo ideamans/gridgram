@@ -11,28 +11,7 @@ story. Hover and step through: frame 1 is the pipeline at rest,
 frame 2 clears the eval gate, frame 3 lands the model in the
 registry.
 
-```gg-diagram gallery framing=1-3
-doc { cols: 5 }
-
-icon :data  @A1 tabler/database   "Data"
-icon :feat  @B1 tabler/puzzle     "Features"
-icon :train @C1 tabler/brain      "Train"
-icon :eval  @D1 tabler/chart-bar  "Eval"   sizeScale=1.3
-icon :reg   @E1 tabler/package    "Registry"
-
-data  --> feat
-feat  --> train
-train --> eval
-eval  --> reg
-
-note @D2 (eval) "Gate:\naccuracy ≥\nbaseline + 0.5%"
-
-# Frame 2+: the eval gate passes.
-[2-] icon :eval color=accent { badges: ['check'] }
-
-# Frame 3: registered.
-[3] icon :reg color=accent { badges: ['star'] }
-```
+<Example name="frame-gallery-training-gate" framing="1-3" layout="single" />
 
 ## RAG: retrieval-augmented generation
 
