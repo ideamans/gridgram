@@ -47,6 +47,7 @@ const HELP = `gg — gridgram CLI
 
 Usage:
   gg <input.gg> [options]
+  gg -          [options]   read .gg source from stdin
 
 Options:
   -o, --output <path>     Output path (extension drives format unless --format is given)
@@ -101,7 +102,9 @@ function parseArgs(argv: string[]): Args {
       case '--no-errors': a.overrides.suppressErrors = true; break
       case '--diagnostics': a.diagnostics = true; break
       default:
-        if (!a.input && !t.startsWith('-')) a.input = t
+        // A bare `-` is a positional arg meaning "read .gg from stdin",
+        // not a flag. Every other `-…` token is an unknown flag.
+        if (!a.input && (t === '-' || !t.startsWith('-'))) a.input = t
         else throw new Error(`Unknown argument: ${t}`)
     }
   }
@@ -169,11 +172,15 @@ async function main(): Promise<number> {
   }
 
   // ---- I/O: read source ----
+  // `-` means "read .gg from stdin" — useful for piping from heredocs
+  // or other tools. fd 0 works in both Bun and Node.
+  const fromStdin = args.input === '-'
   let source: string
   try {
-    source = readFileSync(args.input, 'utf-8')
+    source = readFileSync(fromStdin ? 0 : args.input, 'utf-8')
   } catch (e: any) {
-    process.stderr.write(`Cannot read input: ${args.input}: ${e.message}\n`)
+    const label = fromStdin ? 'stdin' : args.input
+    process.stderr.write(`Cannot read input: ${label}: ${e.message}\n`)
     return 3
   }
 
@@ -181,8 +188,11 @@ async function main(): Promise<number> {
   const { def: rawDef, errors, icons: rawIcons } = parseGg(source)
   const parseErrors = errors.filter((e) => e.source !== 'check')
   const checkErrors = errors.filter((e) => e.source === 'check')
-  if (parseErrors.length > 0) { reportErrors(parseErrors, args.input); return 1 }
-  if (checkErrors.length > 0) { reportErrors(checkErrors, args.input); return 2 }
+  // Filename label used in diagnostics; stdin shows as <stdin> so the
+  // ` at <stdin>:12 ` location is unambiguous.
+  const sourceLabel = fromStdin ? '<stdin>' : args.input
+  if (parseErrors.length > 0) { reportErrors(parseErrors, sourceLabel); return 1 }
+  if (checkErrors.length > 0) { reportErrors(checkErrors, sourceLabel); return 2 }
 
   // ---- Merge layers ----
   const settings = resolveSettings([
@@ -211,14 +221,17 @@ async function main(): Promise<number> {
       jsonIconsMap: rawIcons,
       aliases: settings.assetAliases,
       def: mergedDef,
-      docDir: pathResolve(dirname(args.input)),
+      // When reading from stdin, there's no source directory to
+      // resolve `./foo.svg` against — fall back to cwd so the user's
+      // shell working directory is the reference.
+      docDir: fromStdin ? process.cwd() : pathResolve(dirname(args.input)),
       aliasDir: process.cwd(),
     })
     // Per-icon non-fatal issues (bad URL, missing file, …). Each node
     // affected still renders with the iconError ring — we just print
     // the reasons so the user can trace the red ring back.
     for (const err of ctx.errors ?? []) {
-      process.stderr.write(formatError(err, args.input) + '\n')
+      process.stderr.write(formatError(err, sourceLabel) + '\n')
     }
     const iconResolve = resolveDiagramIcons(mergedDef, ctx)
     def = iconResolve.def

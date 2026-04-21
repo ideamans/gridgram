@@ -36,6 +36,15 @@ html[data-theme='dark'],
   --color-accent-content: #0f172a;
 }
 
+/* Hide the daisyui theme's built-in dark/light toggle. We've set
+   `appearance: false` in VitePress config — the toggle no longer
+   flips anything, but the button still renders. Target it by
+   aria-label since that's the only stable hook on it. */
+button[aria-label*="dark theme" i],
+button[aria-label*="light theme" i] {
+  display: none !important;
+}
+
 /* Inline diagrams emitted by the gg-diagram markdown-it plugin.
    No frame, no checker backdrop — the diagram stands on its own and
    stretches to the content column. */

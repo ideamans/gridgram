@@ -1,0 +1,6 @@
+# Matches the one-line `echo … | gg - -o hello.png` snippet on the
+# Quick start page. Two icons, one labelled connector — the smallest
+# diagram that still shows a node-to-node flow.
+icon :u tabler/user "User"
+icon :a tabler/server "API"
+u --> a "request"

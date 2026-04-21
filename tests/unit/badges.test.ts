@@ -30,8 +30,15 @@ describe('BADGE_PRESETS', () => {
     }
   })
 
-  test('every preset has exactly two layers (backing disc + icon)', () => {
+  // Presets split into two families: "composed" (white disc + Tabler
+  // filled icon on top) for icons whose shape is a cutout, and "solid"
+  // (single Tabler filled icon) for silhouette icons that don't need a
+  // backing.
+  const SOLID_PRESETS = new Set(['star', 'heart'])
+
+  test('composed presets have two layers (backing disc + colored icon)', () => {
     for (const [name, preset] of Object.entries(BADGE_PRESETS)) {
+      if (SOLID_PRESETS.has(name)) continue
       expect(preset.layers.length).toBe(2)
       // Layer 0 = disc (currentColor driven by white iconTheme='theme')
       expect(preset.layers[0].icon).toContain('<circle')
@@ -41,6 +48,18 @@ describe('BADGE_PRESETS', () => {
       expect(typeof preset.layers[1].icon).toBe('string')
       expect(preset.layers[1].color).toBeDefined()
       expect(name).toBeTruthy()
+    }
+  })
+
+  test('solid presets (star, heart) have a single colored layer — no disc', () => {
+    for (const name of SOLID_PRESETS) {
+      const preset = BADGE_PRESETS[name]
+      expect(preset).toBeDefined()
+      expect(preset.layers.length).toBe(1)
+      expect(preset.layers[0].color).toBeDefined()
+      expect(preset.layers[0].iconTheme).toBe('theme')
+      // No circle-backing layer sneaking in.
+      expect(preset.layers[0].icon).not.toContain('<circle')
     }
   })
 })

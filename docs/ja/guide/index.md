@@ -1,138 +1,69 @@
-# Gridgram とは
+# クイックスタート
 
-Gridgram は **グリッドベースの図版生成器** です。コマンド先頭型の
-`.gg` ファイル、または TypeScript の `DiagramDef` で図を記述すると、
-SVG または PNG にレンダリングします。
+`gg` バイナリをインストールして、最初の図を 1 分以内にレンダリング
+できます。リモートスクリプトをシェルにパイプするのが気になる方は、
+手動のインストール方法を紹介した [インストール](./install) を
+参照してください。
 
-想定利用者は 2 種類：
+## インストール
 
-- **ライター** — Wiki やドキュメントに図を書きたく、描画アプリより
-  プレーンテキストを好む人。`.gg` ファイルと `gg` CLI を使う。
-- **開発者** — 自分のパイプライン（静的サイトジェネレータ、MCP
-  サーバ、ビルドスクリプト）に Gridgram を組み込みたい人。
-  TypeScript API を使う。
+お使いの OS に合わせたコマンドを選んでください。どちらのスクリプトも
+自動で `gg` を PATH に追加します。
 
-両方とも同じレンダリングパイプラインを通るため、出力は**同一**です。
+### macOS / Linux
 
-## 最小の例
-
-<Example name="basic-01-hello" />
-
-単一アイコンの図です — `@pos` を省略していることに注目。Gridgram は
-アイコンを宣言順に row 0 上で自動配置するので、横一列の単純なフロー
-図は座標指定が一切不要です。
-
-### 2 つのショートハンド
-
-ほぼすべての行で登場するので先に押さえておくと読みやすくなります：
-
-- **`"…"` または `'…'` — ラベル。** `icon` / `region` / `note` /
-  コネクタに付くクォート文字列は表示ラベルです。どちらのクォートでも
-  同じ。テキスト内のエスケープが楽なほうを選んでください。
-- **`:user` — ID。** 先頭の `:` はノードに名前を付ける記号で、他の
-  ステートメントから参照できるようにします。ID が必要なのは **コネクタ**
-  （`user --> api`）や **ノートのターゲット**（`note [user] "…"`）から
-  参照されるときだけ。参照されないノードは `:id` を省略でき、内部で
-  自動 ID が割り振られます。
-
-```gg
-icon :user tabler/user   "User"    # :user は ID、"User" はラベル
-icon :api  tabler/server "API"
-user --> api "login"               # コネクタが :id で参照
+```sh
+curl -fsSL https://bin.ideamans.com/install/gg.sh | bash
 ```
 
-## 組込アイコン（Tabler）
+### Windows (PowerShell)
 
-上の例で使っている `tabler/user` は組込アイコン集から来ています。
-Gridgram は **[Tabler アイコン](https://tabler.io/icons)** を同梱
-しており、5,500 以上の outline アイコンと多数の filled 亜種が使えます。
-参照は `tabler/` 名前空間経由：
-
-```gg
-icon @A1 tabler/world        "Front"   # outline
-icon @B1 tabler/filled/star  "Hot"     # filled
+```powershell
+irm https://bin.ideamans.com/install/gg.ps1 | iex
 ```
 
-<Example name="icon-tabler" />
+### 動作確認
 
-<https://tabler.io/icons> で全アイコンを検索・ブラウズできます。
-カタログ上の名前（`arrow-right`、`cloud-upload`、`database` など）は
-すべて `tabler/` プレフィックス付きで使えます。
-
-指定した名前に filled 亜種がない場合、リゾルバはそのノードを
-`iconError` として扱い、**赤いリング** で描画します。これにより参照
-切れが一目で分かります（Tabler の outline は filled よりずっと
-網羅的）。
-
-独自アセット（URL / ファイルパス / dataURL）は `doc { icons: … }`
-または `gridgram.config.ts` で登録します。詳細は
-[アイコン](./icon/) を参照。
-
-## 自動配置の横フロー
-
-<Example name="basic-02-multi-node" />
-
-最小例と同じ原理：アイコンは自動配置され、row 0 上で col が増加します。
-コネクタは `<id> <arrow> <id>` の形でノード間を繋ぎます。
-
-### 行の折り返し
-
-`doc` で `cols` を指定しつつ `@pos` を省略した場合、自動配置された
-アイコンは列数に達した時点で **次の行に折り返し** ます：
-
-<Example name="auto-wrap" />
-
-```gg
-doc { cols: 4 }
-
-icon tabler/user     "user"
-icon tabler/world    "web"
-icon tabler/server   "api"
-icon tabler/database "db"
-icon tabler/bolt     "queue"
-icon tabler/cloud    "cdn"
-icon tabler/lock     "auth"
-icon tabler/file     "audit"
+```sh
+gg --help
 ```
 
-8 個のアイコン × 4 列 → 2 行。明示的な `@pos` と暗黙の配置は自由に
-混在でき、明示配置は auto カウンタを進めません。
+使い方のバナーが表示されれば成功です。`gg: command not found` と
+出る場合は、シェルを開き直す（更新後の PATH を読み込むため）か、
+[インストール](./install) を参照してください。
 
-## グリッドに配置する
+## 最初の図をレンダリング
 
-1 行に収まらなくなったら、各アイコンに `@col,row` を書きます。グリッド
-は Excel 風の **(列, 行)** 順 — 表計算ソフトの `A1` と同じ配置規則
-です。**`cols` / `rows` は書いた `@col` / `@row` の最大値から自動推論**
-されるため、2×2 のレイアウトには `doc { }` ブロックすら不要：
+1 行の `.gg` ソースを `gg` にパイプするだけで図が作れます。入力パスを
+`-` にすると `gg` は標準入力から読み取るので、`;` で文を区切れば
+ワンライナーに収まります。
 
-<Example name="basic-03-grid-2x2" coords cols="2" rows="2" />
+### macOS / Linux
 
-```gg
-icon :front @A1 tabler/world    "Frontend"
-icon :api   @B1 tabler/server   "API"
-icon :cache @A2 tabler/database "Cache"
-icon :db    @B2 tabler/database "DB"
+```sh
+echo 'icon :u tabler/user "User"; icon :a tabler/server "API"; u --> a "request"' | gg -o hello.png - --width 1024
 ```
 
-明示的にグリッドを固定したい場合（末尾の空セルを残す、推論値を
-曖昧にしたくない等）は `doc { cols: N, rows: M }` を追加します。
-リージョン・テーマ・明示グリッドが揃った例は
-[クイックスタート (.gg)](./quickstart-gg) を参照。
+`hello.png` を `hello.svg` に変えれば（`--width` は省略）ベクター
+出力になります。`--format svg --stdout` でターミナルへ SVG を直接
+流し込むことも可能です。
 
-## ラベルは Unicode（CJK OK）
+### Windows (PowerShell)
 
-ラベルはすべて UTF-8 テキストとして扱われるので、日本語・中国語・
-韓国語などの非ラテン文字もラテン文字と同じように描画されます。
-フォント設定もエスケープも不要：
+```powershell
+'icon :u tabler/user "User"; icon :a tabler/server "API"; u --> a "request"' | gg -o hello.png - --width 1024
+```
 
-<Example name="label-cjk" />
+`hello.png` を画像ビューアで開くと、2 つのアイコンがラベル付きの
+矢印で繋がっているのが見えるはずです。これで CLI が動作していることが
+確認できました。
 
-コネクタのラベル、ノートの本文、リージョンのタイトルも同様です。
-混在スクリプト（`"API 伺服器"` など）は Gridgram が SVG の `<text>` に
-そのまま渡し、ブラウザやラスタライザがグリフを選びます。
+<Example name="quickstart-echo" />
 
 ## 次に読む
 
-- [クイックスタート (.gg)](./quickstart-gg) — CLI インストールと描画
-- [ドキュメント](./document/) — `doc { }` / コマンド / マージ規則
-- [アイコン](./icon/) — Tabler / パス / エイリアス / フォールバック
+- **[First Gridgram](./first-gridgram)** — `.gg` 言語の概念を 1 つずつ
+  紹介するガイド付きツアー。
+- **[インストール](./install)** — GitHub Releases、ソースからの
+  ビルド、その他のインストール方法。
+- **[CLI リファレンス](./cli)** — 全フラグと終了コード。

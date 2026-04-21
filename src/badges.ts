@@ -59,7 +59,10 @@ interface BadgePreset {
 /** Solid 24×24 disc using currentColor — the backing layer for every preset. */
 const DISC_BACKING = '<circle cx="12" cy="12" r="11" fill="currentColor"/>'
 
-/** Helper: two-layer preset (white disc + colored icon). */
+/** Helper: two-layer preset (white disc + colored icon). Use for
+ *  Tabler filled icons whose check-mark / arrow / etc. is rendered as
+ *  a transparent cutout — without a backing, the cutout reveals the
+ *  node ring beneath, which muddles the glyph. */
 function composed(iconName: string, color: string): BadgePreset {
   return {
     layers: [
@@ -72,15 +75,27 @@ function composed(iconName: string, color: string): BadgePreset {
   }
 }
 
+/** Helper: single-layer preset. Use for solid silhouette icons (star,
+ *  heart, …) where the shape is fully painted — a backing disc would
+ *  just add an unwanted white halo around the silhouette. */
+function solid(iconName: string, color: string): BadgePreset {
+  return {
+    layers: [
+      { icon: tablerFilled(iconName), color, iconTheme: 'theme' },
+    ],
+  }
+}
+
 export const BADGE_PRESETS: Record<string, BadgePreset> = {
   check: composed('circle-check',  '#16a34a'),
-  star:  composed('star',          '#f59e0b'),
   alert: composed('alert-circle',  '#dc2626'),
   info:  composed('info-circle',   '#0ea5e9'),
   help:  composed('help-circle',   '#0ea5e9'),
   lock:  composed('lock',          '#475569'),
   flag:  composed('flag',          '#dc2626'),
-  heart: composed('heart',         '#e11d48'),
+  // Solid silhouettes — no disc backing, no white halo.
+  star:  solid('star',             '#f59e0b'),
+  heart: solid('heart',            '#e11d48'),
 }
 
 // ---------------------------------------------------------------------------

@@ -33,37 +33,30 @@ shell (so the updated `PATH` is picked up) or consult
 
 ## Render your first diagram
 
-Write a tiny `.gg` file and render it to SVG and PNG:
+Pipe a one-line `.gg` source straight into `gg` — `-` as the input
+path tells the CLI to read from stdin. `;` separates statements so
+the whole diagram fits on one command line.
+
+### macOS / Linux
 
 ```sh
-cat > hello.gg <<'EOF'
-icon :user tabler/user   "User"
-icon :api  tabler/server "API"
-user --> api "request"
-EOF
-
-gg hello.gg -o hello.svg
-gg hello.gg -o hello.png --width 1024
+echo 'icon :u tabler/user "User"; icon :a tabler/server "API"; u --> a "request"' | gg -o hello.png - --width 1024
 ```
 
-Windows (PowerShell) equivalent:
+Swap `hello.png` for `hello.svg` (drop `--width`) to get a vector
+file, or use `--format svg --stdout` to print the SVG straight to
+your terminal.
+
+### Windows (PowerShell)
 
 ```powershell
-@'
-icon :user tabler/user   "User"
-icon :api  tabler/server "API"
-user --> api "request"
-'@ | Set-Content hello.gg
-
-gg hello.gg -o hello.svg
-gg hello.gg -o hello.png --width 1024
+'icon :u tabler/user "User"; icon :a tabler/server "API"; u --> a "request"' | gg -o hello.png - --width 1024
 ```
 
-Open `hello.svg` in any browser or `hello.png` in your image viewer —
-you should see two icons with a labelled arrow between them. That's
-it; the CLI is working.
+Open `hello.png` in your image viewer — you should see two icons
+with a labelled arrow between them. That's it; the CLI is working.
 
-<Example name="basic-02-multi-node" />
+<Example name="quickstart-echo" />
 
 ## Where to next
 
