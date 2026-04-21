@@ -51,28 +51,33 @@ store --> proj  "replay"
 proj  --> view  "build"
 ```
 
-## CQRS with a dead-letter branch
+## Retries and dead-letter queue
 
-Command and query sides share one event bus. Failures dead-letter
-onto a red-flagged branch; a note names the retry policy.
+One unhealthy subscriber gradually drives the system toward its
+dead-letter branch. Hover to scrub: frame 1 is the steady state,
+frame 2 flags sub-2 red, frame 3 routes the failed message into
+the DLQ with a retries note.
 
-```gg-diagram gallery
+```gg-diagram gallery framing=1-3
 doc { cols: 4, rows: 2 }
 
-icon :ui    @A1 tabler/user             "UI"
-icon :cmd   @B1 tabler/server           "Command" { badges: ['check'] }
-icon :bus   @C1 tabler/arrows-shuffle   "Bus"
-icon :wdb   @D1 tabler/database         "Write DB"
-icon :dlq   @C2 tabler/alert-triangle   "DLQ"     { badges: ['alert'] }
-icon :rdb   @D2 tabler/database-export  "Read DB"
+icon :pub @A2 tabler/broadcast     "Publisher"
+icon :bus @B2 tabler/inbox         "Bus"     sizeScale=1.3
+icon :s1  @C1 tabler/server        "sub-1"
+icon :s2  @C2 tabler/server        "sub-2"
+icon :dlq @D2 tabler/alert-circle  "DLQ"
 
-ui  --> cmd
-cmd --> bus
-bus --> wdb
-bus --> rdb "project" dash="2 4"
-bus --> dlq "fail"    dash="4 4" color=accent
+pub --> bus "publish"
+bus --> s1
+bus --> s2
 
-note @B2 (dlq) "Retries: 3×\nbackoff 30s→5m"
+# Frame 2+: sub-2 is unhealthy.
+[2-] icon :s2 color=#dc2626 { badges: ['alert'] }
+
+# Frame 3: retries failed, message lands in the DLQ.
+[3] bus --> dlq "fail" dash="4 4" color=accent
+[3] icon :dlq color=accent { badges: ['star'] }
+[3] note @D1 (dlq) "Retries: 3×\nbackoff 30s→5m"
 ```
 
 ## Saga state machine

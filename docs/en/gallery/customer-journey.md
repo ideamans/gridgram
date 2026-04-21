@@ -37,22 +37,23 @@ note @C2 (ret) "Cohort retention\nweek 4: 30%"
 
 ## E-commerce purchase flow
 
-Conversion funnel. Each step has its own region; the final step
-(ship) emphasises with size to mark "won."
+Conversion funnel scrubbed step-by-step across four frames — hover
+and use ◀ / ▶ to walk the shopper from landing to shipped. The
+cart frame surfaces the notorious abandon-rate note.
 
-```gg-diagram gallery
+```gg-diagram gallery framing=1-4
 doc { cols: 5 }
 
-region @A1:A1 "Land"     color=secondary/24
-region @B1:B1 "Browse"   color=secondary/24
-region @C1:C1 "Cart"     color=primary/28
-region @D1:D1 "Pay"      color=primary/28
-region @E1:E1 "Ship"     color=accent/32
+region @A1:A1 "Land"   color=secondary/24
+region @B1:B1 "Browse" color=secondary/24
+region @C1:C1 "Cart"   color=primary/28
+region @D1:D1 "Pay"    color=primary/28
+region @E1:E1 "Ship"   color=accent/32
 
-icon :land   @A1 tabler/world         "Landing"
-icon :browse @B1 tabler/search        "Browse"
-icon :cart   @C1 tabler/shopping-cart "Cart"
-icon :pay    @D1 tabler/credit-card   "Pay"
+icon :land   @A1 tabler/world          "Landing"
+icon :browse @B1 tabler/search         "Browse"
+icon :cart   @C1 tabler/shopping-cart  "Cart"
+icon :pay    @D1 tabler/credit-card    "Pay"
 icon :ship   @E1 tabler/truck-delivery "Ship" sizeScale=1.3
 
 land   --> browse
@@ -60,7 +61,13 @@ browse --> cart
 cart   --> pay
 pay    --> ship
 
-note @C2 (cart) "Abandon rate\n~68%"
+# Each frame lights up the current step.
+[1] icon :land   color=accent
+[2] icon :browse color=accent
+[3] icon :cart   color=accent
+[3] note @C2 (cart) "Abandon rate\n~68%"
+[4] icon :pay  color=accent { badges: ['check'] }
+[4] icon :ship color=accent { badges: ['star'] }
 ```
 
 ## Onboarding flow

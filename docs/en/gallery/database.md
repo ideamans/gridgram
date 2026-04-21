@@ -50,10 +50,11 @@ router --> s3
 
 ## Read-through cache
 
-Green theme for the cache-happy path; dashed line + note for the
-slow miss. A compact three-node diagram reads quickly.
+Two frames contrast the hot and cold paths. Hover and flip between
+them — frame 1 is the fast round-trip served from cache; frame 2
+is the miss falling back to the DB with a "populate on read" note.
 
-```gg-diagram gallery
+```gg-diagram gallery framing=1-2
 doc {
   cols: 3,
   theme: { primary: '#047857', secondary: '#0d9488', accent: '#f59e0b' },
@@ -63,10 +64,14 @@ icon :app   @A1 tabler/server   "App"
 icon :cache @B1 tabler/bolt     "Cache" sizeScale=1.3
 icon :db    @C1 tabler/database "DB"
 
-app   <-> cache  "fast"  width=2
-cache --> db     "miss"  dash="4 4" color=accent
+# Frame 1: hot path — round-trip to the cache.
+[1] app <-> cache "hit" width=2
 
-note @B2 (cache) "invalidate\non write"
+# Frame 2: cold path — miss, fetch from DB.
+[2] app   --> cache "miss"  dash="4 4"
+[2] cache --> db    "fetch" dash="4 4" color=accent
+[2] icon :cache color=accent
+[2] note @B2 (cache) "Populate\non read"
 ```
 
 ## CDC → downstream

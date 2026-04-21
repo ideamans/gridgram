@@ -7,10 +7,18 @@
  *   ```gg-diagram  → build-time SVG, inlined into the page
  *
  * Fence info string accepts optional flags after the language:
- *   ```gg-diagram            → SVG only (default)
- *   ```gg-diagram gallery    → Tabbed "Diagram | Source" viewer; source
- *                              is syntax-highlighted via VitePress's
- *                              existing Shiki pipeline.
+ *   ```gg-diagram                     → SVG only (default)
+ *   ```gg-diagram gallery             → Tabbed "Diagram | Source" viewer.
+ *   ```gg-diagram gallery framing=1-3 → Gallery viewer with a per-frame
+ *                                        carousel: badge `Frame N / 1–3`
+ *                                        in the top-left, left/right nav
+ *                                        arrows revealed on hover. One
+ *                                        SVG per frame is rendered up
+ *                                        front; a CSS radio-button trick
+ *                                        swaps which one is visible, so
+ *                                        the page stays JS-free.
+ *   ```gg-diagram gallery framing=2   → Fixed single frame (no arrows,
+ *                                        badge shows `Frame 2`).
  *
  * Synchronous — reuses Gridgram's sync render pipeline. Icon support:
  *   - Tabler built-ins (tabler/<name>, tabler/filled/<name>)
@@ -28,30 +36,29 @@
  */
 import type MarkdownIt from 'markdown-it'
 import { parseGg } from '../../../src/gg/parser'
-import { resolveDiagramIcons, stripSvgWrapper } from '../../../src/gg/icons'
+import { resolveDiagramIcons, stripSvgWrapper, type ResolveIconsResult } from '../../../src/gg/icons'
 import { renderDiagram } from '../../../src/components/Diagram'
 import { formatError, type GgError } from '../../../src/gg/errors'
 import { decodeDataUrl } from '../../../src/gg/icon-loader'
+import type { DiagramDef } from '../../../src/types'
 
 const escapeHtml = (s: string) =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
    .replace(/"/g, '&quot;').replace(/'/g, '&#39;')
 
-/** Shape the plugin emits — either a rendered SVG or a structured
- *  error record the caller renders as an accordion. Kept as a union
- *  so the dispatch is explicit and testable. */
+/** Shape the plugin emits — either a list of rendered frames (one
+ *  entry per frame for frame-aware diagrams, a single entry otherwise)
+ *  or a structured error record the caller renders as an accordion. */
+interface FrameRender { frame: number | null; svg: string }
 type RenderOutcome =
-  | { kind: 'ok'; svg: string }
+  | { kind: 'ok'; frames: FrameRender[]; warningsHtml?: string }
   | { kind: 'error'; errors: GgError[]; source: string }
 
-function renderGgSource(source: string): RenderOutcome {
+/** Parse + sync-resolve icons once, shared by both the single-SVG and
+ *  the per-frame rendering paths. */
+function prepareDef(source: string): { def: DiagramDef; diagnostics: ResolveIconsResult['diagnostics']; errors: GgError[] } | { errors: GgError[] } {
   const { def: rawDef, errors, icons: rawIcons } = parseGg(source)
-  const allErrors = errors // parser + integrity merged
-  if (allErrors.length > 0) {
-    return { kind: 'error', errors: allErrors, source }
-  }
-
-  // Sync icon resolution: Tabler + inline raw-SVG + data: URLs.
+  if (errors.length > 0) return { errors }
   const inline: Record<string, string> = {}
   if (rawIcons) {
     for (const [id, value] of Object.entries(rawIcons)) {
@@ -60,31 +67,60 @@ function renderGgSource(source: string): RenderOutcome {
       if (trimmed.startsWith('<')) {
         inline[id] = stripSvgWrapper(value)
       } else if (trimmed.startsWith('data:')) {
-        try {
-          inline[id] = decodeDataUrl(trimmed)
-        } catch {
-          // Leave unresolved; the icon resolver will flag iconError.
-        }
+        try { inline[id] = decodeDataUrl(trimmed) }
+        catch { /* leave unresolved; resolver flags iconError */ }
       }
       // HTTP URLs / file paths remain silently skipped — use examples/
       // with the async loader for those.
     }
   }
-  const { def, diagnostics: iconDiagnostics } = resolveDiagramIcons(rawDef, { inline })
-  const { svg, diagnostics: layoutDiagnostics } = renderDiagram(def)
-  const allDiagnostics = [...iconDiagnostics, ...layoutDiagnostics]
+  const { def, diagnostics } = resolveDiagramIcons(rawDef, { inline })
+  return { def, diagnostics, errors: [] }
+}
+
+function renderGgSource(source: string, frames: number[] | null): RenderOutcome {
+  const prepared = prepareDef(source)
+  if ('def' in prepared === false) {
+    return { kind: 'error', errors: prepared.errors, source }
+  }
+  const { def, diagnostics: iconDiagnostics } = prepared
+  const allDiagnostics = [...iconDiagnostics]
+  const renders: FrameRender[] = []
+  if (frames === null) {
+    const { svg, diagnostics: d } = renderDiagram(def)
+    renders.push({ frame: null, svg })
+    allDiagnostics.push(...d)
+  } else {
+    for (const f of frames) {
+      const { svg, diagnostics: d } = renderDiagram(def, { frame: f })
+      renders.push({ frame: f, svg })
+      allDiagnostics.push(...d)
+    }
+  }
 
   // Non-fatal diagnostics (icon-unresolved, label-collision,
   // route-failed) surface through a `warnings` accordion under the
-  // rendered diagram — the page still shows the SVG, authors see what
-  // needs tidying.
-  if (allDiagnostics.length > 0) {
-    const asGgErrors: GgError[] = allDiagnostics.map((d) => ({
+  // rendered diagram — the page still shows the SVG(s), authors see
+  // what needs tidying. De-dupe by message so N frames don't emit the
+  // same warning N times.
+  const seen = new Set<string>()
+  const deduped = allDiagnostics.filter((d) => {
+    const key = `${d.kind}|${d.message}`
+    if (seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
+  if (deduped.length > 0) {
+    const asGgErrors: GgError[] = deduped.map((d) => ({
       message: d.message, line: 0, source: d.kind === 'icon-unresolved' ? 'icon' : 'check',
     }))
-    return { kind: 'ok', svg: svg + buildErrorAccordion(asGgErrors, source, 'warnings') }
+    return {
+      kind: 'ok',
+      frames: renders,
+      warningsHtml: buildErrorAccordion(asGgErrors, source, 'warnings'),
+    }
   }
-  return { kind: 'ok', svg }
+  return { kind: 'ok', frames: renders }
 }
 
 /**
@@ -137,6 +173,26 @@ function highlightGgSource(source: string, options: any): string {
   return `<pre class="gg-gallery__code-fallback"><code>${escapeHtml(source)}</code></pre>`
 }
 
+/** Parse the fence's `framing=` flag. Returns null when the flag is
+ *  absent (no frame carousel), or `{ min, max }` otherwise. `min ===
+ *  max` means "fixed single frame" — shows a badge but no arrows. */
+function parseFramingFlag(flags: Iterable<string>): { min: number; max: number } | null {
+  for (const f of flags) {
+    if (!f.startsWith('framing=')) continue
+    const spec = f.slice('framing='.length)
+    const range = /^(\d+)\s*-\s*(\d+)$/.exec(spec)
+    if (range) {
+      const min = Number(range[1]), max = Number(range[2])
+      if (Number.isFinite(min) && Number.isFinite(max) && min <= max) return { min, max }
+      return null
+    }
+    const single = /^\d+$/.exec(spec)
+    if (single) return { min: Number(spec), max: Number(spec) }
+    return null
+  }
+  return null
+}
+
 /**
  * Build the "Diagram | Source" tabbed viewer. Pure HTML + CSS — two
  * hidden radios drive the `:checked ~ …` sibling selectors in custom.css
@@ -160,6 +216,67 @@ function buildGalleryHtml(id: number, diagramHtml: string, sourceHtml: string): 
   )
 }
 
+/**
+ * Build the diagram-pane body when the fence requested `framing=`. One
+ * SVG, badge, and (for ranges) a pair of nav labels is emitted per
+ * frame; which one is visible is decided by a per-gallery radio group
+ * in custom.css. Keeps the component JS-free — label `for=` targets
+ * the radio for the destination frame, so clicking ◀ / ▶ just flips
+ * the `:checked` state.
+ */
+function buildFramingPane(id: number, renders: FrameRender[], framing: { min: number; max: number }): string {
+  const name = `gg-gallery-${id}-frame`
+  const frames = renders.map((r) => r.frame ?? framing.min)
+  const firstFrame = framing.min
+  const label = (n: number): string =>
+    framing.min === framing.max ? `Frame ${n}` : `Frame ${n} <span class="gg-gallery__frame-range">/ ${framing.min}–${framing.max}</span>`
+
+  const radios = frames.map((f) =>
+    `<input type="radio" class="gg-gallery__frame-radio" ` +
+    `data-frame="${f}" id="${name}-${f}" name="${name}"${f === firstFrame ? ' checked' : ''}>`
+  ).join('')
+
+  const slides = renders.map((r) => {
+    const f = r.frame ?? framing.min
+    return `<div class="gg-gallery__frame" data-frame="${f}">${r.svg}</div>`
+  }).join('')
+
+  const badges = frames.map((f) =>
+    `<span class="gg-gallery__frame-badge" data-frame="${f}">${label(f)}</span>`
+  ).join('')
+
+  // Prev/next labels: each frame gets its own pair (possibly disabled
+  // at the ends). CSS shows only the pair whose `data-from` matches
+  // the currently-checked frame.
+  let nav = ''
+  if (framing.min !== framing.max) {
+    for (let i = 0; i < frames.length; i++) {
+      const f = frames[i]
+      const prevF = i > 0 ? frames[i - 1] : null
+      const nextF = i < frames.length - 1 ? frames[i + 1] : null
+      if (prevF !== null) {
+        nav += `<label class="gg-gallery__nav gg-gallery__nav--prev" data-from="${f}" for="${name}-${prevF}" aria-label="Previous frame">◀</label>`
+      } else {
+        nav += `<span class="gg-gallery__nav gg-gallery__nav--prev is-disabled" data-from="${f}" aria-hidden="true">◀</span>`
+      }
+      if (nextF !== null) {
+        nav += `<label class="gg-gallery__nav gg-gallery__nav--next" data-from="${f}" for="${name}-${nextF}" aria-label="Next frame">▶</label>`
+      } else {
+        nav += `<span class="gg-gallery__nav gg-gallery__nav--next is-disabled" data-from="${f}" aria-hidden="true">▶</span>`
+      }
+    }
+  }
+
+  return (
+    radios +
+    `<div class="gg-gallery__framebox">` +
+    `<div class="gg-gallery__frame-slides">${slides}</div>` +
+    `<div class="gg-gallery__frame-badges">${badges}</div>` +
+    nav +
+    `</div>`
+  )
+}
+
 export function ggDiagramPlugin(md: MarkdownIt): void {
   let galleryCounter = 0
   const defaultFence = md.renderer.rules.fence
@@ -169,14 +286,31 @@ export function ggDiagramPlugin(md: MarkdownIt): void {
     const parts = info.split(/\s+/)
     const lang = parts[0]
     if (lang === 'gg-diagram') {
-      const flags = new Set(parts.slice(1).map((s) => s.toLowerCase()))
+      const flagParts = parts.slice(1)
+      const flags = new Set(flagParts.map((s) => s.toLowerCase()))
       const galleryMode = flags.has('gallery')
+      const framing = parseFramingFlag(flagParts)
+      const framesToRender: number[] | null = framing
+        ? Array.from({ length: framing.max - framing.min + 1 }, (_, i) => framing.min + i)
+        : null
       let body: string
       let isError = false
       try {
-        const outcome = renderGgSource(token.content)
+        const outcome = renderGgSource(token.content, framesToRender)
         if (outcome.kind === 'ok') {
-          body = outcome.svg
+          // Generate a gallery id upfront — needed when framing is on
+          // so the per-frame radio group has a unique `name=`.
+          const id = ++galleryCounter
+          if (framing) {
+            body = buildFramingPane(id, outcome.frames, framing)
+          } else {
+            body = outcome.frames[0]?.svg ?? ''
+          }
+          if (outcome.warningsHtml) body += outcome.warningsHtml
+          if (galleryMode) {
+            const sourceHtml = highlightGgSource(token.content, options)
+            return buildGalleryHtml(id, body, sourceHtml)
+          }
         } else {
           // On error, render no diagram — just the accordion. Keeps
           // the page layout intact and gives the author a clear pointer.
@@ -195,13 +329,8 @@ export function ggDiagramPlugin(md: MarkdownIt): void {
         )
         isError = true
       }
-      // Hard render errors skip the tabbed viewer — the accordion is
-      // already a self-contained "here's the source + why it failed"
-      // unit and the Source tab would just duplicate it.
       if (galleryMode && !isError) {
-        const sourceHtml = highlightGgSource(token.content, options)
-        const id = ++galleryCounter
-        return buildGalleryHtml(id, body, sourceHtml)
+        // Already emitted above in the ok branch.
       }
       return `<div class="gg-inline-diagram">${body}</div>\n`
     }

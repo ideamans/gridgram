@@ -86,25 +86,36 @@ pick  --> ship
 
 ## Reverse logistics
 
-Returns flow back through inspection → refurbish or recycle → back
-to inventory. Notes call out the branch conditions.
+Returns flow back through inspection, then branch to refurbish or
+recycle. Hover the diagram and scrub — frame 1 is intake and
+inspection, frame 2 takes the serviceable-refurb branch, frame 3
+takes the damaged-recycle branch.
 
-```gg-diagram gallery
+```gg-diagram gallery framing=1-3
 doc { cols: 5, rows: 3 }
 
-icon :cust  @A2 tabler/user               "Customer"
-icon :intake @B2 tabler/truck-return      "Intake"
-icon :insp  @C2 tabler/clipboard-list     "Inspect"
-icon :refurb @D1 tabler/tools             "Refurb"
-icon :recycle @D3 tabler/recycle          "Recycle"
-icon :wh    @E2 tabler/building-warehouse "WH"
+icon :cust    @A2 tabler/user               "Customer"
+icon :intake  @B2 tabler/truck-return       "Intake"
+icon :insp    @C2 tabler/clipboard-list     "Inspect"
+icon :refurb  @D1 tabler/tools              "Refurb"
+icon :recycle @D3 tabler/recycle            "Recycle"
+icon :wh      @E2 tabler/building-warehouse "WH"
 
-cust    --> intake
-intake  --> insp
-insp    --> refurb  "serviceable"
-insp    --> recycle "damaged"
-refurb  --> wh
-recycle --> wh "raw" dash="4 4"
+cust   --> intake
+intake --> insp
 
-note @B1 (intake) "Within 30 days\nof purchase"
+# Frame 1: intake + inspection are the active stations.
+[1] icon :intake color=accent
+[1] icon :insp   color=accent
+[1] note @C1 (insp) "Within 30 days\nof purchase"
+
+# Frame 2: serviceable — refurbished back to stock.
+[2] insp   --> refurb "serviceable"
+[2] refurb --> wh
+[2] icon :refurb color=accent { badges: ['check'] }
+
+# Frame 3: damaged — recycled, raw materials returned.
+[3] insp    --> recycle "damaged" dash="4 4"
+[3] recycle --> wh      "raw"     dash="2 4"
+[3] icon :recycle color=#dc2626 { badges: ['alert'] }
 ```
