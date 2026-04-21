@@ -12,30 +12,31 @@
  *   note-stmt   := 'note'   arg* body?
  *   connector-stmt := IDENT arrow IDENT arg* body?
  *
- *   arg         := id-sigil | pos | span | label | target-list | attr
+ *   arg         := id-sigil | pos | span | label | target-list | frame-spec | attr
  *
  *   id-sigil    := ':' IDENT
  *   pos         := '@' INT ',' INT
  *   span        := '@' INT ',' INT '-' INT ',' INT
  *   label       := '"' ... '"' | "'" ... "'"
  *   target-list := '(' IDENT (',' IDENT)* ')'
+ *   frame-spec  := '[' frame-item (',' frame-item)* ']'
+ *   frame-item  := INT | INT '-' INT | INT '-'
  *   attr        := IDENT '=' (BARE-WORD | quoted-string)
  *   body        := '{' ... balanced JSON5 ... '}'
  *   arrow       := '-->' | '->' | '<--' | '<->' | '---' | '..>' | '<..' | '<..>' | '...'
  *
  * Statement separator: newline OR ';' at depth 0 (outside body / target-list /
- * strings). Inside a `body` / `target-list` / quoted string, newlines are
- * ordinary whitespace, so those forms can span multiple lines.
- *
- * Note: `[ … ]` is reserved for a future frame-selector syntax and is **not**
- * accepted as a token outside `body`.
+ * frame-spec / strings). Inside a `body` / `target-list` / `frame-spec` /
+ * quoted string, newlines are ordinary whitespace, so those forms can span
+ * multiple lines.
  *
  * Comments: `#` or `//` to end-of-line, at a whitespace boundary, not inside
  * a string. Inside `body` the JSON5 parser handles its own comments.
  */
 import JSON5 from 'json5'
-import type { ConnectorDef, DiagramDef, NodeDef, NoteDef, RegionDef, ArrowEnd } from '../types.js'
+import type { ConnectorDef, DiagramDef, NodeDef, NoteDef, RegionDef, ArrowEnd, FrameSpec } from '../types.js'
 import { parseA1 } from '../a1.js'
+import { parseGgFrameSpec } from '../frame.js'
 import type { GgError } from './errors.js'
 
 // ---------------------------------------------------------------------------
@@ -56,6 +57,7 @@ export type Token =
       to:   { col: number; row: number };             line: number }
   | { type: 'label';        value: string;            line: number }
   | { type: 'target-list';  ids: string[];            line: number }
+  | { type: 'frame-spec';   spec: FrameSpec;          line: number }
   | { type: 'attr';         key: string; value: string; line: number }
   | { type: 'arrow';        spec: ArrowSpec;          line: number }
   | { type: 'body';         value: Record<string, unknown>; line: number }
@@ -182,6 +184,19 @@ function readOneToken(ctx: Ctx): boolean {
     return true
   }
 
+  // Frame selector — [ 2 ], [ 2,3 ], [ 2-5 ], [ 5- ], [ 2, 4-6, 10- ]
+  if (ch === '[') {
+    const m = readBalanced(ctx, '[', ']')
+    if (m === null) return false
+    const { spec, error } = parseGgFrameSpec(m.slice(1, -1))
+    if (error !== undefined || spec === undefined) {
+      ctx.errors.push({ message: error ?? 'Invalid frame spec', line: startLine, source: 'dsl' })
+      return false
+    }
+    ctx.tokens.push({ type: 'frame-spec', spec, line: startLine })
+    return true
+  }
+
   // `@` — a cell address. Two forms, both 1-based, with either `:`
   // (Excel-style) or `-` as the range separator:
   //   A1 notation:  @A1               single cell
@@ -292,7 +307,7 @@ function readOneToken(ctx: Ctx): boolean {
       while (end < ctx.src.length) {
         const c = ctx.src[end]
         if (c === ' ' || c === '\t' || c === '\n' || c === '\r') break
-        if (c === ';' || c === '{' || c === '(') break
+        if (c === ';' || c === '{' || c === '(' || c === '[') break
         end++
       }
       value = ctx.src.slice(ctx.pos, end)
@@ -307,12 +322,12 @@ function readOneToken(ctx: Ctx): boolean {
   }
 
   // Bare word / identifier (or icon-ref like `tabler/server`, `./foo.svg`).
-  // Read until whitespace, `;`, `{`, `(`, `"`, `'`.
+  // Read until whitespace, `;`, `{`, `(`, `[`, `"`, `'`.
   let end = ctx.pos
   while (end < ctx.src.length) {
     const c = ctx.src[end]
     if (c === ' ' || c === '\t' || c === '\n' || c === '\r') break
-    if (c === ';' || c === '{' || c === '(' || c === '"' || c === "'") break
+    if (c === ';' || c === '{' || c === '(' || c === '[' || c === '"' || c === "'") break
     end++
   }
   if (end === ctx.pos) {
@@ -356,11 +371,12 @@ function readString(ctx: Ctx, quote: '"' | "'"): string | null {
 }
 
 /**
- * Read a balanced bracketed region (e.g. `{ … }` or `( … )`). Respects
- * strings and nested brackets. Returns the matched text (including outer
- * brackets) and advances ctx.pos past it; or null on unclosed.
+ * Read a balanced bracketed region (e.g. `{ … }`, `( … )`, `[ … ]`).
+ * Respects strings and nested brackets. Returns the matched text
+ * (including outer brackets) and advances ctx.pos past it; or null on
+ * unclosed.
  */
-function readBalanced(ctx: Ctx, open: '{' | '(', close: '}' | ')'): string | null {
+function readBalanced(ctx: Ctx, open: '{' | '(' | '[', close: '}' | ')' | ']'): string | null {
   const startLine = ctx.line
   const startPos = ctx.pos
   let depth = 0
@@ -400,6 +416,11 @@ export interface ParseLineResult {
   note?: NoteDef
   /** doc-stmt body merges into the diagram-level settings. */
   doc?: Record<string, unknown>
+  /** When the doc statement carried a `[frame-spec]`, this is the
+   *  parsed spec — the parser collects such blocks into
+   *  `DiagramDef.frameOverrides` instead of folding them into the
+   *  base settings. */
+  docFrames?: FrameSpec
   error?: GgError
 }
 
@@ -456,17 +477,24 @@ function parseStatement(toks: Token[]): ParseLineResult {
 // ---------------------------------------------------------------------------
 
 function parseDoc(toks: Token[], line: number): ParseLineResult {
-  // `doc` takes exactly one body.
+  // `doc` takes an optional [frame-spec] and exactly one body.
   const body = toks.find((t) => t.type === 'body')
   if (!body || body.type !== 'body') {
     return { error: { message: '`doc` requires a `{ … }` body', line, source: 'dsl' } }
   }
+  let frames: FrameSpec | undefined
   for (const t of toks) {
-    if (t !== body) {
-      return { error: { message: `Unexpected argument in \`doc\`: ${describeToken(t)}`, line, source: 'dsl' } }
+    if (t === body) continue
+    if (t.type === 'frame-spec') {
+      if (frames !== undefined) {
+        return { error: { message: '`doc` accepts at most one `[frame-spec]`', line, source: 'dsl' } }
+      }
+      frames = t.spec
+      continue
     }
+    return { error: { message: `Unexpected argument in \`doc\`: ${describeToken(t)}`, line, source: 'dsl' } }
   }
-  return { doc: body.value }
+  return { doc: body.value, docFrames: frames }
 }
 
 function parseIcon(toks: Token[], line: number): ParseLineResult {
@@ -477,6 +505,7 @@ function parseIcon(toks: Token[], line: number): ParseLineResult {
       case 'id-sigil': node.id = t.value; break
       case 'pos': node.pos = { col: t.col, row: t.row }; break
       case 'label': node.label = t.value; break
+      case 'frame-spec': node.frames = t.spec; break
       case 'attr': {
         const err = applyNodeAttr(node, t.key, t.value, line); if (err) return { error: err }; break
       }
@@ -506,6 +535,7 @@ function parseRegion(toks: Token[], line: number): ParseLineResult {
       case 'pos':  region.spans.push({ from: { col: t.col, row: t.row }, to: { col: t.col, row: t.row } }); break
       case 'span': region.spans.push({ from: t.from, to: t.to }); break
       case 'label': region.label = t.value; break
+      case 'frame-spec': region.frames = t.spec; break
       case 'attr': {
         const err = applyRegionAttr(region, t.key, t.value, line); if (err) return { error: err }; break
       }
@@ -532,6 +562,7 @@ function parseNote(toks: Token[], line: number): ParseLineResult {
       case 'pos': note.pos = { col: t.col, row: t.row }; break
       case 'label': note.text = t.value; break
       case 'target-list': note.targets = t.ids; break
+      case 'frame-spec': note.frames = t.spec; break
       case 'attr': {
         const err = applyNoteAttr(note, t.key, t.value, line); if (err) return { error: err }; break
       }
@@ -565,6 +596,7 @@ function parseConnector(toks: Token[]): ParseLineResult {
     const t = toks[i]
     switch (t.type) {
       case 'label': conn.label = t.value; break
+      case 'frame-spec': conn.frames = t.spec; break
       case 'attr': {
         const err = applyConnectorAttr(conn, t.key, t.value, line); if (err) return { error: err }; break
       }
@@ -664,6 +696,7 @@ function describeToken(t: Token): string {
     case 'span':        return `span @${t.from.col},${t.from.row}-${t.to.col},${t.to.row}`
     case 'label':       return `label "${t.value}"`
     case 'target-list': return `target-list (${t.ids.join(', ')})`
+    case 'frame-spec':  return `frame-spec ${JSON.stringify(t.spec)}`
     case 'attr':        return `attribute ${t.key}=${t.value}`
     case 'arrow':       return `arrow ${t.spec.ends}/${t.spec.dashed ? 'dashed' : 'solid'}`
     case 'body':        return `{ … } body`

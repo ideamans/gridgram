@@ -14,12 +14,43 @@
  * Duplicate-node-id detection happens in parser.ts because it needs to
  * see source attribution (DSL vs JSON) at parse time.
  */
-import type { DiagramDef, NormalizedDiagramDef } from '../types.js'
+import type { DiagramDef, FrameSpec, FrameRange, NormalizedDiagramDef } from '../types.js'
 import type { GgError } from './errors.js'
 import { buildBlob, DisjointRegionError } from '../geometry/blob.js'
 import { computeLayout } from '../geometry/grid.js'
 import { normalizeDiagramDef } from '../normalize.js'
 import { cellAddress } from './diagnostics.js'
+import { hasFrames, resolveFrame, normalizeFrameSpec } from '../frame.js'
+
+/**
+ * Collect every finite frame number that appears as an endpoint of
+ * any spec in the def. Open-ended ranges `[n, Infinity]` contribute
+ * their lower endpoint only — the check at the low end covers the
+ * behaviour for the whole range (anything in the range references the
+ * same set of frame-qualifying objects).
+ *
+ * Frame 1 is always included so frame-less diagrams still get their
+ * default check.
+ */
+function declaredFrames(def: DiagramDef): number[] {
+  const frames = new Set<number>([1])
+  const visit = (spec: FrameSpec | undefined): void => {
+    if (spec === undefined) return
+    let ranges: FrameRange[] | undefined
+    try { ranges = normalizeFrameSpec(spec) } catch { return }
+    if (!ranges) return
+    for (const [lo, hi] of ranges) {
+      if (Number.isFinite(lo)) frames.add(lo)
+      if (Number.isFinite(hi)) frames.add(hi)
+    }
+  }
+  for (const n of def.nodes) visit(n.frames)
+  for (const c of def.connectors ?? []) visit(c.frames)
+  for (const r of def.regions ?? []) visit(r.frames)
+  for (const n of def.notes ?? []) visit(n.frames)
+  for (const o of def.frameOverrides ?? []) visit(o.frames)
+  return Array.from(frames).sort((a, b) => a - b)
+}
 
 /** Format a normalized 0-based span as `A1-C3` using A1 addresses —
  *  agents and humans read this directly without having to adjust
@@ -28,7 +59,41 @@ function formatSpan(from: { col: number; row: number }, to: { col: number; row: 
   return `${cellAddress(from.col + 1, from.row + 1)}-${cellAddress(to.col + 1, to.row + 1)}`
 }
 
-export function checkIntegrity(def: DiagramDef): GgError[] {
+/**
+ * Run the integrity checks against a diagram. When `frame` is given,
+ * checks that specific frame only. When omitted, checks every frame
+ * number explicitly referenced by the declarations (at least frame 1)
+ * so errors that only manifest at frame N — e.g. two icons at the
+ * same cell at frame 3 — are caught at parse time rather than
+ * silently accepted until someone renders `--frame 3`.
+ *
+ * Duplicate messages across frames are deduplicated; frame-specific
+ * errors are annotated with `(frame N)` so the reader can tell which
+ * frame to look at.
+ */
+export function checkIntegrity(rawDef: DiagramDef, frame?: number): GgError[] {
+  if (frame !== undefined) return checkIntegrityAtFrame(rawDef, frame)
+  if (!hasFrames(rawDef)) return checkIntegrityAtFrame(rawDef, 1)
+
+  const collected: GgError[] = []
+  const seen = new Set<string>()
+  for (const f of declaredFrames(rawDef)) {
+    const frameErrs = checkIntegrityAtFrame(rawDef, f)
+    for (const e of frameErrs) {
+      const annotated: GgError = { ...e, message: `${e.message} (frame ${f})` }
+      const key = `${annotated.source}|${annotated.message}`
+      if (seen.has(key)) continue
+      seen.add(key)
+      collected.push(annotated)
+    }
+  }
+  return collected
+}
+
+function checkIntegrityAtFrame(rawDef: DiagramDef, frame: number): GgError[] {
+  // Collapse frame-tagged declarations first — everything below
+  // reasons about the flat frame-N view of the diagram.
+  const def = hasFrames(rawDef) ? resolveFrame(rawDef, frame) : rawDef
   const errors: GgError[] = []
 
   // Connector ref check (no coords involved)

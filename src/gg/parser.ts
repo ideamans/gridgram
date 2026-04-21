@@ -10,7 +10,7 @@
  * No more `%%{…}%%` directives — all scalars / theme / icons come from
  * `doc { … }` statements.
  */
-import type { ConnectorDef, DiagramDef, NodeDef, NoteDef, RegionDef } from '../types.js'
+import type { ConnectorDef, DiagramDef, FrameDocOverride, NodeDef, NoteDef, RegionDef } from '../types.js'
 import { tokenize, parseStatements } from './dsl.js'
 import { checkIntegrity } from './integrity.js'
 import type { GgError } from './errors.js'
@@ -60,12 +60,62 @@ export function parseGg(source: string): ParseResult {
   const regions: RegionDef[] = []
   const connectors: ConnectorDef[] = []
   const notes: NoteDef[] = []
-  const seenNodeIds = new Map<string, number>()  // id → line of first declaration
+  const frameOverrides: FrameDocOverride[] = []
+
+  // Track frames-less declarations by id so we can surface duplicate-id
+  // errors only when both declarations are frame-less (matching in
+  // every frame and therefore definitely a user mistake). Pairs where
+  // either side carries a frame spec are merged by `resolveFrame`.
+  const framelessNodeIds = new Map<string, number>()
+
+  const registerNode = (n: NodeDef, errSource: 'dsl' | 'json'): void => {
+    if (n.frames === undefined) {
+      const prev = framelessNodeIds.get(n.id)
+      if (prev !== undefined) {
+        errors.push({
+          message: `Duplicate node id "${n.id}"`,
+          line: 0, source: errSource,
+          related: { line: prev, source: 'dsl' },
+        })
+        return
+      }
+      framelessNodeIds.set(n.id, 0)
+    }
+    nodes.push(n)
+  }
 
   for (const stmt of statements) {
     if (stmt.error) continue
     if (stmt.doc) {
-      // Apply doc { ... } body: scalars / theme / icons → settings.
+      // `doc [frame-spec] { … }` never folds into the base settings —
+      // it lands in frameOverrides and resolveFrame merges it on top
+      // of the base at render time.
+      if (stmt.docFrames !== undefined) {
+        const settingsPart: Record<string, any> = {}
+        for (const [k, v] of Object.entries(stmt.doc)) {
+          if (k === 'nodes' || k === 'connectors' || k === 'regions' || k === 'notes') {
+            errors.push({
+              message: `\`doc [${describeFrameSpec(stmt.docFrames)}]\` can't declare ${k}; move the declaration to a standalone statement with a \`[frame-spec]\``,
+              line: 0, source: 'dsl',
+            })
+            continue
+          }
+          if (k === 'icons') {
+            errors.push({
+              message: '`doc [frame-spec]` cannot override `icons` — icon maps must be declared in the base `doc { … }`',
+              line: 0, source: 'dsl',
+            })
+            continue
+          }
+          if (isScalarKey(k)) {
+            const dstKey = k === 'cols' ? 'columns' : k
+            settingsPart[dstKey] = v
+          }
+        }
+        frameOverrides.push({ frames: stmt.docFrames, settings: settingsPart })
+        continue
+      }
+      // Apply plain `doc { ... }`: scalars / theme / icons → settings.
       // Arrays (nodes / connectors / regions / notes) are accepted too, for
       // bulk declaration without the DSL.
       for (const [k, v] of Object.entries(stmt.doc)) {
@@ -83,18 +133,7 @@ export function parseGg(source: string): ParseResult {
         }
       }
       if (Array.isArray(stmt.doc.nodes)) {
-        for (const n of stmt.doc.nodes as NodeDef[]) {
-          if (seenNodeIds.has(n.id)) {
-            errors.push({
-              message: `Duplicate node id "${n.id}"`,
-              line: 0, source: 'json',
-              related: { line: seenNodeIds.get(n.id)!, source: 'dsl' },
-            })
-            continue
-          }
-          seenNodeIds.set(n.id, 0)
-          nodes.push(n)
-        }
+        for (const n of stmt.doc.nodes as NodeDef[]) registerNode(n, 'json')
       }
       if (Array.isArray(stmt.doc.connectors)) connectors.push(...(stmt.doc.connectors as ConnectorDef[]))
       if (Array.isArray(stmt.doc.regions)) regions.push(...(stmt.doc.regions as RegionDef[]))
@@ -108,20 +147,12 @@ export function parseGg(source: string): ParseResult {
         // every node still has a unique key for downstream bookkeeping.
         // Users don't see these unless they do `--format json`.
         let autoId = ''
-        let i = seenNodeIds.size + 1
-        do { autoId = `__n${i++}` } while (seenNodeIds.has(autoId))
+        let i = nodes.length + 1
+        const taken = new Set(nodes.map((x) => x.id))
+        do { autoId = `__n${i++}` } while (taken.has(autoId))
         n.id = autoId
       }
-      if (seenNodeIds.has(n.id)) {
-        errors.push({
-          message: `Duplicate node id "${n.id}"`,
-          line: 0, source: 'dsl',
-          related: { line: seenNodeIds.get(n.id)!, source: 'dsl' },
-        })
-        continue
-      }
-      seenNodeIds.set(n.id, 0)
-      nodes.push(n)
+      registerNode(n, 'dsl')
     }
     if (stmt.region)    regions.push(stmt.region)
     if (stmt.connector) connectors.push(stmt.connector)
@@ -131,9 +162,10 @@ export function parseGg(source: string): ParseResult {
   const def: DiagramDef = {
     ...settings,
     nodes,
-    regions:    regions.length    > 0 ? regions    : undefined,
-    connectors: connectors.length > 0 ? connectors : undefined,
-    notes:      notes.length      > 0 ? notes      : undefined,
+    regions:    regions.length        > 0 ? regions        : undefined,
+    connectors: connectors.length     > 0 ? connectors     : undefined,
+    notes:      notes.length          > 0 ? notes          : undefined,
+    frameOverrides: frameOverrides.length > 0 ? frameOverrides : undefined,
   } as DiagramDef
 
   if (def.nodes.length > 0 || (def.connectors?.length ?? 0) > 0 || (def.regions?.length ?? 0) > 0) {
@@ -141,4 +173,19 @@ export function parseGg(source: string): ParseResult {
   }
 
   return { def, errors, icons: iconsMap }
+}
+
+function describeFrameSpec(spec: unknown): string {
+  if (typeof spec === 'number') return String(spec)
+  if (Array.isArray(spec)) {
+    return spec.map((item) => {
+      if (typeof item === 'number') return String(item)
+      if (Array.isArray(item) && item.length === 2) {
+        const [a, b] = item as [number, number]
+        return b === Infinity ? `${a}-` : `${a}-${b}`
+      }
+      return JSON.stringify(item)
+    }).join(',')
+  }
+  return JSON.stringify(spec)
 }

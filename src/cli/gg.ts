@@ -12,7 +12,9 @@
 import { readFileSync, writeFileSync, mkdirSync } from 'fs'
 import { dirname, extname, resolve as pathResolve } from 'path'
 import { parseGg } from '../gg/parser.js'
+import { checkIntegrity } from '../gg/integrity.js'
 import { formatError, type GgError } from '../gg/errors.js'
+import { hasFrames } from '../frame.js'
 import { resolveDiagramIcons } from '../gg/icons.js'
 import { buildIconContext } from '../gg/icon-loader.js'
 import { renderDiagram, computeRenderDimensions } from '../components/Diagram.js'
@@ -59,6 +61,8 @@ Options:
       --cell-size <px>    Override per-cell pixel size (default: 256)
       --width <px>        Final output width in px (aspect preserved)
       --scale <n>         Additional multiplier on the final width (default 1)
+      --frame <n>         Frame number to render (default: 1) — for diagrams
+                          that use frame-tagged declarations (icon [2] …).
       --stdout            Write to stdout (also implied when no -o given)
       --no-errors         Suppress red error markers in output
       --diagnostics       Emit placement + icon diagnostics as JSON to stderr
@@ -98,6 +102,7 @@ function parseArgs(argv: string[]): Args {
       case '--cell-size': a.overrides.cellSize = Number(argv[++i]); break
       case '--width':     a.overrides.renderWidth = Number(argv[++i]); break
       case '--scale':     a.scale = Number(argv[++i]); break
+      case '--frame':     a.overrides.frame = Number(argv[++i]); break
       case '--stdout':    a.stdout = true; break
       case '--no-errors': a.overrides.suppressErrors = true; break
       case '--diagnostics': a.diagnostics = true; break
@@ -194,6 +199,15 @@ async function main(): Promise<number> {
   if (parseErrors.length > 0) { reportErrors(parseErrors, sourceLabel); return 1 }
   if (checkErrors.length > 0) { reportErrors(checkErrors, sourceLabel); return 2 }
 
+  // If the user requested a non-default frame on a diagram that uses
+  // frames, re-run integrity against that frame — refs / occupancy
+  // can differ per frame and we want errors surfaced before render.
+  if (args.overrides.frame !== undefined && args.overrides.frame !== 1 && hasFrames(rawDef)) {
+    const frameErrs = checkIntegrity(rawDef, args.overrides.frame)
+      .filter((e) => e.source === 'check')
+    if (frameErrs.length > 0) { reportErrors(frameErrs, sourceLabel); return 2 }
+  }
+
   // ---- Merge layers ----
   const settings = resolveSettings([
     projectLayer,
@@ -262,6 +276,7 @@ async function main(): Promise<number> {
   const renderOpts: DiagramSettings = {
     suppressErrors: settings.suppressErrors,
     renderWidth: settings.renderWidth,
+    frame: args.overrides.frame,
   }
   const { svg: bareSvg, diagnostics: layoutDiagnostics } = renderDiagram(def, renderOpts)
   const diagnostics = [...iconDiagnostics, ...layoutDiagnostics]
