@@ -147,12 +147,45 @@ renders them to SVG / PNG / JSON:
 ```bash
 gg diagram.gg -o out.svg
 gg diagram.gg -o out.png --width 2048
+
+gg render diagram.gg -o out.svg       # explicit form (same as above)
+gg icons --search database            # search 6,000+ built-in Tabler icons
+gg icons --tag cloud --limit 20       # or filter by tag
+gg llm                                # emit the full LLM reference bundle
+gg license                            # bundled third-party notices
 ```
 
-The CLI is a single self-contained binary built from the same engine
-this package exposes. Install from the
+The CLI is built on [citty](https://github.com/unjs/citty) and ships as
+a single self-contained binary from the
 [GitHub Releases](https://github.com/ideamans/gridgram/releases) page —
 no npm install required.
+
+## AI-agent integrations
+
+gridgram is built for LLM-driven workflows out of the box:
+
+- **`gg llm`** emits a one-shot Markdown (or `--format json`) reference
+  covering the `.gg` grammar, CLI surface, `doc { }` settings, icon
+  resolution, JSON envelope shape, and canonical examples. Drop it
+  into an agent's context to eliminate guesswork.
+- **`gg icons`** provides semantic search over 5,039 outline + 1,053
+  filled Tabler icons with a scored query model
+  (`name` / `label` / `tags` / `category`). `src/data/icon-tags.json`
+  adds gridgram-authored synonyms so common architecture terms
+  (`cache`, `microservice`, `kubernetes`, `loadbalancer`, …) surface
+  the right generic icons.
+- **[`/llms.txt`](https://llmstxt.org/) and `/llms-full.txt`** on the
+  docs site index and concatenate every page plus the LLM reference.
+- **[`context7.json`](./context7.json)** registers gridgram with
+  [context7](https://context7.com/) so agents can fetch the docs over
+  MCP.
+- **Claude Code / gh skill plugin** at
+  [`plugins/gridgram`](./plugins/gridgram) — install via the
+  [`ideamans/claude-plugins`](https://github.com/ideamans/claude-plugins)
+  marketplace to get `/gg-render`, `/gg-icons`, and `/gg-author` skills.
+  The same `SKILL.md` bundle is compatible with `gh skill install`,
+  Cursor, Gemini CLI, Codex, and any other host that speaks the
+  [Agent Skills](https://agentskills.io/) open standard.
 
 ## Runtime support
 

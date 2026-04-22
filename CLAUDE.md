@@ -17,8 +17,11 @@ This project **requires Bun**, not Node/npm/yarn. TypeScript is executed directl
 
 ```bash
 bun install                  # install deps
-bun run sync-tabler          # REQUIRED post-install: copies tabler JSON into src/data/
-                             # (src/data/ is gitignored — typecheck/tests fail without it)
+bun run sync-tabler          # REQUIRED post-install: copies tabler JSON into
+                             # src/data/, builds src/generated/icon-index.json,
+                             # and rebuilds src/generated/llm-reference.md.
+                             # (both src/data/ and src/generated/ are gitignored —
+                             # typecheck/tests fail without this step)
 bun run sync-licenses        # regenerate THIRD_PARTY_LICENSES.md + src/data/licenses.txt
 
 bun run typecheck            # tsc --noEmit (strict)
@@ -29,11 +32,18 @@ bun test --test-name-pattern "blob"       # filter by name
 bun run gg <file.gg> [opts]  # run CLI from source (no compile)
 bun run compile              # produce ./gg single-file binary (bun --compile)
 
-bun run docs:dev             # vitepress dev (builds examples + logo first)
-bun run docs:build           # production docs build
+bun run ai:regen             # regenerate all LLM-facing artifacts:
+                             #   src/generated/icon-index.json
+                             #   src/generated/llm-reference.md
+                             #   docs/public/llms.txt + llms-full.txt
+bun run validate-plugin-skills  # check plugins/**/SKILL.md against the
+                                # Agent Skills open standard
+
+bun run docs:dev             # vitepress dev (builds examples, logo, llms.txt first)
+bun run docs:build           # production docs build (same pre-steps)
 ```
 
-CI runs `bun install --frozen-lockfile && bun run typecheck && bun test` on Ubuntu (see `.github/workflows/test.yml`). Release workflow cross-compiles `gg` for linux/darwin/windows × amd64/arm64 on tag push.
+CI runs `bun install --frozen-lockfile && bun run sync-tabler && bun run ai:regen && bun run typecheck && bun test` on Ubuntu (see `.github/workflows/test.yml`). Release workflow cross-compiles `gg` for linux/darwin/windows × amd64/arm64 on tag push.
 
 ## Architecture
 
@@ -92,10 +102,48 @@ Parse errors have `source !== 'check'`; integrity errors have `source === 'check
 
 ### Icons
 
-- **Tabler** is the built-in icon set. JSON dumps live in `src/data/tabler-outline.json` and `src/data/tabler-filled.json`, copied from `node_modules/@tabler/icons` by `scripts/sync-tabler-icons.ts`. `src/data/` is gitignored — always re-run `bun run sync-tabler` after a fresh checkout.
+- **Tabler** is the built-in icon set. JSON dumps live in `src/data/tabler-outline.json` and `src/data/tabler-filled.json`, copied from `node_modules/@tabler/icons` by `scripts/sync-tabler-icons.ts`. `src/data/*` is gitignored (except for `icon-tags.json` — see below) — always re-run `bun run sync-tabler` after a fresh checkout.
 - `src/tabler.ts` exposes `tabler(name)`, `tablerOutline(name)`, `tablerFilled(name)` as VNode builders for the TS API.
 - `.gg` icon resolution (`src/gg/icons.ts` + `icon-loader.ts`): priority is `doc { icons: … }` inline map > `--icons <dir>` / `iconsDir` auto-register > built-in tabler (`tabler/xxx`, `tabler/filled/xxx`) > error (flags the node with `iconError`, red ring).
 - Asset aliases (`--alias name=dir` or `assetAliases`) expand `@name/x.svg` → `<dir>/x.svg`.
+- **Icon search index** (`src/generated/icon-index.json`, built by `scripts/build-icon-index.ts`) — one record per icon+style pair: `{name, set, ref, label, category, tags}`. Feeds `gg icons` semantic search and the LLM reference bundle. Tabler's own tags cover most queries; `src/data/icon-tags.json` (hand-curated, **tracked**) patches misses (`cache`, `kubernetes`, `websocket`, `loadbalancer`, etc.). Adding a tag override here is almost always better than hardcoding synonyms in search logic.
+
+### CLI structure (citty)
+
+`src/cli/gg.ts` dispatches via [citty](https://github.com/unjs/citty) subcommands. Root-level help lives in `src/cli/args.ts` (shared between the bare `gg <file>` and explicit `gg render <file>` forms); per-command files are thin citty wrappers in `src/cli/commands/`. The pure render pipeline is `src/cli/render.ts` — no citty imports — so it can be called from tests or scripts.
+
+- `gg render <file>` (alias: `gg <file>`) — SVG/PNG/JSON output
+- `gg icons` — Tabler search over `icon-index.json`
+- `gg llm` — emit the LLM reference (`--format markdown|json`)
+- `gg license` — bundled third-party licenses
+
+Non-standard citty behaviors worth remembering: `--no-X` gets translated to `X: false`, which collides with the `--config <path>` string arg, so `--no-config` is read directly from `rawArgs`. Repeated flags (`--alias a=b --alias c=d`) also need rawArgs parsing — citty only keeps the last value.
+
+### LLM-facing artifacts (SSOT → derived)
+
+Everything agents consume is generated from a single source of truth. Never hand-edit a file under `src/generated/`, `docs/public/llms.txt`, or `docs/public/llms-full.txt` — the source will overwrite it on the next `ai:regen`.
+
+| Source of truth                              | Derived artifact                                |
+| -------------------------------------------- | ----------------------------------------------- |
+| `src/gg/dsl.ts` (leading BNF comment)        | LLM reference grammar section                   |
+| `src/cli/args.ts` + `src/cli/commands/*`     | CLI help + LLM reference                        |
+| `src/data/icon-tags.json` + tabler dumps     | `src/generated/icon-index.json`                 |
+| `src/templates/llm-reference.template.md`    | `src/generated/llm-reference.md`                |
+| `docs/en/**` + `src/generated/llm-reference.md` | `docs/public/llms.txt`, `docs/public/llms-full.txt` |
+
+`context7.json` at the repo root registers gridgram with [context7](https://context7.com/). Its `rules` array calls out non-obvious gotchas (Preact-not-React, `doc { }` replaced legacy `%%{}%%`, diagnostics are warnings not exceptions, etc.) — add to it only when a gotcha isn't surfaced anywhere else.
+
+### Project-local Claude Code state
+
+`.claude/rules/` and `.claude/skills/` are committed; everything else under `.claude/` is gitignored (settings.local.json, scheduled_tasks.lock, caches).
+
+- `.claude/rules/ai-artifacts-policy.md` — policy listing every generated file and its SSOT. Loaded every session.
+- `.claude/rules/regen-triggers.md` — `paths:`-scoped rule, loads only when the user edits one of the SSOT files; reminds the session to run `/regen-ai`.
+- `.claude/skills/regen-ai/SKILL.md` — `/regen-ai` slash command. Runs the three generators + typecheck + tests.
+
+### Plugin distribution
+
+`plugins/gridgram/` is the gridgram plugin for Claude Code marketplaces and `gh skill`. Three skills (`gg-render`, `gg-icons`, `gg-author`) use **only** Agent Skills standard fields (`name`, `description`, `license`, `compatibility`, `allowed-tools`, `metadata`) — no Claude-specific frontmatter — so the same bundle also works with Copilot, Cursor, Gemini CLI, and Codex. `scripts/validate-plugin-skills.ts` enforces that; see `plugins/gridgram/PUBLISH.md` for the release checklist and the marketplace-side entry lives in `~/dev/claude-plugins` (separate repo).
 
 ### Diagnostics
 
