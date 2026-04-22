@@ -51,6 +51,7 @@
     "build-icon-index": "bun scripts/build-icon-index.ts",
     "build-llm-reference": "bun scripts/build-llm-reference.ts",
     "build-llms-txt": "bun scripts/build-llms-txt.ts",
+    "validate-plugin-skills": "bun scripts/validate-plugin-skills.ts",
     "ai:regen": "bun scripts/build-icon-index.ts && bun scripts/build-llm-reference.ts && bun scripts/build-llms-txt.ts",
     "sync-licenses": "bun scripts/sync-licenses.ts",
     "clean:dist": "rm -rf dist",

@@ -8,7 +8,11 @@ pnpm-lock.yaml
 dist/
 *.log
 .DS_Store
-.claude/
+# Claude Code local state. skills/ and rules/ are project-shared; everything
+# else (settings.local.json, scheduled_tasks.lock, caches) stays local.
+.claude/*
+!.claude/skills/
+!.claude/rules/
 src/data/
 src/generated/
 tmp/

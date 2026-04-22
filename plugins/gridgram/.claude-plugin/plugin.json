@@ -1,0 +1,13 @@
+{
+  "name": "gridgram",
+  "description": "Adds /gg-render, /gg-icons, and /gg-author skills for authoring grid-based diagrams with gridgram.",
+  "version": "0.3.0",
+  "author": {
+    "name": "Ideamans Inc.",
+    "email": "support@ideamans.com"
+  },
+  "homepage": "https://github.com/ideamans/gridgram",
+  "repository": "https://github.com/ideamans/gridgram",
+  "license": "MIT",
+  "keywords": ["diagram", "svg", "tabler", "dsl", "grid", "llm"]
+}
