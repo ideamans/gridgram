@@ -1,0 +1,60 @@
+{
+  "_comment": "Gridgram-authored tag overrides on top of Tabler's built-in tags. Union'd into the per-icon `tags` array by scripts/build-icon-index.ts. Keep each entry short and genuine — only add a tag an agent is plausibly going to type. Tabler's own tags already cover ~80% of common architecture-diagram queries; this file patches the holes surfaced by dogfooding `gg icons --search`.",
+
+  "database": ["db", "sql", "datastore", "persistence", "backend"],
+  "server": ["backend", "api", "service", "node", "microservice"],
+  "world": ["frontend", "ui", "web", "client-side"],
+  "browser": ["frontend", "client", "web"],
+  "layout": ["frontend", "ui", "design", "screen"],
+  "device-desktop": ["client", "workstation", "pc"],
+  "device-mobile": ["client", "phone", "handheld"],
+
+  "cloud": ["cdn", "hosted", "managed", "edge"],
+  "cloud-upload": ["deploy", "publish", "push"],
+
+  "bolt": ["cache", "fast", "speed", "queue", "lambda", "function"],
+  "clock-play": ["cache", "ttl", "expiry"],
+  "stack": ["queue", "buffer", "fifo"],
+  "stack-2": ["queue", "buffer"],
+  "list": ["queue", "log", "feed"],
+  "logs": ["logging", "audit", "trace", "observability"],
+
+  "lock": ["auth", "authentication", "security", "credential"],
+  "key": ["auth", "credential", "token", "secret"],
+  "shield": ["security", "firewall", "policy"],
+  "shield-check": ["authz", "permitted", "policy"],
+
+  "credit-card": ["payment", "billing", "checkout"],
+  "cash": ["payment", "money", "transaction"],
+  "coins": ["payment", "balance", "wallet"],
+  "receipt": ["invoice", "payment", "order"],
+
+  "activity": ["monitoring", "health", "observability", "uptime"],
+  "gauge": ["monitoring", "metric", "meter"],
+  "chart-line": ["monitoring", "metric", "graph", "timeseries"],
+  "chart-histogram": ["metric", "distribution"],
+  "bug": ["error", "debug", "issue", "bugfix"],
+  "alert-triangle": ["warning", "alert", "error", "incident"],
+
+  "route": ["routing", "loadbalancer", "lb", "proxy", "gateway", "websocket"],
+  "arrows-split": ["loadbalancer", "lb", "fanout", "split"],
+  "plug": ["websocket", "connection", "socket", "integration"],
+
+  "box": ["container", "microservice", "package"],
+  "box-multiple": ["kubernetes", "k8s", "containers", "cluster", "microservices"],
+  "cube": ["container", "package", "module"],
+  "puzzle": ["plugin", "module", "integration", "microservice"],
+
+  "mail": ["email", "notification", "smtp"],
+  "message": ["chat", "notification", "im"],
+  "bell": ["notification", "alert", "push"],
+  "broadcast": ["pubsub", "fanout", "event", "broker"],
+
+  "file": ["document", "asset", "storage"],
+  "file-text": ["document", "log", "note"],
+  "folder": ["directory", "bucket", "storage"],
+
+  "users": ["team", "group", "people"],
+  "user": ["person", "account", "profile", "actor", "client"],
+  "user-check": ["authenticated", "verified", "authz"]
+}

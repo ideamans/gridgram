@@ -94,4 +94,23 @@ describe('gg icons', () => {
     expect(r.status).toBe(0)
     expect(JSON.parse(r.stdout)).toEqual([])
   })
+
+  // Regression coverage for src/data/icon-tags.json: these common
+  // architecture-diagram concepts used to return zero or off-topic results
+  // before the gridgram-authored tag overrides were added.
+  for (const [query, expectedNames] of [
+    ['cache', ['bolt', 'clock-play']],
+    ['microservice', ['box', 'puzzle']],
+    ['kubernetes', ['box-multiple']],
+    ['websocket', ['plug', 'route']],
+    ['loadbalancer', ['arrows-split', 'route']],
+  ] as const) {
+    test(`--search "${query}" surfaces ${expectedNames.join(' or ')}`, () => {
+      const r = gg(['icons', '--search', query, '--limit', '5', '--format', 'json'])
+      expect(r.status).toBe(0)
+      const names = (JSON.parse(r.stdout) as Array<{ name: string }>).map((x) => x.name)
+      // At least one of the expected canonical icons must appear in the top N.
+      expect(expectedNames.some((n) => names.includes(n))).toBe(true)
+    })
+  }
 })
