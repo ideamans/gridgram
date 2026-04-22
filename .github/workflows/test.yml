@@ -24,6 +24,12 @@ jobs:
           bun run sync-tabler
           bun run sync-licenses
 
+      # Regenerates icon-index / llm-reference / llms.txt from the SSOT.
+      # sync-tabler already runs the first two; we run the full chain so
+      # docs/public/llms*.txt is available for the test that exercises it.
+      - name: Regenerate AI artifacts
+        run: bun run ai:regen
+
       - name: Typecheck
         run: bun run typecheck
 

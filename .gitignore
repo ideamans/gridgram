@@ -15,5 +15,7 @@ tmp/
 /gg
 /gg.bun-build
 docs/public/examples/
+docs/public/llms.txt
+docs/public/llms-full.txt
 docs/.vitepress/cache/
 docs/.vitepress/dist/

@@ -1,0 +1,25 @@
+{
+  "$schema": "https://context7.com/schema/context7.json",
+  "projectTitle": "gridgram",
+  "description": "Grid-based diagram rendering library and CLI. Renders .gg DSL or a TypeScript DiagramDef to SVG / PNG / JSON with deterministic layout and 6,000+ built-in Tabler icons.",
+  "folders": ["docs/en", "examples", "src/generated"],
+  "excludeFolders": [
+    "docs/.vitepress",
+    "docs/public",
+    "docs/ja",
+    "node_modules",
+    "tests",
+    "dist",
+    "src/data"
+  ],
+  "excludeFiles": ["CHANGELOG.md"],
+  "rules": [
+    "Use `doc { … }` command statements inside `.gg` files. The legacy `%%{…}%%` directive form is removed.",
+    "Built-in Tabler icons are referenced as `tabler/<name>` (outline) or `tabler/filled/<name>` (filled). Use `gg icons --search <query>` to find an icon; fall back to `gg icons --tag <tag>` for browsing.",
+    "The gg CLI returns diagnostics via `--diagnostics` (JSON on stderr) or as `diagnostics` inside the `--format json` envelope. Do NOT treat them as thrown errors. An SVG with diagnostics is still a valid render — they flag warnings such as unresolved icons (red ring) or collisions.",
+    "Coordinates accept A1 strings (`@A1`), 1-based tuples (`@1,1`), and `{col,row}` objects. Internally gridgram normalizes everything to 0-based `{col,row}`. Write public-facing examples in A1 form for readability.",
+    "Settings resolve in this order: system defaults → `gridgram.config.*` (walk-up) → embedded `doc { … }` → CLI flags / `renderDiagram` opts. Surface-specific branching (CLI vs TS API) should not happen past `resolveSettings`.",
+    "Exit codes: 0 success, 1 parse error, 2 integrity error (unknown ref / region not 4-connected), 3 I/O or environment error. Agents should check the exit code before parsing stdout.",
+    "The TypeScript API uses Preact (not React). Components return VNodes via `h()` from 'preact'. Do not propose JSX/TSX or `react` imports when extending gridgram."
+  ]
+}
