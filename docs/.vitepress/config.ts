@@ -130,6 +130,14 @@ const config: ReturnType<typeof withTheme> = withTheme({
           { text: "User Guide", link: "/en/guide/" },
           { text: "Developer Guide", link: "/en/developer/" },
           { text: "Gallery", link: "/en/gallery/" },
+          {
+            text: "AI",
+            items: [
+              { text: "AI-agent guide", link: "/en/developer/ai-agents" },
+              { text: "llms.txt (index)", link: "/llms.txt", target: "_blank" },
+              { text: "llms-full.txt (bundle)", link: "/llms-full.txt", target: "_blank" },
+            ],
+          },
           // Editor page exists at /en/editor but is hidden from nav for now.
           // { text: "Editor", link: "/en/editor" },
         ],
@@ -222,6 +230,7 @@ const config: ReturnType<typeof withTheme> = withTheme({
               text: "Guides",
               items: [
                 { text: "Integrations", link: "/en/developer/integrations" },
+                { text: "AI agents", link: "/en/developer/ai-agents" },
                 { text: "Specification", link: "/en/developer/spec" },
               ],
             },
