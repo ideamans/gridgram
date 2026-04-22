@@ -10,6 +10,7 @@ dist/
 .DS_Store
 .claude/
 src/data/
+src/generated/
 tmp/
 /gg
 /gg.bun-build

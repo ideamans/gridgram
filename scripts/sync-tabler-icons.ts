@@ -13,6 +13,9 @@ mkdirSync(dst, { recursive: true })
 const files: [string, string][] = [
   ['tabler-nodes-outline.json', 'tabler-outline.json'],
   ['tabler-nodes-filled.json', 'tabler-filled.json'],
+  // Per-icon metadata (category, tags, styles). Used by scripts/build-icon-index.ts
+  // to generate the icon-index SSOT consumed by `gg icons` and by llm-reference docs.
+  ['icons.json', 'tabler-meta.json'],
 ]
 
 for (const [from, to] of files) {

@@ -47,7 +47,9 @@
     "compile": "bun build --compile --minify --sourcemap=external --external sharp --external '@img/*' src/cli/gg.ts --outfile gg",
     "typecheck": "tsc --noEmit",
     "test": "bun test",
-    "sync-tabler": "bun scripts/sync-tabler-icons.ts",
+    "sync-tabler": "bun scripts/sync-tabler-icons.ts && bun scripts/build-icon-index.ts && bun scripts/build-llm-reference.ts",
+    "build-icon-index": "bun scripts/build-icon-index.ts",
+    "build-llm-reference": "bun scripts/build-llm-reference.ts",
     "sync-licenses": "bun scripts/sync-licenses.ts",
     "clean:dist": "rm -rf dist",
     "build:lib": "bun run clean:dist && bun run sync-tabler && tsc -p tsconfig.build.json && mkdir -p dist/data && cp src/data/tabler-outline.json src/data/tabler-filled.json dist/data/",
@@ -61,6 +63,7 @@
     "docs:deploy": "bun run docs:build && rsync -av docs/.vitepress/dist/ web-g6:web/vhosts/gridgram.ideamans.com/html/"
   },
   "dependencies": {
+    "citty": "^0.2.2",
     "json5": "^2.2.3",
     "preact": "^10.29.1",
     "preact-render-to-string": "^6.6.7"
