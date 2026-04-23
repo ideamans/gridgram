@@ -17,6 +17,7 @@ import { defineCommand, runMain, showUsage } from 'citty'
 import { renderArgs, toRenderArgs } from './args.js'
 import { runRender } from './render.js'
 import licensesText from '../data/licenses.txt' with { type: 'text' }
+import pkg from '../../package.json' with { type: 'json' }
 import renderCmd from './commands/render.js'
 import iconsCmd from './commands/icons.js'
 import llmCmd from './commands/llm.js'
@@ -24,7 +25,10 @@ import licenseCmd from './commands/license.js'
 
 const SUBCOMMAND_NAMES = new Set(['render', 'icons', 'llm', 'license'])
 
-const VERSION = '0.3.0'
+// Sourced from package.json at build time so `gg --help` / `gg --version`
+// never drift from the published version. bun --compile bundles the
+// parsed JSON into the binary.
+const VERSION = pkg.version
 const DESCRIPTION =
   'gridgram — grid-based diagram renderer. Subcommands: render (default) | icons | llm | license.'
 

@@ -266,4 +266,13 @@ describe('gg CLI', () => {
     expect(r.stdout).toContain('Apache License')
     expect(r.stdout).toContain('MIT')
   })
+
+  test('--help version matches package.json (no hardcoded drift)', () => {
+    const pkg = JSON.parse(readFileSync('package.json', 'utf-8')) as { version: string }
+    // `gg --help` exits 0 via citty's built-in handler, writes the banner
+    // to stdout. The banner format is: `gg v<version>` surrounded by ANSI.
+    const r = gg(['--help'])
+    expect(r.status).toBe(0)
+    expect(r.stdout).toContain(`gg v${pkg.version}`)
+  })
 })
