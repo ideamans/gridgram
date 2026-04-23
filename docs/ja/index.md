@@ -8,6 +8,9 @@ landing:
     primary:
       text: はじめる
       link: /ja/guide/
+    ai:
+      text: AI エージェントで使う
+      link: /ja/ai/
     secondary:
       text: GitHub で見る
       link: https://github.com/ideamans/gridgram
@@ -37,6 +40,32 @@ landing:
     ggLabel: .gg (DSL)
     tsLabel: TypeScript
 
+  aiReady:
+    eyebrow: AI ネイティブ
+    title: そのまま LLM エージェントに書かせられる
+    intro: 4 つのファーストクラスな連携チャネルから、使っているホストを選ぶだけ。どの経路も同じ `.gg` 文法で動くので、エージェントをまたいでも図は使い回せます。
+    items:
+      - icon: puzzle
+        title: Claude Code プラグイン
+        body: マーケットプレイス配布。/gg-install・/gg-icons・/gg-author・/gg-render のスラッシュコマンドで完結。
+        link: /ja/ai/claude-plugin
+        linkText: チュートリアル →
+      - icon: brand-github
+        title: gh skill
+        body: 同じスキルバンドルを Copilot / Cursor / Gemini CLI / Codex に `gh` コマンド一発でインストール。
+        link: /ja/ai/gh-skill
+        linkText: チュートリアル →
+      - icon: plug-connected
+        title: context7（MCP）
+        body: インストール不要のドキュメント取得。MCP 対応エージェントから gridgram の全リファレンスを参照可能。
+        link: /ja/ai/context7
+        linkText: チュートリアル →
+      - icon: file-text
+        title: llms.txt
+        body: ドキュメントサイトのルートに公開。curl で取れるインデックスと約 230 KB のフルバンドル。
+        link: /ja/ai/llms-txt
+        linkText: リファレンス →
+
   architecture:
     title: しくみ
     intro: 2 つの入力パス（gg CLI が読む .gg ファイル / gridgram npm パッケージが受け取る DiagramDef）が、同じレンダリングパイプラインに合流します。どちらのパスでも同一の SVG を生成し、PNG は CLI からのみ、sharp / libvips を初回実行時に取得して変換します。
@@ -52,6 +81,9 @@ landing:
     primary:
       text: ガイドを読む
       link: /ja/guide/
+    ai:
+      text: AI エージェントで使う
+      link: /ja/ai/
     secondary:
       text: GitHub
       link: https://github.com/ideamans/gridgram

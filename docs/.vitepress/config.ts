@@ -40,6 +40,17 @@ const config: ReturnType<typeof withTheme> = withTheme({
   // current month). SVG favicon is enough for modern browsers.
   head: [
     ["link", { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" }],
+    // ideamans tracking tag — fires on first paint. Subsequent SPA
+    // route changes are handled by installRouteTracker() in theme/index.ts,
+    // which re-injects the same script on every vue-router navigation.
+    [
+      "script",
+      {
+        src: "https://tags.ideamans.com/scripts/gridgram.js",
+        async: "",
+        "data-gg-tracking": "1",
+      },
+    ],
   ],
 
   // Lock to light mode. `appearance: false` disables VitePress's
@@ -131,13 +142,6 @@ const config: ReturnType<typeof withTheme> = withTheme({
           { text: "Developer Guide", link: "/en/developer/" },
           { text: "AI Guide", link: "/en/ai/" },
           { text: "Gallery", link: "/en/gallery/" },
-          {
-            text: "Raw",
-            items: [
-              { text: "llms.txt (index)", link: "/llms.txt", target: "_blank" },
-              { text: "llms-full.txt (bundle)", link: "/llms-full.txt", target: "_blank" },
-            ],
-          },
           // Editor page exists at /en/editor but is hidden from nav for now.
           // { text: "Editor", link: "/en/editor" },
         ],
@@ -253,6 +257,7 @@ const config: ReturnType<typeof withTheme> = withTheme({
               text: "Reference",
               items: [
                 { text: "gg llm / gg icons", link: "/en/ai/cli" },
+                { text: "llms.txt", link: "/en/ai/llms-txt" },
               ],
             },
           ],
@@ -343,13 +348,6 @@ const config: ReturnType<typeof withTheme> = withTheme({
           { text: "開発者ガイド", link: "/ja/developer/" },
           { text: "AI ガイド", link: "/ja/ai/" },
           { text: "ギャラリー", link: "/ja/gallery/" },
-          {
-            text: "Raw",
-            items: [
-              { text: "llms.txt (インデックス)", link: "/llms.txt", target: "_blank" },
-              { text: "llms-full.txt (バンドル)", link: "/llms-full.txt", target: "_blank" },
-            ],
-          },
         ],
         sidebar: {
           "/ja/guide/": [
@@ -463,6 +461,7 @@ const config: ReturnType<typeof withTheme> = withTheme({
               text: "リファレンス",
               items: [
                 { text: "gg llm / gg icons", link: "/ja/ai/cli" },
+                { text: "llms.txt", link: "/ja/ai/llms-txt" },
               ],
             },
           ],

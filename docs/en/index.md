@@ -8,6 +8,9 @@ landing:
     primary:
       text: Get started
       link: /en/guide/
+    ai:
+      text: Use with AI agents
+      link: /en/ai/
     secondary:
       text: View on GitHub
       link: https://github.com/ideamans/gridgram
@@ -37,6 +40,32 @@ landing:
     ggLabel: .gg (DSL)
     tsLabel: TypeScript
 
+  aiReady:
+    eyebrow: AI-native
+    title: Built for LLM agents out of the box
+    intro: Four first-class integration channels — pick whichever host you already use. Every path speaks the same `.gg` grammar, so your diagrams stay portable between agents.
+    items:
+      - icon: puzzle
+        title: Claude Code plugin
+        body: Marketplace plugin with /gg-install, /gg-icons, /gg-author, /gg-render slash commands.
+        link: /en/ai/claude-plugin
+        linkText: Tutorial →
+      - icon: brand-github
+        title: gh skill
+        body: Install the same skill bundle into Copilot, Cursor, Gemini CLI, or Codex with one `gh` command.
+        link: /en/ai/gh-skill
+        linkText: Tutorial →
+      - icon: plug-connected
+        title: context7 (MCP)
+        body: Zero-install doc retrieval — any MCP-capable agent can query gridgram's full reference.
+        link: /en/ai/context7
+        linkText: Tutorial →
+      - icon: file-text
+        title: llms.txt
+        body: Public discovery files at the site root. curl-able index and ~230 KB full-bundle for context windows.
+        link: /en/ai/llms-txt
+        linkText: Reference →
+
   architecture:
     title: How it works
     intro: Two authoring paths converge on one rendering pipeline. The gg CLI reads .gg files; the gridgram npm package takes a DiagramDef directly. Both emit the same SVG. PNG is produced by the CLI only, via sharp / libvips fetched on first use.
@@ -52,6 +81,9 @@ landing:
     primary:
       text: Read the guide
       link: /en/guide/
+    ai:
+      text: Use with AI agents
+      link: /en/ai/
     secondary:
       text: GitHub
       link: https://github.com/ideamans/gridgram

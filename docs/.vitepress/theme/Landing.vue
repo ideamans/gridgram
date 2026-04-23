@@ -43,21 +43,37 @@ interface AcknowledgmentsContent {
   roleLabel?: string
   licenseLabel?: string
 }
+interface AiReadyItem {
+  icon: string
+  title: string
+  body: string
+  link: string
+  linkText?: string
+}
+interface AiReadyContent {
+  eyebrow?: string
+  title: string
+  intro?: string
+  items: AiReadyItem[]
+}
 interface LandingFrontmatter {
   hero: {
     name: string
     text: string
     primary?: CtaLink
+    ai?: CtaLink
     secondary?: CtaLink
   }
   features?: { items: FeatureItem[] }
   demo?: DemoContent
+  aiReady?: AiReadyContent
   architecture?: ArchitectureContent
   acknowledgments?: AcknowledgmentsContent
   finalCta?: {
     title: string
     text?: string
     primary?: CtaLink
+    ai?: CtaLink
     secondary?: CtaLink
   }
 }
@@ -232,6 +248,14 @@ const siteLang = computed<string>(() => {
           class="btn btn-primary btn-lg"
         >{{ content.hero.primary.text }}</a>
         <a
+          v-if="content.hero.ai"
+          :href="content.hero.ai.link"
+          class="btn btn-outline btn-primary btn-lg gg-hero__ai"
+        >
+          <span class="gg-hero__ai-icon" v-html="iconSvg('robot', 22)" />
+          {{ content.hero.ai.text }}
+        </a>
+        <a
           v-if="content.hero.secondary"
           :href="content.hero.secondary.link"
           class="btn btn-ghost btn-lg"
@@ -338,6 +362,50 @@ const siteLang = computed<string>(() => {
       </div>
     </section>
 
+    <!-- ========================== AI-ready ========================== -->
+    <!-- Four first-class agent-integration channels, immediately above
+         the architecture diagram so readers see "LLMs can drive this"
+         before they look at the pipeline. Icons are Tabler outline
+         symbols picked to read at a glance (puzzle = plugin,
+         brand-github = gh, plug-connected = MCP, file-text = llms.txt). -->
+    <section
+      v-if="content.aiReady"
+      class="gg-ai py-16 md:py-20 px-6 bg-base-200"
+    >
+      <div class="max-w-6xl mx-auto">
+        <header class="text-center mb-10">
+          <div
+            v-if="content.aiReady.eyebrow"
+            class="gg-ai__eyebrow"
+          >
+            <span class="gg-ai__eyebrow-icon" v-html="iconSvg('sparkles', 16)" />
+            {{ content.aiReady.eyebrow }}
+          </div>
+          <h2 class="text-3xl md:text-4xl font-bold tracking-tight">
+            {{ content.aiReady.title }}
+          </h2>
+          <p
+            v-if="content.aiReady.intro"
+            class="opacity-70 mt-3 max-w-2xl mx-auto"
+          >{{ content.aiReady.intro }}</p>
+        </header>
+        <ul class="gg-ai__grid grid gap-4 md:gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <li
+            v-for="(item, i) in content.aiReady.items"
+            :key="i"
+            class="gg-ai__card"
+          >
+            <a :href="item.link" class="gg-ai__link">
+              <div class="gg-ai__icon text-primary" v-html="iconSvg(item.icon, 32)" />
+              <h3 class="gg-ai__title">{{ item.title }}</h3>
+              <p class="gg-ai__body">{{ item.body }}</p>
+              <span class="gg-ai__cta">{{ item.linkText || '→' }}</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </section>
+
     <!-- ========================== Architecture ========================== -->
     <!-- Gridgram describing itself: the .gg source that produces the
          diagram is the same grammar users write. Shown as a single big
@@ -380,6 +448,14 @@ const siteLang = computed<string>(() => {
           :href="content.finalCta.primary.link"
           class="btn btn-primary btn-lg"
         >{{ content.finalCta.primary.text }}</a>
+        <a
+          v-if="content.finalCta.ai"
+          :href="content.finalCta.ai.link"
+          class="btn btn-outline btn-primary btn-lg gg-hero__ai"
+        >
+          <span class="gg-hero__ai-icon" v-html="iconSvg('robot', 22)" />
+          {{ content.finalCta.ai.text }}
+        </a>
         <a
           v-if="content.finalCta.secondary"
           :href="content.finalCta.secondary.link"
@@ -540,6 +616,83 @@ const siteLang = computed<string>(() => {
 .gg-demo__pane :deep(code) {
   background: transparent;
   padding: 0;
+}
+
+/* Hero AI CTA — outline variant needs an inline icon + text. */
+.gg-hero__ai {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.gg-hero__ai-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* AI-ready — four-up grid of tutorial cards. Each card is a full link
+   so the entire tile is clickable. Accent colour is the theme primary. */
+.gg-ai__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--vp-c-brand-1);
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--vp-c-brand-1) 12%, transparent);
+  margin-bottom: 14px;
+}
+.gg-ai__grid { list-style: none; padding: 0; margin: 0; }
+.gg-ai__card {
+  background: var(--vp-c-bg, #fff);
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 14px;
+  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+.gg-ai__card:hover {
+  transform: translateY(-3px);
+  border-color: var(--vp-c-brand-1);
+  box-shadow: 0 6px 20px -8px color-mix(in oklab, var(--vp-c-brand-1) 40%, transparent);
+}
+.gg-ai__link {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 22px 22px 20px;
+  height: 100%;
+  text-decoration: none;
+  color: inherit;
+}
+.gg-ai__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: color-mix(in oklab, var(--vp-c-brand-1) 10%, transparent);
+}
+.gg-ai__title {
+  font-weight: 600;
+  font-size: 16px;
+  margin: 0;
+}
+.gg-ai__body {
+  font-size: 13.5px;
+  opacity: 0.72;
+  line-height: 1.55;
+  margin: 0;
+  flex: 1;
+}
+.gg-ai__cta {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--vp-c-brand-1);
+  margin-top: 4px;
 }
 
 /* Architecture canvas — full-width card hosting the self-describing diagram. */
