@@ -43,26 +43,26 @@ function extractBnf(dslSource: string): string {
 async function renderCliUsage(): Promise<{ usage: string; subcommands: string }> {
   // Import the compiled CLI's citty commands and render their help.
   const { renderUsage } = await import('citty')
+  // Only import render.ts here. commands/llm.ts top-level imports
+  // src/generated/llm-reference.md (via `with { type: 'text' }`), which
+  // creates a chicken-and-egg on a fresh checkout: this very script
+  // runs *before* any llm-reference.md exists, so importing llm.ts
+  // fails with "Cannot find module". The render command already carries
+  // the full flag surface, so it's sufficient for renderUsage. The
+  // subcommand bullet list is hand-rolled below to skip the cycle.
   const flatRoot = (await import(join(root, 'src/cli/commands/render.ts'))).default
-  const iconsCmd = (await import(join(root, 'src/cli/commands/icons.ts'))).default
-  const llmCmd = (await import(join(root, 'src/cli/commands/llm.ts'))).default
-  const licenseCmd = (await import(join(root, 'src/cli/commands/license.ts'))).default
 
   // Use the render command as the "primary" help since it has the whole
   // flag surface. citty injects ANSI escapes; we strip them for markdown.
   const ansiRE = /\[[0-9;]*m/g
   const usage = (await renderUsage(flatRoot)).replace(ansiRE, '')
 
-  const renderMeta = (cmd: any): string => {
-    const m = typeof cmd.meta === 'function' ? cmd.meta() : cmd.meta
-    return `**\`gg ${m.name}\`** — ${m.description}`
-  }
   const subcommands = [
     '- **`gg <file>`** — render a `.gg` to SVG/PNG/JSON (the default; same as `gg render`).',
-    `- ${renderMeta(flatRoot)}`,
-    `- ${renderMeta(iconsCmd)}`,
-    `- ${renderMeta(llmCmd)}`,
-    `- ${renderMeta(licenseCmd)}`,
+    '- **`gg render`** — Render a .gg file to SVG / PNG / JSON (the default action when a file is passed).',
+    '- **`gg icons`** — List and search built-in Tabler icons (outline + filled).',
+    '- **`gg llm`** — Emit the LLM-facing reference bundle (.gg grammar, CLI, doc{} keys, JSON schema).',
+    '- **`gg license`** — Print bundled third-party license texts.',
   ].join('\n')
   return { usage, subcommands }
 }
