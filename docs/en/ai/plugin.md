@@ -23,9 +23,16 @@ Cursor, Gemini CLI, Codex, and any future host that speaks the spec.
 ## Install in Claude Code
 
 ```text
-/plugin marketplace add ideamans/claude-public-plugins
+/plugin marketplace add https://github.com/ideamans/claude-public-plugins.git
 /plugin install gridgram@ideamans-plugins
 ```
+
+The full `https://…` URL is the recommended form. Claude Code also
+accepts the `owner/repo` shorthand (`/plugin marketplace add
+ideamans/claude-public-plugins`), but that defaults to cloning over
+SSH — convenient if you already have keys loaded, annoying on machines
+where `ssh-add -l` is empty (you'll get `Premature close` from a
+non-interactive `git clone`). The HTTPS URL sidesteps SSH entirely.
 
 The marketplace repository lives at
 <https://github.com/ideamans/claude-public-plugins>. The entry points at a
