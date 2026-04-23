@@ -143,8 +143,11 @@ content changes later even without a version bump.
 
 ## 4. Install the `gg` CLI
 
-The skills shell out to the `gg` binary. Restart your agent host so
-the new skills load, then ask:
+The skills shell out to the `gg` binary. Either path works:
+
+### Option A: Use `/gg-install` inside your agent
+
+Restart your agent host so the new skills load, then ask:
 
 > Install the gridgram CLI for my platform.
 
@@ -156,7 +159,14 @@ The agent picks up `/gg-install` and performs:
 3. Install into the first writable `$PATH` directory (or stage at
    `/tmp/gg` with a sudo hint).
 
-Verify with:
+### Option B: Install `gg` the regular way
+
+If you'd rather skip the skill, follow the standard install guide at
+**[Quick start](/en/guide/)** (one-line curl / PowerShell scripts) or
+**[Install](/en/guide/install)** for manual alternatives. Any install
+that puts `gg` on `$PATH` is picked up by the skills automatically.
+
+### Verify
 
 ```sh
 gg --help

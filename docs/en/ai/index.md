@@ -43,8 +43,12 @@ tutorial of your choice calls for before starting.
 | `bun` ([install](https://bun.sh/))                               | Only if building `gg` from source     | You can use the release binary instead.|
 
 You do **not** need to install the `gg` CLI manually — the Claude
-plugin has a `/gg-install` skill that handles it, and `gh skill`
-users can run the same skill after installing it.
+plugin ships a `/gg-install` skill that handles it, and `gh skill`
+users can run the same skill after installing it. If you'd rather
+install `gg` outside your agent, follow the standard
+[Quick start](/en/guide/) or [Install](/en/guide/install) page; any
+install that puts `gg` on `$PATH` is picked up by the skills
+automatically.
 
 ## At a glance: what gridgram exposes
 

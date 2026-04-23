@@ -75,8 +75,12 @@ Type `/gg-` — Claude Code's autocomplete should now offer
 
 ## 3. Install the `gg` CLI
 
-The skills shell out to the `gg` binary. Ask Claude to run the
-install skill:
+The skills shell out to the `gg` binary. You have two options; either
+works — pick whichever you prefer.
+
+### Option A: Use `/gg-install` inside Claude (recommended for first-timers)
+
+Ask Claude:
 
 > Install the gridgram CLI for my platform.
 
@@ -91,15 +95,23 @@ Claude picks up `/gg-install`, which:
 5. Downloads + extracts + moves the binary into place.
 
 If no candidate is writable without sudo, the skill stages `gg` at
-`/tmp/gg` and prints:
+`/tmp/gg` and prints the exact `sudo mv …` command to run:
 
 ```
 gg staged at /tmp/gg — run 'sudo mv /tmp/gg /usr/local/bin/gg' to finish
 ```
 
-Run that command yourself, then continue.
+### Option B: Install `gg` the regular way
 
-**Verify the install**:
+If you already have a preferred install method, or you want to set
+up `gg` outside of Claude Code, follow the standard install guide
+at **[Quick start](/en/guide/)** (one-line curl / PowerShell scripts)
+or **[Install](/en/guide/install)** for manual alternatives.
+
+Any install that puts `gg` on `$PATH` will be picked up by the
+skills — they don't care how it got there.
+
+### Verify
 
 ```sh
 gg --help

@@ -11,6 +11,14 @@ allowed-tools: Bash(curl:*) Bash(wget:*) Bash(tar:*) Bash(unzip:*) Bash(which:*)
 Install or update the `gg` gridgram CLI from the GitHub Releases of
 `ideamans/gridgram`, cross-platform.
 
+This skill is **one of several ways to install `gg`**. If the user
+already prefers their own install method (Homebrew, a system
+package manager, a downloaded binary, or one of the curl / PowerShell
+one-liners documented at <https://gridgram.ideamans.com/en/guide/>),
+confirm they want to use this skill before proceeding. Any install
+that puts `gg` on `$PATH` works equally well; the other gridgram
+skills don't care how the binary got there.
+
 ## Workflow
 
 ### 1. Detect platform
