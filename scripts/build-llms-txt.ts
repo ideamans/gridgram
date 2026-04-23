@@ -100,6 +100,17 @@ function loadPages(): DocPage[] {
   return pages
 }
 
+// Slug → display label. Anything missing falls through to simple
+// capitalization. Keeps acronyms and multi-word labels clean in llms.txt.
+const GROUP_LABELS: Record<string, string> = {
+  ai: 'AI Guide',
+  cli: 'CLI',
+  developer: 'Developer',
+  editor: 'Editor',
+  gallery: 'Gallery',
+  guide: 'Guide',
+}
+
 function groupForIndex(pages: DocPage[]): Map<string, DocPage[]> {
   // Group by first path segment after /en/: guide / developer / gallery / etc.
   const groups = new Map<string, DocPage[]>()
@@ -107,7 +118,8 @@ function groupForIndex(pages: DocPage[]): Map<string, DocPage[]> {
     // p.route looks like "/en", "/en/guide", "/en/guide/connector", …
     const parts = p.route.split('/').filter(Boolean)
     // parts[0] === 'en'
-    const group = parts.length < 2 ? 'Home' : capitalize(parts[1]!)
+    const slug = parts.length < 2 ? 'home' : parts[1]!
+    const group = GROUP_LABELS[slug] ?? capitalize(slug)
     if (!groups.has(group)) groups.set(group, [])
     groups.get(group)!.push(p)
   }
@@ -132,8 +144,9 @@ function renderIndex(pages: DocPage[]): string {
   )
   lines.push('')
 
-  // Canonical order for the top-level groups.
-  const order = ['Home', 'Guide', 'Developer', 'Gallery', 'Editor']
+  // Canonical order for the top-level groups. Must use the display
+  // labels returned by GROUP_LABELS above.
+  const order = ['Home', 'Guide', 'Developer', 'AI Guide', 'Gallery', 'Editor']
   const seen = new Set<string>()
 
   const emitGroup = (name: string, items: DocPage[]) => {

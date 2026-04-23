@@ -129,11 +129,11 @@ const config: ReturnType<typeof withTheme> = withTheme({
         nav: [
           { text: "User Guide", link: "/en/guide/" },
           { text: "Developer Guide", link: "/en/developer/" },
+          { text: "AI Guide", link: "/en/ai/" },
           { text: "Gallery", link: "/en/gallery/" },
           {
-            text: "AI",
+            text: "Raw",
             items: [
-              { text: "AI-agent guide", link: "/en/developer/ai-agents" },
               { text: "llms.txt (index)", link: "/llms.txt", target: "_blank" },
               { text: "llms-full.txt (bundle)", link: "/llms-full.txt", target: "_blank" },
             ],
@@ -230,8 +230,19 @@ const config: ReturnType<typeof withTheme> = withTheme({
               text: "Guides",
               items: [
                 { text: "Integrations", link: "/en/developer/integrations" },
-                { text: "AI agents", link: "/en/developer/ai-agents" },
                 { text: "Specification", link: "/en/developer/spec" },
+              ],
+            },
+          ],
+          "/en/ai/": [
+            {
+              text: "AI Guide",
+              items: [
+                { text: "Overview", link: "/en/ai/" },
+                { text: "CLI surfaces", link: "/en/ai/cli" },
+                { text: "Discovery files", link: "/en/ai/discovery" },
+                { text: "Plugin distribution", link: "/en/ai/plugin" },
+                { text: "End-to-end workflow", link: "/en/ai/workflow" },
               ],
             },
           ],
