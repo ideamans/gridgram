@@ -9,7 +9,6 @@
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'fs'
 import { homedir } from 'os'
 import { join } from 'path'
-import { pathToFileURL } from 'url'
 import { createRequire } from 'module'
 import { spawnSync } from 'child_process'
 
@@ -91,6 +90,60 @@ class Fetcher {
   }
 }
 
+/**
+ * Duplicate every top-level transitive dep into `<nm>/sharp/node_modules/`
+ * so sharp's own `require('detect-libc')` / `require('color')` /
+ * `require('semver')` (and their recursive deps) resolve via the standard
+ * CJS algorithm WITHOUT having to walk up to the flat parent node_modules.
+ *
+ * Bun's compiled single-file binary (observed on 1.3.x) does not walk up
+ * `node_modules/` from a runtime-loaded CJS file; it only consults the
+ * directory immediately above the file and the file's own `node_modules/`.
+ * Putting a full copy next to sharp sidesteps the whole walk-up problem.
+ *
+ * Overhead: ~200 KB of pure-JS duplicates; negligible.
+ */
+function seedNestedDeps(nm: string): void {
+  const sharpNm = join(nm, 'sharp', 'node_modules')
+  mkdirSync(sharpNm, { recursive: true })
+  for (const name of readdirSyncSafe(nm)) {
+    // Skip sharp itself and scoped dirs (which contain native platform packages).
+    if (name === 'sharp' || name.startsWith('.') || name.startsWith('@')) continue
+    const src = join(nm, name)
+    const dst = join(sharpNm, name)
+    if (existsSync(dst)) continue
+    cpRecursiveSync(src, dst)
+  }
+}
+
+function readdirSyncSafe(dir: string): string[] {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { readdirSync } = require('fs')
+    return readdirSync(dir) as string[]
+  } catch {
+    return []
+  }
+}
+
+function cpRecursiveSync(src: string, dst: string): void {
+  // Node 16+ / Bun supports fs.cpSync recursive. Use it when available.
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { cpSync, mkdirSync, readdirSync, statSync, copyFileSync } = require('fs')
+  if (typeof cpSync === 'function') {
+    cpSync(src, dst, { recursive: true })
+    return
+  }
+  // Fallback recursive copy.
+  mkdirSync(dst, { recursive: true })
+  for (const entry of readdirSync(src)) {
+    const s = join(src, entry)
+    const d = join(dst, entry)
+    if (statSync(s).isDirectory()) cpRecursiveSync(s, d)
+    else copyFileSync(s, d)
+  }
+}
+
 async function ensureCache(): Promise<string> {
   const plat = detect()
   const suffix = nativeSuffix(plat)
@@ -120,40 +173,31 @@ async function ensureCache(): Promise<string> {
     await fetcher.install(libvipsName, libvipsSpec as string)
   }
 
+  // Mirror transitive pure-JS deps under sharp/node_modules/ so Bun's
+  // compiled-binary resolver finds them without walking up.
+  seedNestedDeps(nm)
+
   writeFileSync(marker, new Date().toISOString() + '\n')
   return sharpDir
 }
 
 export async function loadSharp(): Promise<any> {
   const sharpDir = await ensureCache()
-  const entry = join(sharpDir, 'lib', 'index.js')
 
-  // Bun's compiled single-file binary does NOT walk up `node_modules/`
-  // from a dynamically-imported absolute path (observed on linux-arm64,
-  // likely every target). So `require('detect-libc')` inside
-  // sharp/lib/sharp.js fails with "Cannot find package 'detect-libc'"
-  // even though the dep is correctly installed at
-  // `<cache>/node_modules/detect-libc`.
+  // IMPORTANT: this code path requires Bun 1.3.0 for the compiled binary.
+  // Bun 1.3.1+ regressed the module resolver such that bare requires
+  // issued from a runtime-loaded CJS file (`require('detect-libc')` inside
+  // sharp/lib/sharp.js) cannot find deps even when installed both flat
+  // and nested in the cache's node_modules. createRequire's bare-name
+  // resolution, Module._resolveFilename hooks, and direct symlinks were
+  // all verified as non-working on 1.3.13. The release workflow pins
+  // Bun to 1.3.0 until the regression is fixed upstream.
   //
-  // Workaround: use `createRequire` anchored at sharp's own
-  // package.json (an existing file — Bun's createRequire is stricter
-  // than Node's and rejects non-existent anchor paths). Then require
-  // sharp's entry point via a relative path. The inner `require(...)`
-  // calls inside sharp/lib/*.js then walk the standard CJS resolver,
-  // which finds transitive deps at `<cache>/node_modules/<name>`.
+  // With Bun 1.3.0, anchoring createRequire at sharp's package.json is
+  // enough: the standard CJS resolver walks up to the cache's flat
+  // node_modules and finds every transitive dep.
   const anchor = join(sharpDir, 'package.json')
   const cacheRequire = createRequire(anchor)
-  try {
-    const mod = cacheRequire('./lib/index.js')
-    return (mod as any).default ?? mod
-  } catch (err) {
-    // Last-resort fallback: dynamic import of the entry's file URL.
-    // Leaves the original createRequire error intact if this also fails.
-    try {
-      const mod = await import(/* @vite-ignore */ pathToFileURL(entry).href)
-      return (mod as any).default ?? mod
-    } catch {
-      throw err
-    }
-  }
+  const mod = cacheRequire('./lib/index.js')
+  return (mod as any).default ?? mod
 }
