@@ -81,9 +81,9 @@ From a local checkout:
 ### GitHub CLI (`gh skill`)
 
 ```bash
-gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-render --agent claude-code
-gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-icons
-gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-author
+gh skill install ideamans/gridgram plugins/gridgram/skills/gg-render --agent claude-code
+gh skill install ideamans/gridgram plugins/gridgram/skills/gg-icons
+gh skill install ideamans/gridgram plugins/gridgram/skills/gg-author
 ```
 
 `gh skill` writes `repository` / `ref` / tree SHA into the frontmatter on

@@ -73,7 +73,7 @@ the commands copy-paste directly.
 + body so you can read what it'll do before letting it run:
 
 ```sh
-gh skill preview ideamans/gridgram/plugins/gridgram/skills/gg-install
+gh skill preview ideamans/gridgram plugins/gridgram/skills/gg-install
 ```
 
 Do the same for the other three (`gg-render`, `gg-icons`, `gg-author`)
@@ -87,45 +87,45 @@ target agent:
 ::: code-group
 
 ```sh [Claude Code]
-gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-install --agent claude-code
-gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-render  --agent claude-code
-gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-icons   --agent claude-code
-gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-author  --agent claude-code
+gh skill install ideamans/gridgram plugins/gridgram/skills/gg-install --agent claude-code
+gh skill install ideamans/gridgram plugins/gridgram/skills/gg-render  --agent claude-code
+gh skill install ideamans/gridgram plugins/gridgram/skills/gg-icons   --agent claude-code
+gh skill install ideamans/gridgram plugins/gridgram/skills/gg-author  --agent claude-code
 ```
 
 ```sh [Copilot]
-gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-install --agent copilot
-gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-render  --agent copilot
-gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-icons   --agent copilot
-gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-author  --agent copilot
+gh skill install ideamans/gridgram plugins/gridgram/skills/gg-install --agent copilot
+gh skill install ideamans/gridgram plugins/gridgram/skills/gg-render  --agent copilot
+gh skill install ideamans/gridgram plugins/gridgram/skills/gg-icons   --agent copilot
+gh skill install ideamans/gridgram plugins/gridgram/skills/gg-author  --agent copilot
 ```
 
 ```sh [Cursor]
-gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-install --agent cursor
-gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-render  --agent cursor
-gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-icons   --agent cursor
-gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-author  --agent cursor
+gh skill install ideamans/gridgram plugins/gridgram/skills/gg-install --agent cursor
+gh skill install ideamans/gridgram plugins/gridgram/skills/gg-render  --agent cursor
+gh skill install ideamans/gridgram plugins/gridgram/skills/gg-icons   --agent cursor
+gh skill install ideamans/gridgram plugins/gridgram/skills/gg-author  --agent cursor
 ```
 
 ```sh [Codex]
-gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-install --agent codex
-gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-render  --agent codex
-gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-icons   --agent codex
-gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-author  --agent codex
+gh skill install ideamans/gridgram plugins/gridgram/skills/gg-install --agent codex
+gh skill install ideamans/gridgram plugins/gridgram/skills/gg-render  --agent codex
+gh skill install ideamans/gridgram plugins/gridgram/skills/gg-icons   --agent codex
+gh skill install ideamans/gridgram plugins/gridgram/skills/gg-author  --agent codex
 ```
 
 ```sh [Gemini CLI]
-gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-install --agent gemini-cli
-gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-render  --agent gemini-cli
-gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-icons   --agent gemini-cli
-gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-author  --agent gemini-cli
+gh skill install ideamans/gridgram plugins/gridgram/skills/gg-install --agent gemini-cli
+gh skill install ideamans/gridgram plugins/gridgram/skills/gg-render  --agent gemini-cli
+gh skill install ideamans/gridgram plugins/gridgram/skills/gg-icons   --agent gemini-cli
+gh skill install ideamans/gridgram plugins/gridgram/skills/gg-author  --agent gemini-cli
 ```
 
 ```sh [Antigravity]
-gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-install --agent antigravity
-gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-render  --agent antigravity
-gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-icons   --agent antigravity
-gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-author  --agent antigravity
+gh skill install ideamans/gridgram plugins/gridgram/skills/gg-install --agent antigravity
+gh skill install ideamans/gridgram plugins/gridgram/skills/gg-render  --agent antigravity
+gh skill install ideamans/gridgram plugins/gridgram/skills/gg-icons   --agent antigravity
+gh skill install ideamans/gridgram plugins/gridgram/skills/gg-author  --agent antigravity
 ```
 
 :::
@@ -189,7 +189,7 @@ no-op updates.
 Update a single skill:
 
 ```sh
-gh skill update ideamans/gridgram/plugins/gridgram/skills/gg-author
+gh skill update ideamans/gridgram plugins/gridgram/skills/gg-author
 ```
 
 ### Update the `gg` binary
@@ -203,7 +203,7 @@ Just ask the agent:
 ## 7. Uninstall (optional)
 
 ```sh
-gh skill remove ideamans/gridgram/plugins/gridgram/skills/gg-author
+gh skill remove ideamans/gridgram plugins/gridgram/skills/gg-author
 # …and the other three
 ```
 
