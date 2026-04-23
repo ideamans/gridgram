@@ -54,19 +54,18 @@ sudo apt install --only-upgrade gh
 
 ## 1. Pick your target agent
 
-`gh skill install --agent <target>` supports:
+`gh skill install --agent <target>` supports six host targets. Each
+tutorial snippet from here on has a tab per target — pick yours and
+the commands copy-paste directly.
 
-| `<target>`      | Where skills end up                                           |
-| --------------- | ------------------------------------------------------------- |
-| `claude-code`   | `~/.claude/skills/<skill>/SKILL.md`                           |
-| `copilot`       | GitHub Copilot's skills directory (default if `--agent` omitted) |
-| `cursor`        | Cursor's skill directory                                      |
-| `codex`         | OpenAI Codex                                                  |
-| `gemini-cli`    | Google Gemini CLI                                             |
-| `antigravity`   | Antigravity                                                   |
-
-For the rest of this tutorial, replace `<target>` with whichever host
-you're installing into.
+| Target          | Where skills end up                                                |
+| --------------- | ------------------------------------------------------------------ |
+| `claude-code`   | `~/.claude/skills/<skill>/SKILL.md`                                |
+| `copilot`       | GitHub Copilot's skills directory (default if `--agent` is omitted)|
+| `cursor`        | Cursor's skill directory                                           |
+| `codex`         | OpenAI Codex                                                       |
+| `gemini-cli`    | Google Gemini CLI                                                  |
+| `antigravity`   | Antigravity                                                        |
 
 ## 2. Preview before installing
 
@@ -82,14 +81,54 @@ if you want to inspect each.
 
 ## 3. Install the skills
 
-Install all four:
+Install all four with one copy-paste. Switch tabs to match your
+target agent:
 
-```sh
-gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-install --agent <target>
-gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-render  --agent <target>
-gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-icons   --agent <target>
-gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-author  --agent <target>
+::: code-group
+
+```sh [Claude Code]
+gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-install --agent claude-code
+gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-render  --agent claude-code
+gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-icons   --agent claude-code
+gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-author  --agent claude-code
 ```
+
+```sh [Copilot]
+gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-install --agent copilot
+gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-render  --agent copilot
+gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-icons   --agent copilot
+gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-author  --agent copilot
+```
+
+```sh [Cursor]
+gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-install --agent cursor
+gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-render  --agent cursor
+gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-icons   --agent cursor
+gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-author  --agent cursor
+```
+
+```sh [Codex]
+gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-install --agent codex
+gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-render  --agent codex
+gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-icons   --agent codex
+gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-author  --agent codex
+```
+
+```sh [Gemini CLI]
+gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-install --agent gemini-cli
+gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-render  --agent gemini-cli
+gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-icons   --agent gemini-cli
+gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-author  --agent gemini-cli
+```
+
+```sh [Antigravity]
+gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-install --agent antigravity
+gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-render  --agent antigravity
+gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-icons   --agent antigravity
+gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-author  --agent antigravity
+```
+
+:::
 
 Verify:
 
