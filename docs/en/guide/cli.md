@@ -7,6 +7,7 @@ the merged `DiagramDef`). It's the tool most people will use.
 
 ```
 gg <input.gg> [options]
+gg <subcommand> [args…]
 ```
 
 ```sh
@@ -20,6 +21,21 @@ gg diagram.gg --format json > merged.json
 Without `-o`, `gg` writes to stdout. Without `--format`, the extension
 of `-o` picks the format (`.svg` / `.png` / `.json`); lacking both, the
 default is SVG.
+
+## Subcommands
+
+| Subcommand           | What it does                                                                      |
+|----------------------|-----------------------------------------------------------------------------------|
+| `gg render <file>`   | Render a `.gg` file (the default when a file path is given — `gg <file>` is a shortcut). |
+| `gg icons`           | Search the 6,000+ built-in Tabler icons (by name, tag, or category).              |
+| `gg llm`             | Emit the LLM-facing reference bundle — `.gg` grammar, CLI, icons, JSON schema, examples. |
+| `gg license`         | Print bundled third-party license texts.                                          |
+
+`gg icons` and `gg llm` are primarily for LLM-driven workflows; the
+[AI Guide → CLI reference](/en/ai/cli) page documents both in full
+(flags, scoring model, JSON output shape, agent prompt templates).
+See the [AI Guide overview](/en/ai/) if you want to drive `gg` from
+Claude Code, `gh skill`, or an MCP agent.
 
 ## Options
 
