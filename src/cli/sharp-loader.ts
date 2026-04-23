@@ -130,26 +130,25 @@ export async function loadSharp(): Promise<any> {
 
   // Bun's compiled single-file binary does NOT walk up `node_modules/`
   // from a dynamically-imported absolute path (observed on linux-arm64,
-  // likely on every target). So `require('detect-libc')` inside
+  // likely every target). So `require('detect-libc')` inside
   // sharp/lib/sharp.js fails with "Cannot find package 'detect-libc'"
   // even though the dep is correctly installed at
   // `<cache>/node_modules/detect-libc`.
   //
-  // Workaround: use `createRequire` anchored at the cache root so the
-  // resolver uses the standard CJS algorithm starting from that
-  // directory's node_modules. This is a Node builtin that Bun honors.
-  const anchor = join(sharpDir, '..', '..', '__sharp_anchor.js')
-  // anchor is a fake path; createRequire only cares about the parent
-  // directory, not the existence of the file. We use it to root the
-  // require to the cache's node_modules.
+  // Workaround: use `createRequire` anchored at sharp's own
+  // package.json (an existing file — Bun's createRequire is stricter
+  // than Node's and rejects non-existent anchor paths). Then require
+  // sharp's entry point via a relative path. The inner `require(...)`
+  // calls inside sharp/lib/*.js then walk the standard CJS resolver,
+  // which finds transitive deps at `<cache>/node_modules/<name>`.
+  const anchor = join(sharpDir, 'package.json')
   const cacheRequire = createRequire(anchor)
   try {
-    const mod = cacheRequire('sharp')
+    const mod = cacheRequire('./lib/index.js')
     return (mod as any).default ?? mod
   } catch (err) {
-    // Fall back to dynamic import in case createRequire isn't supported
-    // for some reason (older Bun, ESM-only exports, …). Keeps the original
-    // error if both paths fail.
+    // Last-resort fallback: dynamic import of the entry's file URL.
+    // Leaves the original createRequire error intact if this also fails.
     try {
       const mod = await import(/* @vite-ignore */ pathToFileURL(entry).href)
       return (mod as any).default ?? mod
