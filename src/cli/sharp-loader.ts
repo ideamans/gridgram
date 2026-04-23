@@ -9,6 +9,8 @@
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'fs'
 import { homedir } from 'os'
 import { join } from 'path'
+import { pathToFileURL } from 'url'
+import { createRequire } from 'module'
 import { spawnSync } from 'child_process'
 
 const SHARP_VERSION = '0.33.5'
@@ -125,6 +127,34 @@ async function ensureCache(): Promise<string> {
 export async function loadSharp(): Promise<any> {
   const sharpDir = await ensureCache()
   const entry = join(sharpDir, 'lib', 'index.js')
-  const mod = await import(/* @vite-ignore */ entry)
-  return (mod as any).default ?? mod
+
+  // Bun's compiled single-file binary does NOT walk up `node_modules/`
+  // from a dynamically-imported absolute path (observed on linux-arm64,
+  // likely on every target). So `require('detect-libc')` inside
+  // sharp/lib/sharp.js fails with "Cannot find package 'detect-libc'"
+  // even though the dep is correctly installed at
+  // `<cache>/node_modules/detect-libc`.
+  //
+  // Workaround: use `createRequire` anchored at the cache root so the
+  // resolver uses the standard CJS algorithm starting from that
+  // directory's node_modules. This is a Node builtin that Bun honors.
+  const anchor = join(sharpDir, '..', '..', '__sharp_anchor.js')
+  // anchor is a fake path; createRequire only cares about the parent
+  // directory, not the existence of the file. We use it to root the
+  // require to the cache's node_modules.
+  const cacheRequire = createRequire(anchor)
+  try {
+    const mod = cacheRequire('sharp')
+    return (mod as any).default ?? mod
+  } catch (err) {
+    // Fall back to dynamic import in case createRequire isn't supported
+    // for some reason (older Bun, ESM-only exports, …). Keeps the original
+    // error if both paths fail.
+    try {
+      const mod = await import(/* @vite-ignore */ pathToFileURL(entry).href)
+      return (mod as any).default ?? mod
+    } catch {
+      throw err
+    }
+  }
 }
