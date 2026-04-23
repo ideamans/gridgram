@@ -2,7 +2,7 @@
 
 Use this before pushing changes that affect `plugins/gridgram/**` to the
 `ideamans/gridgram` repository, and before any marketplace update in
-`ideamans/claude-plugins`.
+`ideamans/claude-public-plugins`.
 
 ## Pre-push checklist
 
@@ -25,7 +25,7 @@ Use this before pushing changes that affect `plugins/gridgram/**` to the
 Once `plugins/gridgram/**` is pushed to `ideamans/gridgram`:
 
 ```bash
-# In ideamans/claude-plugins checkout:
+# In ideamans/claude-public-plugins checkout:
 claude plugin validate .           # marketplace.json schema
 git pull && git status             # ensure clean
 # If you changed plugin metadata (description/version/keywords), update

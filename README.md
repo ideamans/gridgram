@@ -181,7 +181,7 @@ gridgram is built for LLM-driven workflows out of the box:
   MCP.
 - **Claude Code / gh skill plugin** at
   [`plugins/gridgram`](./plugins/gridgram) — install via the
-  [`ideamans/claude-plugins`](https://github.com/ideamans/claude-plugins)
+  [`ideamans/claude-public-plugins`](https://github.com/ideamans/claude-public-plugins)
   marketplace to get `/gg-render`, `/gg-icons`, and `/gg-author` skills.
   The same `SKILL.md` bundle is compatible with `gh skill install`,
   Cursor, Gemini CLI, Codex, and any other host that speaks the

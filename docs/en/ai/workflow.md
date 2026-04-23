@@ -12,7 +12,7 @@ SVG of a small system architecture, with no red error rings.
 ## Setup
 
 ```text
-/plugin marketplace add ideamans/claude-plugins
+/plugin marketplace add ideamans/claude-public-plugins
 /plugin install gridgram@ideamans-plugins
 ```
 

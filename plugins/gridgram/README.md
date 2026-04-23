@@ -36,7 +36,7 @@ bun scripts/validate-plugin-skills.ts
 
 ### Claude Code — via a marketplace
 
-1. Create a marketplace repository (e.g. `ideamans/claude-plugins`) with a
+1. Create a marketplace repository (e.g. `ideamans/claude-public-plugins`) with a
    `.claude-plugin/marketplace.json` that lists this plugin:
 
    ```json
@@ -62,7 +62,7 @@ bun scripts/validate-plugin-skills.ts
 2. Users then install from Claude Code:
 
    ```
-   /plugin marketplace add ideamans/claude-plugins
+   /plugin marketplace add ideamans/claude-public-plugins
    /plugin install gridgram@ideamans-plugins
    ```
 

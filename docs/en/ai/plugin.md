@@ -23,12 +23,12 @@ Cursor, Gemini CLI, Codex, and any future host that speaks the spec.
 ## Install in Claude Code
 
 ```text
-/plugin marketplace add ideamans/claude-plugins
+/plugin marketplace add ideamans/claude-public-plugins
 /plugin install gridgram@ideamans-plugins
 ```
 
 The marketplace repository lives at
-<https://github.com/ideamans/claude-plugins>. The entry points at a
+<https://github.com/ideamans/claude-public-plugins>. The entry points at a
 `git-subdir` source inside `ideamans/gridgram`, so the plugin's version
 always matches the gridgram release — no separate version bump needed.
 
