@@ -23,7 +23,7 @@ how to use each of them as a human (or as the agent's instructor).
 | [`/llms.txt`](./discovery)      | Index of the docs site, [llmstxt.org](https://llmstxt.org/) convention.                   | Agent crawlers    |
 | [`/llms-full.txt`](./discovery) | Every docs page concatenated + the `gg llm` reference. One-payload context.               | Agent crawlers    |
 | [`context7.json`](./discovery#context7)  | Manifest that registers gridgram with [context7](https://context7.com/) for MCP consumers. | MCP-connected agents |
-| [`plugins/gridgram`](./plugin)  | Claude Code + `gh skill` distribution of three skills (`gg-render`, `gg-icons`, `gg-author`). | Plugin hosts      |
+| [`plugins/gridgram`](./plugin)  | Claude Code + `gh skill` distribution of four skills (`gg-render`, `gg-icons`, `gg-author`, `gg-install`). | Plugin hosts      |
 
 ## Reading order
 

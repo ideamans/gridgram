@@ -53,6 +53,7 @@ describe('skill descriptions include discovery keywords', () => {
     { skill: 'gg-render', keywords: ['render', 'gridgram', 'diagnostics'] },
     { skill: 'gg-icons', keywords: ['icon', 'tabler', 'gridgram'] },
     { skill: 'gg-author', keywords: ['diagram', 'gridgram', 'draw'] },
+    { skill: 'gg-install', keywords: ['install', 'gridgram', 'update', 'github release'] },
   ]
 
   for (const { skill, keywords } of cases) {

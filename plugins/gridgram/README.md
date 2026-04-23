@@ -17,7 +17,8 @@ plugins/gridgram/
 ├── skills/
 │   ├── gg-render/SKILL.md          # render / validate a .gg file
 │   ├── gg-icons/SKILL.md           # search the 6,000+ built-in Tabler icons
-│   └── gg-author/SKILL.md          # compose a new diagram from a description
+│   ├── gg-author/SKILL.md          # compose a new diagram from a description
+│   └── gg-install/SKILL.md         # install or update the gg CLI from GitHub releases
 └── README.md (this file)
 ```
 

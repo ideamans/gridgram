@@ -6,7 +6,7 @@ description: Install gridgram as an Agent Skills plugin in Claude Code, via gh s
 # Plugin distribution
 
 `plugins/gridgram/` in the repository is a ready-to-install
-[Agent Skills](https://agentskills.io/) bundle. Three skills, shipped
+[Agent Skills](https://agentskills.io/) bundle. Four skills, shipped
 in a single plugin:
 
 | Skill         | What it does                                                                      |
@@ -14,6 +14,7 @@ in a single plugin:
 | `/gg-render`  | Render a `.gg` file. Runs `gg <file> --format json --diagnostics` first, surfaces diagnostics, then writes SVG / PNG / JSON.        |
 | `/gg-icons`   | Drive the [`gg icons`](./cli#gg-icons) search workflow conversationally.         |
 | `/gg-author`  | Compose a new diagram from a natural-language description, validate, and render. |
+| `/gg-install` | Install or update the `gg` CLI from the latest GitHub release. Detects OS + arch, picks a writable PATH directory, or falls back to a sudo hint when every candidate is read-only. |
 
 Every `SKILL.md` uses **only** the standard frontmatter fields
 (`name`, `description`, `license`, `compatibility`, `allowed-tools`),
@@ -60,6 +61,7 @@ skill can be installed independently:
 gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-render --agent claude-code
 gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-icons
 gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-author
+gh skill install ideamans/gridgram/plugins/gridgram/skills/gg-install
 ```
 
 The `--agent` flag picks which host to install into. Supported
@@ -76,15 +78,23 @@ useful for iterating on skill bodies between releases.
 
 ## Runtime dependency: the `gg` CLI
 
-All three skills shell out to the `gg` binary. If `gg` isn't on
-`PATH`, the skill body tells the user how to install it:
+`gg-render`, `gg-icons`, and `gg-author` shell out to the `gg` binary.
+If `gg` isn't on `PATH`, any of them can hand off to `/gg-install`,
+which:
 
-- **Binary**: <https://github.com/ideamans/gridgram/releases>
-- **Source build**: `git clone … && bun install && bun run compile`
+- detects the user's OS and arch
+- fetches the matching archive from
+  <https://github.com/ideamans/gridgram/releases/latest>
+- drops the binary into the first writable `$PATH` directory
+  (`~/.local/bin`, `/usr/local/bin`, …)
+- or, when every candidate is read-only, stages it at `/tmp/gg` and
+  prints the exact `sudo mv …` the user can run themselves
 
-A skill that can't find `gg` reports the failure instead of silently
-producing nothing. Users who never intended to install gridgram find
-out immediately and with an install command to copy-paste.
+`gg-install` is also the upgrade path: when `gg` is already on `PATH`,
+it replaces the existing binary in place with the latest release.
+
+A skill that can't find `gg` will tell the user how to fix it
+immediately, instead of silently producing nothing.
 
 ## Installing from a local checkout (development)
 
