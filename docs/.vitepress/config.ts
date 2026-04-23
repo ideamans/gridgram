@@ -341,7 +341,15 @@ const config: ReturnType<typeof withTheme> = withTheme({
         nav: [
           { text: "ユーザーガイド", link: "/ja/guide/" },
           { text: "開発者ガイド", link: "/ja/developer/" },
+          { text: "AI ガイド", link: "/ja/ai/" },
           { text: "ギャラリー", link: "/ja/gallery/" },
+          {
+            text: "Raw",
+            items: [
+              { text: "llms.txt (インデックス)", link: "/llms.txt", target: "_blank" },
+              { text: "llms-full.txt (バンドル)", link: "/llms-full.txt", target: "_blank" },
+            ],
+          },
         ],
         sidebar: {
           "/ja/guide/": [
@@ -433,6 +441,28 @@ const config: ReturnType<typeof withTheme> = withTheme({
               items: [
                 { text: "統合レシピ", link: "/ja/developer/integrations" },
                 { text: "仕様", link: "/ja/developer/spec" },
+              ],
+            },
+          ],
+          "/ja/ai/": [
+            {
+              text: "AI ガイド",
+              items: [
+                { text: "概要", link: "/ja/ai/" },
+              ],
+            },
+            {
+              text: "チュートリアル",
+              items: [
+                { text: "Claude Code プラグイン", link: "/ja/ai/claude-plugin" },
+                { text: "gh skill (Copilot / Cursor / …)", link: "/ja/ai/gh-skill" },
+                { text: "context7 (MCP 取得)", link: "/ja/ai/context7" },
+              ],
+            },
+            {
+              text: "リファレンス",
+              items: [
+                { text: "gg llm / gg icons", link: "/ja/ai/cli" },
               ],
             },
           ],
