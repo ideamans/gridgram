@@ -1,88 +1,75 @@
 ---
 title: AI Guide
-description: Using gridgram with LLM agents — the `gg llm` reference bundle, semantic icon search, public discovery files, and the Claude Code / gh skill plugin.
+description: Tutorials for using gridgram with LLM agents — Claude Code plugin, GitHub `gh skill`, and context7.
 ---
 
 # AI Guide
 
-Gridgram is built from the ground up to be **author-able by an LLM
-agent**. You can describe what you want in natural language and have
-Claude, Cursor, or any other coding agent produce a valid `.gg` file,
-render it, and iterate on diagnostics — all without handing the agent
-a separate reference document.
+Gridgram is built to be **author-able by an LLM agent**. You describe
+what you want in natural language; an agent produces a valid `.gg`
+file, renders it, reads back diagnostics, and iterates — no manual
+reference-pasting required.
 
-This guide walks through the surfaces gridgram exposes to agents and
-how to use each of them as a human (or as the agent's instructor).
+This guide is **task-oriented**. Pick one of the three usage paths
+below and follow it end-to-end. Each tutorial starts from a clean
+machine and ends with a rendered diagram plus the command to update
+later.
 
-## At a glance
+## Three ways to use gridgram from an agent
 
-| Surface                         | What it is                                                                                | Who runs it       |
-| ------------------------------- | ----------------------------------------------------------------------------------------- | ----------------- |
-| [`gg llm`](./cli#gg-llm)        | One-shot Markdown / JSON reference: grammar, CLI, icons, JSON envelope, examples.         | Any agent or shell |
-| [`gg icons`](./cli#gg-icons)    | Semantic search over 6,092 built-in Tabler icons, scored.                                 | Any agent or shell |
-| [`/llms.txt`](./discovery)      | Index of the docs site, [llmstxt.org](https://llmstxt.org/) convention.                   | Agent crawlers    |
-| [`/llms-full.txt`](./discovery) | Every docs page concatenated + the `gg llm` reference. One-payload context.               | Agent crawlers    |
-| [`context7.json`](./discovery#context7)  | Manifest that registers gridgram with [context7](https://context7.com/) for MCP consumers. | MCP-connected agents |
-| [`plugins/gridgram`](./plugin)  | Claude Code + `gh skill` distribution of four skills (`gg-render`, `gg-icons`, `gg-author`, `gg-install`). | Plugin hosts      |
+| Tutorial                                  | Best for                                                                       |
+| ----------------------------------------- | ------------------------------------------------------------------------------ |
+| [Claude Code plugin](./claude-plugin)     | You use Claude Code. Slash commands (`/gg-install`, `/gg-icons`, `/gg-author`, `/gg-render`) drive the whole workflow. |
+| [`gh skill`](./gh-skill)                  | You want the same skill bundle installed into Copilot, Cursor, Gemini CLI, or Codex alongside (or instead of) Claude Code. |
+| [context7 (MCP)](./context7)              | You want an agent to retrieve gridgram's docs via MCP without installing anything plugin-side. Read-only. |
 
-## Reading order
+You can mix and match. The Claude plugin includes a `/gg-install`
+skill that fetches the CLI binary; `gh skill` gives you the same
+skills in other hosts; context7 is a parallel retrieval channel that
+works even without any plugin.
 
-1. **[CLI surfaces](./cli)** — `gg llm` and `gg icons`, with the exact
-   commands an agent should run. Start here even if you don't plan to
-   use the other surfaces; these two alone are enough to drive most
-   agent workflows.
-2. **[Discovery files](./discovery)** — `/llms.txt`, `/llms-full.txt`,
-   and `context7.json`. How agents find gridgram without being told
-   about it.
-3. **[Plugin distribution](./plugin)** — installing gridgram as an
-   Agent Skills plugin in Claude Code, via `gh skill`, or in any
-   other host that speaks the spec.
-4. **[End-to-end workflow](./workflow)** — a worked example: ask
-   Claude to draw an architecture diagram, show the exact prompts,
-   the agent's `.gg` output, and how to iterate on diagnostics.
+## What you'll need
 
-## Why this exists
+None of this is installed by gridgram itself. Install whatever the
+tutorial of your choice calls for before starting.
 
-Most LLMs don't know what a `.gg` file looks like. Teaching them by
-pasting documentation into a chat works but is brittle:
+| Software                                                         | For which tutorial                    | Why                                    |
+| ---------------------------------------------------------------- | ------------------------------------- | -------------------------------------- |
+| [git](https://git-scm.com/)                                      | All                                   | Plugin marketplaces clone over git.    |
+| [Claude Code](https://code.claude.com/)                          | Claude plugin, context7               | Host that runs the skills / MCP.       |
+| [GitHub CLI `gh`](https://cli.github.com/) (v2.90+)              | `gh skill`                            | Provides the `gh skill` subcommand.    |
+| [Cursor](https://cursor.com/) / [Gemini CLI](https://github.com/google-gemini/gemini-cli) / [Codex](https://openai.com/index/introducing-codex/) | `gh skill` (optional target)          | Alternative skill hosts.               |
+| `curl`, `tar`, `unzip` (windows)                                 | `/gg-install` runtime                 | Downloading the `gg` binary.          |
+| `bun` ([install](https://bun.sh/))                               | Only if building `gg` from source     | You can use the release binary instead.|
 
-- The reference grows stale as gridgram evolves.
-- Each agent session starts from zero.
-- The agent can't see which icons actually exist in the bundled set.
-- Layout failures (collisions, routing) are hidden — the agent just
-  sees the SVG output.
+You do **not** need to install the `gg` CLI manually — the Claude
+plugin has a `/gg-install` skill that handles it, and `gh skill`
+users can run the same skill after installing it.
 
-Every surface on this page solves one of those problems:
+## At a glance: what gridgram exposes
 
-- **`gg llm`** keeps the reference in the agent's reach, regenerated
-  from source on every build. No drift.
-- **`gg icons`** gives the agent a programmatic search over the real
-  icon set, so it picks names that exist.
-- **`--diagnostics`** surfaces layout issues as structured JSON the
-  agent can read and react to.
-- **`/llms.txt` and `context7.json`** make the above discoverable
-  without anyone telling the agent about gridgram first.
+If you want the full tour before picking a tutorial:
 
-## Quick test (~60 seconds)
+- **[`gg llm`](./cli#gg-llm)** — one-shot Markdown / JSON reference
+  teaching an agent the `.gg` grammar, CLI, icons, JSON envelope, and
+  canonical examples.
+- **[`gg icons`](./cli#gg-icons)** — scored semantic search over
+  5,039 outline + 1,053 filled Tabler icons.
+- **[`/llms.txt`](https://gridgram.ideamans.com/llms.txt) + [`/llms-full.txt`](https://gridgram.ideamans.com/llms-full.txt)** — public discovery files on the docs site.
+- **[`context7.json`](https://github.com/ideamans/gridgram/blob/main/context7.json)** — registers gridgram for [context7](./context7) MCP retrieval.
+- **[`plugins/gridgram`](https://github.com/ideamans/gridgram/tree/main/plugins/gridgram)** — four skills (`gg-install`, `gg-render`, `gg-icons`, `gg-author`) distributed via Claude Code and `gh skill`.
 
-If you have `gg` installed and Claude Code running, you can try the
-plugin workflow right now:
+The [CLI reference page](./cli) documents `gg llm` and `gg icons` in
+full — useful whether an agent is driving them through a skill or
+you're running them manually in a terminal.
 
-```text
-/plugin marketplace add ideamans/claude-public-plugins
-/plugin install gridgram@ideamans-plugins
-```
+## Tutorials
 
-Then ask Claude:
+Start here:
 
-> Draw me a diagram showing a web frontend calling an API backed by a
-> Postgres database and a Redis cache. Use the gridgram plugin.
-
-Claude will:
-
-1. Call `/gg-icons` to pick the right icons.
-2. Call `/gg-author` to compose a `.gg` file.
-3. Call `/gg-render` to produce an SVG, checking diagnostics.
-
-See [End-to-end workflow](./workflow) for the full dialogue and what
-to tweak when the first pass isn't what you wanted.
+- **[Claude Code plugin](./claude-plugin)** — 10-minute path if you
+  already use Claude Code.
+- **[`gh skill`](./gh-skill)** — if you want the skills in Copilot
+  / Cursor / Gemini / Codex.
+- **[context7](./context7)** — if you want an agent to *retrieve*
+  gridgram docs over MCP without installing anything gridgram-specific.

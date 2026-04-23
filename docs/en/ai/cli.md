@@ -1,12 +1,18 @@
 ---
-title: CLI surfaces — gg llm and gg icons
-description: The two gg subcommands designed for LLM agents. One dumps a full reference; the other searches the built-in Tabler icon set semantically.
+title: CLI reference — gg llm and gg icons
+description: Reference for the two gg subcommands that power the AI-agent workflow. One dumps a full reference; the other searches the built-in Tabler icon set semantically.
 ---
 
-# CLI surfaces
+# CLI reference for AI workflows
 
-Two subcommands exist specifically for LLM consumption. Neither needs
-network access; both are bundled in the `gg` single-file binary.
+This is a **reference page**, not a tutorial. Start with one of the
+tutorials ([Claude plugin](./claude-plugin) / [`gh skill`](./gh-skill)
+/ [context7](./context7)) if you haven't installed anything yet.
+
+Two `gg` subcommands exist specifically for LLM consumption. Neither
+needs network access; both are bundled in the `gg` single-file
+binary. The skills in `plugins/gridgram` drive them on the agent's
+behalf; you can also invoke them directly from a shell.
 
 ## `gg llm`
 

@@ -239,10 +239,20 @@ const config: ReturnType<typeof withTheme> = withTheme({
               text: "AI Guide",
               items: [
                 { text: "Overview", link: "/en/ai/" },
-                { text: "CLI surfaces", link: "/en/ai/cli" },
-                { text: "Discovery files", link: "/en/ai/discovery" },
-                { text: "Plugin distribution", link: "/en/ai/plugin" },
-                { text: "End-to-end workflow", link: "/en/ai/workflow" },
+              ],
+            },
+            {
+              text: "Tutorials",
+              items: [
+                { text: "Claude Code plugin", link: "/en/ai/claude-plugin" },
+                { text: "gh skill (Copilot / Cursor / …)", link: "/en/ai/gh-skill" },
+                { text: "context7 (MCP retrieval)", link: "/en/ai/context7" },
+              ],
+            },
+            {
+              text: "Reference",
+              items: [
+                { text: "gg llm / gg icons", link: "/en/ai/cli" },
               ],
             },
           ],
