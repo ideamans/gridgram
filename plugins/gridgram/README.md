@@ -62,7 +62,7 @@ bun scripts/validate-plugin-skills.ts
 2. Users then install from Claude Code:
 
    ```
-   /plugin marketplace add https://github.com/ideamans/claude-public-plugins.git
+   /plugin marketplace add ideamans/claude-public-plugins
    /plugin install gridgram@ideamans-plugins
    ```
 

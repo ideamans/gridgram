@@ -69,7 +69,7 @@ If you have `gg` installed and Claude Code running, you can try the
 plugin workflow right now:
 
 ```text
-/plugin marketplace add https://github.com/ideamans/claude-public-plugins.git
+/plugin marketplace add ideamans/claude-public-plugins
 /plugin install gridgram@ideamans-plugins
 ```
 
