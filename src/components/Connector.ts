@@ -12,15 +12,46 @@ export interface ConnectorProps {
   nodes: Map<string, NormalizedNodeDef>
   layout: GridLayout
   theme: DiagramTheme
-  markerId: string
+  /** Retained for compatibility with existing callers; unused now that
+   *  the arrow head is rendered inline as a polygon (no SVG marker). */
+  markerId?: string
   pixelWaypoints?: Pixel[]
   lineError?: boolean
   labelRect?: LabelRect
   labelError?: boolean
 }
 
+/**
+ * Build the three points of an arrow-head polygon at `tip`, oriented
+ * along `dir` (unit vector pointing the same way the arrow points). The
+ * head is `size` long along `dir` and `size * 0.7` wide across.
+ */
+function arrowHead(tip: Pixel, dir: { x: number; y: number }, size: number): string {
+  // Perpendicular to `dir` (rotated 90°). SVG y-down so the sign of
+  // perp doesn't matter for symmetry — we offset both ways equally.
+  const perpX = -dir.y
+  const perpY = dir.x
+  const halfW = size * 0.35
+  // Back corners sit `size` behind the tip along -dir, ±halfW across perp.
+  const baseX = tip.x - dir.x * size
+  const baseY = tip.y - dir.y * size
+  const leftX  = baseX + perpX * halfW
+  const leftY  = baseY + perpY * halfW
+  const rightX = baseX - perpX * halfW
+  const rightY = baseY - perpY * halfW
+  return `${tip.x},${tip.y} ${leftX},${leftY} ${rightX},${rightY}`
+}
+
+function unitVector(from: Pixel, to: Pixel): { x: number; y: number } {
+  const dx = to.x - from.x
+  const dy = to.y - from.y
+  const len = Math.hypot(dx, dy)
+  if (len < 1e-6) return { x: 1, y: 0 }
+  return { x: dx / len, y: dy / len }
+}
+
 export function Connector({
-  connector, nodes, layout, theme, markerId,
+  connector, nodes, layout, theme,
   pixelWaypoints, lineError, labelRect, labelError,
 }: ConnectorProps): any {
   const path = resolveConnectorPath(connector, nodes, layout, pixelWaypoints)
@@ -34,49 +65,34 @@ export function Connector({
   const d = path.points.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x},${p.y}`).join(' ')
 
   // Arrow head grows sub-linearly with stroke width — a thicker line
-  // doesn't warrant a 5× larger arrow. Default (strokeWidth=2) stays
+  // doesn't warrant a 5× larger arrow. Default (strokeWidth=1.5) stays
   // at 10; strokeWidth=4 → 12; strokeWidth=8 → 24.
   const arrowSize = Math.max(10, strokeWidth * 3)
-  const startMarkerId = `${markerId}-s`
-  const endMarkerId = `${markerId}-e`
 
   const needsEnd = arrow === 'end' || arrow === 'both'
   const needsStart = arrow === 'start' || arrow === 'both'
 
-  const defChildren: any[] = []
-  if (needsEnd) {
-    defChildren.push(
-      h('marker', {
-        id: endMarkerId,
-        markerWidth: arrowSize, markerHeight: arrowSize * 0.7,
-        refX: arrowSize - 1, refY: arrowSize * 0.35,
-        orient: 'auto',
-      }, h('polygon', {
-        points: `0 0, ${arrowSize} ${arrowSize * 0.35}, 0 ${arrowSize * 0.7}`,
-        fill: color,
-      }))
-    )
+  const pts = path.points
+  const arrowEls: any[] = []
+  // End arrow — points along the last segment.
+  if (needsEnd && pts.length >= 2) {
+    const tip = pts[pts.length - 1]
+    const prev = pts[pts.length - 2]
+    const dir = unitVector(prev, tip)
+    arrowEls.push(h('polygon', { points: arrowHead(tip, dir, arrowSize), fill: color }))
   }
-  if (needsStart) {
-    defChildren.push(
-      h('marker', {
-        id: startMarkerId,
-        markerWidth: arrowSize, markerHeight: arrowSize * 0.7,
-        refX: 1, refY: arrowSize * 0.35,
-        orient: 'auto',
-      }, h('polygon', {
-        points: `${arrowSize} 0, 0 ${arrowSize * 0.35}, ${arrowSize} ${arrowSize * 0.7}`,
-        fill: color,
-      }))
-    )
+  // Start arrow — points back along the first segment.
+  if (needsStart && pts.length >= 2) {
+    const tip = pts[0]
+    const next = pts[1]
+    const dir = unitVector(next, tip) // away from the path = toward the start cap
+    arrowEls.push(h('polygon', { points: arrowHead(tip, dir, arrowSize), fill: color }))
   }
 
   const pathEl = h('path', {
     d, fill: 'none', stroke: color,
     'stroke-width': strokeWidth,
     'stroke-dasharray': connector.dash,
-    'marker-end': needsEnd ? `url(#${endMarkerId})` : undefined,
-    'marker-start': needsStart ? `url(#${startMarkerId})` : undefined,
   })
 
   let labelEl: VNode | null = null
@@ -106,5 +122,5 @@ export function Connector({
     ])
   }
 
-  return h('g', null, [h('defs', null, defChildren), pathEl, labelEl])
+  return h('g', null, [pathEl, ...arrowEls, labelEl])
 }
