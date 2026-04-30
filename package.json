@@ -1,6 +1,6 @@
 {
   "name": "gridgram",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "Grid-based diagram rendering library — authored as a DiagramDef or a .gg file, rendered to SVG via Preact SSR.",
   "type": "module",
   "main": "./dist/index.js",
