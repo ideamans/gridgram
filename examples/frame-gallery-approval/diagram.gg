@@ -7,17 +7,21 @@ icon :exec @D1 tabler/crown         "Exec"
 
 emp --> mgr "request"
 
+# Reply connectors share the row with the request line, so we dip them
+# below the row via two waypoints to keep the two flows visually
+# distinct (request → above, approval → below).
+
 # Frame 1: <$1k — manager auto-approves.
-[1] mgr --> emp "< $1k" color=accent
+[1] mgr --> emp "< $1k" color=accent { waypoints: [{ col: 2, row: 1.3 }, { col: 1, row: 1.3 }] }
 [1] icon :mgr color=accent { badges: ['check'] }
 
 # Frame 2: $1k–$10k — finance signs off.
 [2] mgr --> fin  "$1k–$10k"
-[2] fin --> emp  "approved" color=accent
+[2] fin --> emp  "approved" color=accent { waypoints: [{ col: 3, row: 1.3 }, { col: 1, row: 1.3 }] }
 [2] icon :fin color=accent { badges: ['check'] }
 
 # Frame 3: >=$10k — exec also approves.
 [3] mgr  --> fin  "$1k–$10k"
 [3] fin  --> exec ">= $10k"
-[3] exec --> emp  "approved" color=accent
+[3] exec --> emp  "approved" color=accent { waypoints: [{ col: 4, row: 1.3 }, { col: 1, row: 1.3 }] }
 [3] icon :exec color=accent { badges: ['star'] }
