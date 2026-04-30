@@ -1,0 +1,10 @@
+# `text=` puts short text inside the node circle in place of an icon.
+# The text's aspect ratio chooses the largest inscribed rectangle, then
+# height is capped at the icon-area height (and width shrinks with it).
+
+icon :a @A1 text="1"     "single digit"
+icon :b @B1 text="42"    "two digits"
+icon :c @C1 text="1234"  "width-bound"
+icon :d @A2 text="A\nB"  "two lines"
+icon :e @B2 text="OK\nGO" size=0.3 "size=0.3"
+icon :f @C2 "ring only"

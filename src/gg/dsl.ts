@@ -665,6 +665,7 @@ function parseConnector(toks: Token[]): ParseLineResult {
 function applyNodeAttr(node: NodeDef, key: string, value: string, line: number): GgError | null {
   switch (key) {
     case 'src':        node.src = value as any; break
+    case 'text':       node.text = value; break
     case 'size':       node.size = Number(value); break
     case 'sizeScale':  node.sizeScale = Number(value); break
     case 'color':      node.color = value; break

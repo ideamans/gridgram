@@ -162,6 +162,15 @@ export interface NodeDef {
    * later inlines into an SVG fragment.
    */
   src?: SvgFragment
+  /**
+   * Short text rendered inside the node circle in place of an icon.
+   * When set, the icon (`src`) is suppressed. Multi-line strings split
+   * on `\n`. The text auto-sizes to the largest font that fits both
+   *   - height ≤ icon height (`iconSize`)
+   *   - bounding box inscribed in the node circle
+   * so the typical use is digits/short labels like `"1"`, `"2"`, `"OK"`.
+   */
+  text?: string
   /** Label shown as a semi-transparent badge overlapping the top of the icon */
   label?: SvgFragment
   /** Node diameter as absolute fraction of cell size (0–1). Overrides sizeScale when set. */

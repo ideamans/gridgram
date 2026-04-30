@@ -180,6 +180,18 @@ describe('parseLine: icon', () => {
     expect(node).toMatchObject({ id: 'web', pos: { col: 2, row: 1 }, src: 'tabler/server', label: 'Web' })
   })
 
+  test('text= attribute (no icon)', () => {
+    const { node, error } = parseLine('icon :one @1,1 text="1" "Step one"', '', 1)
+    expect(error).toBeUndefined()
+    expect(node).toMatchObject({ id: 'one', pos: { col: 1, row: 1 }, text: '1', label: 'Step one' })
+    expect(node?.src).toBeUndefined()
+  })
+
+  test('text= accepts multi-line via \\n in quoted value', () => {
+    const { node } = parseLine('icon :m @1,1 text="A\\nB"', '', 1)
+    expect(node?.text).toBe('A\nB')
+  })
+
   test('inline { … } body merges fields', () => {
     const { node } = parseLine(
       'icon :n @1,1 src=tabler/user "N" { badges: ["check"], color: "accent/60" }',
