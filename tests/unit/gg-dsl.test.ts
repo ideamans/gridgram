@@ -192,6 +192,53 @@ describe('parseLine: icon', () => {
     expect(node?.text).toBe('A\nB')
   })
 
+  test('style="label-direction: …" pins the slot', () => {
+    const { node, error } = parseLine(
+      'icon :p @1,1 src=tabler/user "P" style="label-direction: bottom-right"',
+      '', 1,
+    )
+    expect(error).toBeUndefined()
+    expect((node as any)?.labelDirection).toBe('bottom-right')
+  })
+
+  test('style= accepts multiple decls separated by ;', () => {
+    const { node } = parseLine(
+      'icon :p @1,1 "P" style="label-direction: top-left;"',
+      '', 1,
+    )
+    expect((node as any)?.labelDirection).toBe('top-left')
+  })
+
+  test('style= rejects unknown property', () => {
+    const { error } = parseLine('icon :p @1,1 "P" style="bogus: 1"', '', 7)
+    expect(error?.message).toMatch(/Unknown style property "bogus"/)
+  })
+
+  test('style= rejects invalid label-direction value', () => {
+    const { error } = parseLine('icon :p @1,1 "P" style="label-direction: north"', '', 9)
+    expect(error?.message).toMatch(/Invalid label-direction "north"/)
+  })
+
+  test('style="leader-length: 2" sets the tier', () => {
+    const { node, error } = parseLine('icon :p @1,1 "P" style="leader-length: 2"', '', 1)
+    expect(error).toBeUndefined()
+    expect((node as any)?.leaderLength).toBe(2)
+  })
+
+  test('style= can set both label-direction and leader-length together', () => {
+    const { node } = parseLine(
+      'icon :p @1,1 "P" style="label-direction: bottom-right; leader-length: 3"',
+      '', 1,
+    )
+    expect((node as any)?.labelDirection).toBe('bottom-right')
+    expect((node as any)?.leaderLength).toBe(3)
+  })
+
+  test('style= rejects invalid leader-length value', () => {
+    const { error } = parseLine('icon :p @1,1 "P" style="leader-length: 7"', '', 11)
+    expect(error?.message).toMatch(/Invalid leader-length "7"/)
+  })
+
   test('inline { … } body merges fields', () => {
     const { node } = parseLine(
       'icon :n @1,1 src=tabler/user "N" { badges: ["check"], color: "accent/60" }',

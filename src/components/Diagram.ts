@@ -142,6 +142,7 @@ function buildDiagramInternal(rawDef: DiagramDef, opts: DiagramOptions = {}): In
       layout,
       theme,
       labelCorner: lr?.corner,
+      labelTier: lr?.tier,
       labelError: mask(lr?.error),
       iconError: mask(n.iconError),
     })

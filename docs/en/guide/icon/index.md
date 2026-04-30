@@ -102,6 +102,62 @@ When both `src=` and `text=` are given on the same node, `text=`
 wins (the icon is suppressed). The convention is to use one or the
 other.
 
+## Pinning the label direction
+
+By default the label-placer auto-searches eight slots around the
+node and picks the first one that doesn't collide with neighbours,
+connectors, or the canvas edge. When you want a specific direction
+regardless, set it via the **CSS-style `style=` attribute**:
+
+```gg
+icon :hub @B2 tabler/server "Hub" style="label-direction: bottom-right"
+```
+
+In the TypeScript API, set `labelDirection` directly:
+
+```ts
+{ id: 'hub', pos: 'B2', src: t('server'), label: 'Hub', labelDirection: 'bottom-right' }
+```
+
+Accepted slot names (kebab-case, the same eight the placer searches):
+
+```
+top-right     top-center     top-left
+right-center                 left-center
+bottom-right  bottom-center  bottom-left
+```
+
+<Example name="label-direction-pinned" />
+
+### Leader-line length
+
+By default the placer also walks **three leader-length tiers** (1 = tight,
+2 = medium, 3 = long) per direction, extending the leader line until the
+label clears nearby obstacles. Pin a tier explicitly with `leader-length`:
+
+```gg
+icon :a @A1 tabler/server "Hub" style="leader-length: 3"             # 8 directions × tier 3
+icon :b @B1 tabler/server "Hub" style="label-direction: top-right; leader-length: 2"  # exactly one slot
+```
+
+The two axes are independent:
+
+| Pinned                               | Candidate combinations |
+|--------------------------------------|------------------------|
+| neither (default)                    | 3 tiers × 8 directions = 24 |
+| `label-direction` only               | 3 tiers × 1 direction = 3 |
+| `leader-length` only                 | 1 tier × 8 directions = 8 |
+| both                                 | 1 |
+
+If every candidate in the filtered set collides, the result still renders
+at the smallest-collision candidate but carries `error: true` and a
+`label-collision` diagnostic — so an agent can see what got run over.
+
+The `style=` attribute is meant to grow with declarations like CSS:
+each value is a list of `property: value` pairs separated by `;`.
+Today only `label-direction` and `leader-length` are recognised; the
+syntax leaves room for more visual properties later.
+
 ## `iconTheme`: theme vs native
 
 Monochrome Tabler icons use `currentColor` so they pick up the node

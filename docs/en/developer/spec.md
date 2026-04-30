@@ -202,6 +202,8 @@ Earlier placements occupy cells; later ones avoid them.
 
 Node labels evaluate the four diagonal corners first (TR → BR → BL → TL), then the top/bottom centers (TC → BC), then the left/right centers (LC → RC). If no slot in tier 1 fits, the placer walks the same eight in tier 2 / 3 (each tier extends the leader line further from the node).
 
+The placer carries the chosen tier back to the renderer via `NodeLabelResult.tier`, and `DiagramNode` multiplies the base `leaderGap` by it — so a label that the placer pushed to tier 2 / 3 actually draws at its longer offset, not silently collapsed to tier 1. See [Pinning the label direction](../guide/icon/#pinning-the-label-direction) on the user-facing guide for the `label-direction` / `leader-length` style properties that filter this candidate list to a single axis or a single combination.
+
 ### 8-direction demo
 
 The figure below sets up a 5×5 grid where the center 3×3 carries demo labels. For each demo node, **seven of its eight neighbour cells are connected**, blocking the corresponding seven label slots; the remaining unconnected neighbour is the open slot the placer falls through to. Each label literally spells the slot it landed in (`TR` / `MR` / `BR` / `BC` / `BL` / `ML` / `TL` / `TC`).
