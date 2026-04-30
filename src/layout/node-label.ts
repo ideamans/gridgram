@@ -18,6 +18,7 @@ import { placeLabel, type SlotCandidate, type AttemptRecord } from '../geometry/
 export type Corner =
   | 'top-right' | 'bottom-right' | 'bottom-left' | 'top-left'
   | 'top-center' | 'bottom-center'
+  | 'left-center' | 'right-center'
 
 export interface CalloutSlot {
   dx: number
@@ -32,15 +33,19 @@ export const SLOTS: Record<Corner, CalloutSlot> = {
   'top-left':      { dx: -1, dy: -1, anchor: 'end'    },
   'top-center':    { dx:  0, dy: -1, anchor: 'middle' },
   'bottom-center': { dx:  0, dy:  1, anchor: 'middle' },
+  'left-center':   { dx: -1, dy:  0, anchor: 'end'    },
+  'right-center':  { dx:  1, dy:  0, anchor: 'start'  },
 }
 
 /**
  * Candidate order. The 4 diagonal corners remain primary (tried first, CW
- * starting from TR). TC/BC are fallbacks used only when no corner fits.
+ * starting from TR). TC/BC are tried next; LC/RC come after the up/down
+ * fallbacks so labels prefer above/below before sliding to the side.
  */
 export const CORNER_ORDER: Corner[] = [
   'top-right', 'bottom-right', 'bottom-left', 'top-left',
   'top-center', 'bottom-center',
+  'left-center', 'right-center',
 ]
 
 /**
@@ -70,18 +75,31 @@ export function computeCallout(
   leaderGap: number
 ): CalloutGeometry {
   const inv2 = 1 / Math.SQRT2
-  const isVertical = slot.dx === 0
+  const isVertical   = slot.dx === 0  // top/bottom-center
+  const isHorizontal = slot.dy === 0  // left/right-center
 
-  // Text anchor point
+  // Text anchor point. Horizontal slots sit a full half-width to the
+  // side; diagonal corners use the inv2 projection so the leader can
+  // exit on the diagonal of the node circle.
   let textX: number
-  if (slot.anchor === 'start') textX = x + (half + leaderGap) * inv2
-  else if (slot.anchor === 'end') textX = x - (half + leaderGap) * inv2
-  else textX = x
+  if (isHorizontal) {
+    textX = slot.anchor === 'start' ? x + half + leaderGap : x - half - leaderGap
+  } else if (slot.anchor === 'start') {
+    textX = x + (half + leaderGap) * inv2
+  } else if (slot.anchor === 'end') {
+    textX = x - (half + leaderGap) * inv2
+  } else {
+    textX = x
+  }
 
   const textY = isVertical
     ? (slot.dy < 0
         ? y - half - leaderGap - textH * 0.2
         : y + half + leaderGap + textH * 0.8)
+    : isHorizontal
+    // Vertically centered on the node (textY is the baseline; nudge
+    // down by ~textH*0.3 so the cap sits across the node's centerline).
+    ? y + textH * 0.3
     : (slot.dy < 0
         ? y - half * inv2 - leaderGap - textH * 0.2
         : y + half * inv2 + leaderGap + textH * 0.8)
@@ -97,7 +115,10 @@ export function computeCallout(
   const leaderTargetX = slot.anchor === 'start' ? rectX
                       : slot.anchor === 'end' ? rectX + textW + 4
                       : rectX + (textW + 4) / 2
-  const leaderTargetY = slot.dy < 0 ? rectY + textH : rectY
+  // Horizontal slots: leader meets the label at its vertical mid-line.
+  const leaderTargetY = isHorizontal
+    ? rectY + textH / 2
+    : (slot.dy < 0 ? rectY + textH : rectY)
 
   // Contact point on the node circle: lie on the ray from the node
   // *centre* to the label's leader target, so the leader visually
