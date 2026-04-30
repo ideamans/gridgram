@@ -156,7 +156,7 @@ const config: ReturnType<typeof withTheme> = withTheme({
               ],
             },
             {
-              text: "Icon",
+              text: "Icon Node",
               items: [
                 { text: "Overview", link: "/en/guide/icon/" },
                 { text: "Badge", link: "/en/guide/icon/badge" },
@@ -360,7 +360,7 @@ const config: ReturnType<typeof withTheme> = withTheme({
               ],
             },
             {
-              text: "アイコン",
+              text: "アイコンノード",
               items: [
                 { text: "概要", link: "/ja/guide/icon/" },
                 { text: "バッジ", link: "/ja/guide/icon/badge" },

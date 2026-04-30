@@ -42,7 +42,52 @@ export function DiagramNode({ node, layout, theme, labelCorner, labelError, icon
     }),
   ]
 
-  if (!iconError && node.src) {
+  if (!iconError && node.text) {
+    // Text-in-circle. The geometry is:
+    //   1. Compute a per-glyph aspect estimate → text aspect ratio
+    //      AR = (maxChars * CHAR_ASPECT) / nLines.
+    //   2. Take the largest rectangle of that aspect that's inscribed
+    //      in the node circle (W² + H² ≤ px²; W = AR · H).
+    //   3. If H exceeds the icon-area height, clamp H = iconSize and
+    //      shrink W proportionally (keeping AR) — height never spills
+    //      past where a glyph would have sat.
+    //   4. Use `textLength` to lock each line's rendered width to its
+    //      proportional share of W, so the text actually fits even
+    //      when the font's true aspect drifts from the estimate.
+    const lines = node.text.split('\n')
+    const nLines = lines.length
+    const charCounts = lines.map((ln) => Math.max(1, Array.from(ln).length))
+    const maxChars = Math.max(...charCounts)
+    // Per-glyph em-width estimate for sans-serif bold; digits/letters
+    // average ≈ 0.55–0.65. Combined with textLength below, the exact
+    // value drives box shape rather than fit.
+    const CHAR_ASPECT = 0.6
+    const textAR = (maxChars * CHAR_ASPECT) / nLines
+    let H = px / Math.sqrt(textAR * textAR + 1)
+    if (H > iconSize) H = iconSize
+    const W = textAR * H
+    const fontSize = H / nLines
+    const tspans = lines.map((ln, i) =>
+      h('tspan', {
+        key: i,
+        x,
+        y: y - H / 2 + (i + 0.5) * fontSize,
+        'dominant-baseline': 'central',
+        textLength: W * (charCounts[i] / maxChars),
+        lengthAdjust: 'spacingAndGlyphs',
+      }, ln),
+    )
+    children.push(
+      h('text', {
+        'text-anchor': 'middle',
+        'dominant-baseline': 'central',
+        'font-size': fontSize,
+        'font-family': 'sans-serif',
+        'font-weight': 700,
+        fill: color,
+      }, tspans),
+    )
+  } else if (!iconError && node.src) {
     // clip:
     //   'square' (default) → overflow: hidden on the ICON_VIEWPORT box
     //   'circle'           → overflow: hidden + clip-path circle inscribed in the square

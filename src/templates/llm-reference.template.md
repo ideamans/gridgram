@@ -51,7 +51,7 @@ The `.gg` format is a whitespace-tolerant, command-first DSL. Every file is a li
 ### Statement kinds
 
 - **`doc { … }`** — a JSON5 body of document settings. Merged with project config and CLI overrides. Known keys: `cellSize`, `padding`, `columns` (or `cols`), `rows`, `theme`, `icons`, and frame-specific overrides.
-- **`icon`** — a node. `icon :id @pos [tabler/<name>|…|<src>] "label" attr=val`. Position is optional; omitted positions auto-flow along `cols`.
+- **`icon`** — a node. `icon :id @pos [tabler/<name>|…|<src>] "label" attr=val`. Position is optional; omitted positions auto-flow along `cols`. The asset reference can be omitted entirely — see "Text in place of an icon" below for the empty / `text=` cases.
 - **`region`** — a rectangular background span. `region :id @col,row-col,row [label]`. Must be 4-connected.
 - **`note`** — an annotation with a leader line pointing at one or more targets.
 - **`<id> <arrow> <id>`** — a connector between nodes. Arrow forms: `-->`, `->`, `<--`, `<->`, `---`, `..>`, `<..`, `<..>`, `...` (dashed = `.`, solid = `-`).
@@ -103,6 +103,27 @@ Scoring (higher = better): exact name 10, prefix 7, exact tag 5, name substring 
 - Inside a `.gg` file, `doc { icons: { <key>: "<svg path or inline markup>" } }` declares per-document icons.
 
 Resolution order: inline `doc { icons }` → `--icons`/`iconsDir` scan → built-in tabler resolver → error (red ring + diagnostic).
+
+The error trigger is *"asset name supplied but didn't resolve"*. An `icon` declaration with **no asset reference** is fine — the node renders as a colored ring (useful as a placeholder, or with `text=`).
+
+### Text in place of an icon
+
+`text="<string>"` puts short text inside the node circle instead of an icon. Use it for step numbers, status codes, single CJK characters, etc.
+
+```gg
+icon :step1 @A1 text="1" "Submit"
+icon :step2 @B1 text="42" "Two digits"
+icon :step3 @C1 text="A\nB" "Multi-line via \\n"
+```
+
+Sizing rules — gridgram picks the largest font that satisfies both:
+
+1. text aspect ratio = (max line chars) / (line count)
+2. the bounding box is the largest rectangle of that aspect inscribed in the node circle (so wider one-line strings spill past the icon-area's left/right edges, gaining width from the rounded corners)
+3. if the box height exceeds the icon-area height, height is clamped to that and width shrinks proportionally (aspect preserved)
+4. each line's `<tspan>` carries `textLength` so glyphs lock to the computed width regardless of the font's true per-glyph aspect
+
+If both `src=` and `text=` are given on the same node, `text=` wins (the icon is suppressed). The convention is to use one or the other.
 
 ---
 

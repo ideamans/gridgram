@@ -1,8 +1,12 @@
-# Icon
+# Icon Node
 
 Every node in Gridgram is declared with the `icon` command — a small
 monochrome glyph that tells the reader at a glance what kind of thing
 this node is (a server, a user, a message bus, …).
+
+The name of the command is `icon`, but the node doesn't *have* to carry
+a glyph: you can put short text inside the circle instead (`text=`),
+or leave the circle empty as a structural placeholder.
 
 ## The three flavors
 
@@ -58,6 +62,45 @@ image placeholder.
 ```gg
 icon :front @A1 tabler/userr "typo"   # Tabler has no "userr" → red ring
 ```
+
+The error trigger is *"asset name supplied but didn't resolve"*. An
+`icon` declaration with **no asset reference at all** is fine — the
+node just renders as a colored ring (useful as a placeholder while
+you're sketching, or with `text=` below).
+
+## Text instead of an icon
+
+Sometimes the right thing to put inside a node is a short label —
+a step number (`"1"`, `"2"`), a status code (`"OK"`), a single CJK
+character — rather than a pictogram. Use the `text=` attribute and
+omit the asset reference:
+
+```gg
+icon :step1 @A1 text="1" "Submit"
+icon :step2 @B1 text="2" "Review"
+icon :step3 @C1 text="OK\nGO" "Approve"
+```
+
+Sizing rules — Gridgram picks the **largest font-size** that satisfies
+both:
+
+- **Height** ≤ the icon area's height (same as a glyph would have).
+- The text's bounding box (W × H) is **inscribed in the node circle**
+  (so a wider one-line label can spill past the icon-area's left/right
+  edges, taking advantage of the rounded corners).
+
+For multi-line strings, separate lines with `\n` inside the quoted
+value. The font-size shrinks to keep all lines stacked within the
+height budget.
+
+<Example name="icon-text" />
+
+The bottom-right cell shows the empty case — neither `src=` nor
+`text=`. That's an intentional placeholder, not an error.
+
+When both `src=` and `text=` are given on the same node, `text=`
+wins (the icon is suppressed). The convention is to use one or the
+other.
 
 ## `iconTheme`: theme vs native
 
