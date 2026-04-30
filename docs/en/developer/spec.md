@@ -196,9 +196,19 @@ Earlier placements occupy cells; later ones avoid them.
 
 | Kind       | Candidates (tried in order)                              |
 |------------|----------------------------------------------------------|
-| Node       | top-right, bottom-right, bottom-left, top-left, top-center, bottom-center |
+| Node       | top-right, bottom-right, bottom-left, top-left, top-center, bottom-center, left-center, right-center |
 | Connector  | middle segment outward (hop order); within a segment: middle → inset positions |
 | Region     | top-left, top-right, bottom-right, bottom-left, top-center, bottom-center (skipping corners that fall outside the union) |
+
+Node labels evaluate the four diagonal corners first (TR → BR → BL → TL), then the top/bottom centers (TC → BC), then the left/right centers (LC → RC). If no slot in tier 1 fits, the placer walks the same eight in tier 2 / 3 (each tier extends the leader line further from the node).
+
+### 8-direction demo
+
+The figure below sets up a 5×5 grid where the center 3×3 carries demo labels. For each demo node, **seven of its eight neighbour cells are connected**, blocking the corresponding seven label slots; the remaining unconnected neighbour is the open slot the placer falls through to. Each label literally spells the slot it landed in (`TR` / `MR` / `BR` / `BC` / `BL` / `ML` / `TL` / `TC`).
+
+<Example name="label-directions" />
+
+The middle-row sides (`ML` / `MR`) are last-resort fallbacks reached only when all corners and the top/bottom centers are blocked — useful in narrow vertical layouts.
 
 ### Collision rule
 
