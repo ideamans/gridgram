@@ -125,6 +125,32 @@ Sizing rules — gridgram picks the largest font that satisfies both:
 
 If both `src=` and `text=` are given on the same node, `text=` wins (the icon is suppressed). The convention is to use one or the other.
 
+### Pinning the label direction
+
+By default the label placer auto-searches eight slots around the node. To force a specific slot, use the CSS-style `style=` attribute:
+
+```gg
+icon :hub @B2 tabler/server "Hub" style="label-direction: bottom-right"
+```
+
+Accepted values (kebab-case): `top-right`, `top-center`, `top-left`, `right-center`, `left-center`, `bottom-right`, `bottom-center`, `bottom-left`. In the TypeScript API the equivalent field is `labelDirection`.
+
+The placer auto-search has two axes: **leader-length tier (1 = tight, 2 = medium, 3 = long)** × **direction (8 slots)**. `label-direction` and `leader-length` independently filter their axis to a single value:
+
+| Pinned                  | Candidate combinations  |
+|-------------------------|-------------------------|
+| neither (default)       | 3 × 8 = 24              |
+| `label-direction` only  | 3 × 1 = 3               |
+| `leader-length` only    | 1 × 8 = 8               |
+| both                    | 1                       |
+
+```gg
+icon :a @A1 tabler/server "Hub" style="leader-length: 3"
+icon :b @B1 tabler/server "Hub" style="label-direction: top-right; leader-length: 2"
+```
+
+`leader-length` accepts `1`, `2`, or `3`; the TS-API equivalent is `leaderLength`. If every candidate in the filtered set collides, the label still renders at the smallest-collision candidate but the result carries `error: true` and a `label-collision` diagnostic. The `style=` syntax is `property: value` pairs separated by `;`; today recognised properties are `label-direction` and `leader-length`.
+
 ---
 
 ## Document settings (`doc { … }`)

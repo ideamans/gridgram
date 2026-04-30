@@ -1,0 +1,20 @@
+# `style="…"` pins the placement axes independently:
+#   label-direction: <slot>     — fix the direction (3 lengths still walked)
+#   leader-length: <1|2|3>      — fix the length (8 directions still walked)
+#   both together                — single combination, no auto-search
+
+icon :a @A1 tabler/user "default"
+icon :b @B1 tabler/user "TR" style="label-direction: top-right"
+icon :c @C1 tabler/user "BR" style="label-direction: bottom-right"
+icon :d @A2 tabler/user "ML" style="label-direction: left-center"
+icon :e @B2 tabler/user "TC" style="label-direction: top-center"
+icon :f @C2 tabler/user "MR" style="label-direction: right-center"
+icon :g @A3 tabler/user "BL" style="label-direction: bottom-left"
+icon :h @B3 tabler/user "BC" style="label-direction: bottom-center"
+icon :i @C3 tabler/user "TL" style="label-direction: top-left"
+
+# Same direction (top-right) at each leader-length tier — the leader gets
+# progressively longer as the value grows.
+icon :j @A4 tabler/user "L1" style="label-direction: top-right; leader-length: 1"
+icon :k @B4 tabler/user "L2" style="label-direction: top-right; leader-length: 2"
+icon :l @C4 tabler/user "L3" style="label-direction: top-right; leader-length: 3"

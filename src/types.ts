@@ -173,6 +173,35 @@ export interface NodeDef {
   text?: string
   /** Label shown as a semi-transparent badge overlapping the top of the icon */
   label?: SvgFragment
+  /**
+   * Pin the label direction to one of the 8 placement slots,
+   * bypassing the direction axis of the auto-search. The leader-length
+   * axis is still walked (tier 1 → 2 → 3) unless `leaderLength` is
+   * also set. Accepts the same kebab-case names the placer uses
+   * internally:
+   *   'top-right' | 'bottom-right' | 'bottom-left' | 'top-left' |
+   *   'top-center' | 'bottom-center' |
+   *   'left-center' | 'right-center'.
+   *
+   * In `.gg` source set this via the CSS-style attribute:
+   *   `style="label-direction: top-right"`.
+   */
+  labelDirection?:
+    | 'top-right' | 'bottom-right' | 'bottom-left' | 'top-left'
+    | 'top-center' | 'bottom-center'
+    | 'left-center' | 'right-center'
+  /**
+   * Pin the leader-line length tier (1 = tight, 2 = medium, 3 = long),
+   * bypassing the length axis of the auto-search. Independent of
+   * `labelDirection` — set neither for full auto-search, set one to
+   * filter that axis, or both to fix the placement to a single slot.
+   * If the pinned combination collides with something else, the label
+   * still renders there but the result carries `error: true` and a
+   * `label-collision` diagnostic.
+   *
+   * In `.gg` source: `style="leader-length: 2"`.
+   */
+  leaderLength?: 1 | 2 | 3
   /** Node diameter as absolute fraction of cell size (0–1). Overrides sizeScale when set. */
   size?: number
   /** Node size multiplier on the default fraction (default: 1). Ignored when `size` is set. */

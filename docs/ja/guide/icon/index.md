@@ -101,6 +101,59 @@ icon :step3 @C1 text="OK\nGO" "承認"
 `src=` と `text=` を同じノードに併記した場合は `text=` が勝ち、アイコンは
 描画されません。慣例としてはどちらか一方だけを使ってください。
 
+## ラベルの方向を固定する
+
+通常、ラベル配置器はノードの周囲 8 方向を順に試して、隣接ノードやコネクタ・
+キャンバス端にぶつからない最初のスロットを選びます。特定の方向に必ず
+寄せたい場合は、**CSS 風の `style=` 属性** で指定してください：
+
+```gg
+icon :hub @B2 tabler/server "Hub" style="label-direction: bottom-right"
+```
+
+TypeScript API では `labelDirection` を直接指定します：
+
+```ts
+{ id: 'hub', pos: 'B2', src: t('server'), label: 'Hub', labelDirection: 'bottom-right' }
+```
+
+指定可能な方向名（配置器が探索する 8 スロットと同じケバブケース）：
+
+```
+top-right     top-center     top-left
+right-center                 left-center
+bottom-right  bottom-center  bottom-left
+```
+
+<Example name="label-direction-pinned" />
+
+### 引き出し線の長さ
+
+配置器は方向 8 候補に加えて **長さ 3 段階**（1 = タイト、2 = 中、3 = 長）
+も走査して、隣接物にぶつからない位置を探します。長さを明示固定するには
+`leader-length` を使います：
+
+```gg
+icon :a @A1 tabler/server "Hub" style="leader-length: 3"
+icon :b @B1 tabler/server "Hub" style="label-direction: top-right; leader-length: 2"
+```
+
+方向と長さは独立した軸です：
+
+| 固定の有無                              | 候補数（length × direction） |
+|------------------------------------------|------------------------------|
+| 何も指定しない（既定）                  | 3 × 8 = 24 |
+| `label-direction` のみ                   | 3 × 1 = 3 |
+| `leader-length` のみ                     | 1 × 8 = 8 |
+| 両方                                     | 1 |
+
+絞り込んだ候補がすべて衝突した場合は、衝突量が最小の候補に配置しつつ
+結果に `error: true` が立ち、`label-collision` 診断が発行されます。
+
+`style=` 属性は CSS のように `property: value` を `;` で区切ったリスト
+として今後拡張する想定です。現時点では `label-direction` と
+`leader-length` の 2 つに対応します。
+
 ## `iconTheme`: theme / native
 
 モノクロの Tabler アイコンは `currentColor` を使うため、ノード色を

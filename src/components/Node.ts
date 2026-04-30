@@ -17,11 +17,13 @@ export interface NodeProps {
   layout: GridLayout
   theme: DiagramTheme
   labelCorner?: Corner
+  /** Leader-length tier the placer chose (1/2/3); defaults to 1. */
+  labelTier?: number
   labelError?: boolean
   iconError?: boolean
 }
 
-export function DiagramNode({ node, layout, theme, labelCorner, labelError, iconError }: NodeProps): any {
+export function DiagramNode({ node, layout, theme, labelCorner, labelTier, labelError, iconError }: NodeProps): any {
   const { x, y } = gridToPixel(layout, node.pos)
   const sizeFrac = resolveNodeSizeFrac(node)
   const px = layout.cellSize * sizeFrac
@@ -138,7 +140,9 @@ export function DiagramNode({ node, layout, theme, labelCorner, labelError, icon
 
   if (node.label && labelCorner) {
     const m = nodeLabelMetrics(node, layout)
-    const best = computeCallout(x, y, half, SLOTS[labelCorner], m.fs, m.textW, m.textH, m.leaderGap)
+    // Multiply the base leaderGap by the tier the placer chose, so a
+    // tier-2 / tier-3 winner actually draws at its longer offset.
+    const best = computeCallout(x, y, half, SLOTS[labelCorner], m.fs, m.textW, m.textH, m.leaderGap * (labelTier ?? 1))
     const labelColor = labelError ? ERROR_COLOR : color
 
     children.push(

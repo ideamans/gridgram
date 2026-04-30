@@ -682,10 +682,56 @@ function applyNodeAttr(node: NodeDef, key: string, value: string, line: number):
       }
       node.clip = value
       break
+    case 'style': {
+      // CSS-style declaration block: `prop: value; prop: value`.
+      // Each declaration maps onto an internal NodeDef field.
+      for (const decl of value.split(';')) {
+        const trimmed = decl.trim()
+        if (!trimmed) continue
+        const colon = trimmed.indexOf(':')
+        if (colon < 0) {
+          return { message: `Invalid style declaration "${trimmed}" (expected "property: value")`, line, source: 'dsl' }
+        }
+        const prop = trimmed.slice(0, colon).trim()
+        const val  = trimmed.slice(colon + 1).trim()
+        const err = applyNodeStyle(node, prop, val, line)
+        if (err) return err
+      }
+      break
+    }
     default:
       return { message: `Unknown icon attribute "${key}"`, line, source: 'dsl' }
   }
   return null
+}
+
+const LABEL_DIRECTIONS = [
+  'top-right', 'bottom-right', 'bottom-left', 'top-left',
+  'top-center', 'bottom-center',
+  'left-center', 'right-center',
+] as const
+
+function applyNodeStyle(node: NodeDef, prop: string, value: string, line: number): GgError | null {
+  switch (prop) {
+    case 'label-direction':
+      if (!(LABEL_DIRECTIONS as readonly string[]).includes(value)) {
+        return {
+          message: `Invalid label-direction "${value}" (expected one of: ${LABEL_DIRECTIONS.join(', ')})`,
+          line,
+          source: 'dsl',
+        }
+      }
+      node.labelDirection = value as NodeDef['labelDirection']
+      return null
+    case 'leader-length':
+      if (value !== '1' && value !== '2' && value !== '3') {
+        return { message: `Invalid leader-length "${value}" (expected 1, 2, or 3)`, line, source: 'dsl' }
+      }
+      node.leaderLength = Number(value) as 1 | 2 | 3
+      return null
+    default:
+      return { message: `Unknown style property "${prop}"`, line, source: 'dsl' }
+  }
 }
 
 function applyConnectorAttr(conn: ConnectorDef, key: string, value: string, line: number): GgError | null {

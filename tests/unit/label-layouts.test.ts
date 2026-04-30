@@ -37,6 +37,41 @@ describe('computeNodeLabelRect', () => {
     const result = computeNodeLabelRect(node, layout, [blocking.rect], [])!
     expect(result.corner).not.toBe(blocking.corner)
   })
+
+  test('labelDirection pins the slot, even if it is not the auto-search winner', () => {
+    const node: NormalizedNodeDef = {
+      id: 'x', pos: { col: 3, row: 3 }, label: 'hi',
+      labelDirection: 'bottom-left',
+    }
+    const result = computeNodeLabelRect(node, layout, [], [])!
+    expect(result.corner).toBe('bottom-left')
+    expect(result.error).toBe(false)
+  })
+
+  test('leaderLength=3 forces tier 3 — every attempt is at that tier', () => {
+    const node: NormalizedNodeDef = {
+      id: 'x', pos: { col: 3, row: 3 }, label: 'hi',
+      leaderLength: 3,
+    }
+    const result = computeNodeLabelRect(node, layout, [], [])!
+    // tier 1 / 2 are not in the candidate set — every attempt is tier 3.
+    for (const a of result.attempts) {
+      expect(a.description).toMatch(/leader×3/)
+    }
+    expect(result.error).toBe(false)
+  })
+
+  test('labelDirection + leaderLength pin to a single combination', () => {
+    const node: NormalizedNodeDef = {
+      id: 'x', pos: { col: 3, row: 3 }, label: 'hi',
+      labelDirection: 'bottom-left',
+      leaderLength: 2,
+    }
+    const result = computeNodeLabelRect(node, layout, [], [])!
+    expect(result.corner).toBe('bottom-left')
+    expect(result.attempts).toHaveLength(1)
+    expect(result.attempts[0].description).toMatch(/^bottom-left \(leader×2\)$/)
+  })
 })
 
 describe('computeRegionLabelRect', () => {

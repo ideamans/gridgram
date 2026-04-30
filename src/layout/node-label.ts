@@ -166,6 +166,11 @@ export function nodeLabelMetrics(node: NormalizedNodeDef, layout: GridLayout): N
 export interface NodeLabelResult {
   rect: LabelRect
   corner: Corner
+  /** Leader-length tier (1 = tight, 2 = medium, 3 = long) the placer
+   *  chose for this label. The renderer multiplies its base leaderGap
+   *  by this value when drawing the callout, so tier-2 / tier-3 wins
+   *  actually appear at their longer offsets. */
+  tier: number
   error: boolean
   /** Every corner the placer tried, for diagnostic emission. */
   attempts: AttemptRecord[]
@@ -200,13 +205,28 @@ export function computeNodeLabelRect(
       m.x, m.y, m.half, SLOTS[corner], m.fs, m.textW, m.textH, m.leaderGap * tier,
     ).labelRect
   const candidates: SlotCandidate<Corner>[] = []
-  for (const tier of LEADER_TIERS) {
-    for (const c of CORNER_ORDER) {
+  // The auto-search has two axes: leader-length tier (outer, so tier 1
+  // is preferred) × direction (inner, CORNER_ORDER). `labelDirection`
+  // and `leaderLength` independently filter their axis to a single
+  // value; setting both fixes the placement to one combination.
+  // Collisions in the filtered candidate set still surface as
+  // `error: true` + a `label-collision` diagnostic.
+  const directions: readonly Corner[] = node.labelDirection
+    ? [node.labelDirection]
+    : CORNER_ORDER
+  const tiers: readonly number[] = node.leaderLength
+    ? [node.leaderLength]
+    : LEADER_TIERS
+  // Parallel array so we can recover the tier of the winning candidate.
+  const candidateTiers: number[] = []
+  for (const tier of tiers) {
+    for (const c of directions) {
       candidates.push({
         slot: c,
         rect: buildRect(c, tier),
         description: tier === 1 ? c : `${c} (leader×${tier})`,
       })
+      candidateTiers.push(tier)
     }
   }
   const result = placeLabel<Corner>(
@@ -215,5 +235,16 @@ export function computeNodeLabelRect(
     undefined,
     { noFitStrategy: 'smallest-collision' },
   )!
-  return { rect: result.rect, corner: result.slot, error: result.error, attempts: result.attempts }
+  // The accepted attempt's index lines up with the candidate index for
+  // both the success path and the smallest-collision fallback (no
+  // `fallback` arg is passed here, so we never get an off-by-one).
+  const acceptedIdx = result.attempts.findIndex((a) => a.accepted)
+  const chosenTier = acceptedIdx >= 0 ? candidateTiers[acceptedIdx] : 1
+  return {
+    rect: result.rect,
+    corner: result.slot,
+    tier: chosenTier,
+    error: result.error,
+    attempts: result.attempts,
+  }
 }
