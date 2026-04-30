@@ -1,0 +1,110 @@
+# 8-direction node-label placement spec demo.
+#
+# 5×5 grid. The center 3×3 carries one-character labels — the arrow
+# points at the slot the label landed in. For each demo node, seven
+# of its eight neighbour cells are connected, blocking those seven
+# label slots; the un-connected neighbour is the open direction the
+# placer falls through to.
+
+doc {
+  cellSize: 180,
+  rows: 5,
+  cols: 5,
+}
+
+# Outer ring (no label) — small, just so the connectors have anchors.
+icon :a1 @A1 sizeScale=0.65
+icon :b1 @B1 sizeScale=0.65
+icon :c1 @C1 sizeScale=0.65
+icon :d1 @D1 sizeScale=0.65
+icon :e1 @E1 sizeScale=0.65
+
+icon :a2 @A2 sizeScale=0.65
+icon :e2 @E2 sizeScale=0.65
+
+icon :a3 @A3 sizeScale=0.65
+icon :e3 @E3 sizeScale=0.65
+
+icon :a4 @A4 sizeScale=0.65
+icon :e4 @E4 sizeScale=0.65
+
+icon :a5 @A5 sizeScale=0.65
+icon :b5 @B5 sizeScale=0.65
+icon :c5 @C5 sizeScale=0.65
+icon :d5 @D5 sizeScale=0.65
+icon :e5 @E5 sizeScale=0.65
+
+# Center 3×3 — eight labelled demo nodes plus an unlabelled hub at C3.
+icon :b2 @B2 "↖"
+icon :c2 @C2 "↑"
+icon :d2 @D2 "↗"
+icon :b3 @B3 "←"
+icon :c3 @C3
+icon :d3 @D3 "→"
+icon :b4 @B4 "↙"
+icon :c4 @C4 "↓"
+icon :d4 @D4 "↘"
+
+# Connectors fan out from each demo node to its seven *blocking* neighbours;
+# the eighth (the arrow direction) is left unconnected so the label-placer
+# falls through to that slot.
+
+# B2 (open=TL ↖)
+b2 --- b1
+b2 --- c1
+b2 --- a2
+b2 --- c2
+b2 --- a3
+b2 --- b3
+b2 --- c3
+
+# C2 (open=TC ↑)
+c2 --- b1
+c2 --- d1
+c2 --- d2
+c2 --- c3
+c2 --- b3
+c2 --- d3
+
+# D2 (open=TR ↗)
+d2 --- c1
+d2 --- d1
+d2 --- e2
+d2 --- c3
+d2 --- d3
+d2 --- e3
+
+# B3 (open=LC ←)
+b3 --- a2
+b3 --- c3
+b3 --- a4
+b3 --- b4
+b3 --- c4
+
+# D3 (open=RC →)
+d3 --- e2
+d3 --- c3
+d3 --- c4
+d3 --- d4
+d3 --- e4
+
+# B4 (open=BL ↙)
+b4 --- a3
+b4 --- c3
+b4 --- a4
+b4 --- b5
+b4 --- c5
+
+# C4 (open=BC ↓)
+c4 --- c3
+c4 --- b4
+c4 --- d4
+c4 --- b5
+c4 --- d5
+
+# D4 (open=BR ↘)
+d4 --- c3
+d4 --- e3
+d4 --- c5
+d4 --- d5
+d4 --- e4
