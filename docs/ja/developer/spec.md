@@ -173,9 +173,19 @@ notes (position fixed by @pos)
 
 | 種類         | 候補（この順に試行）                                         |
 |--------------|------------------------------------------------------------|
-| ノード       | top-right、bottom-right、bottom-left、top-left、top-center、bottom-center |
+| ノード       | top-right、bottom-right、bottom-left、top-left、top-center、bottom-center、left-center、right-center |
 | コネクタ     | 中央セグメントから外側へ（hop 順）。各セグメント内は中央 → inset 位置 |
 | リージョン   | top-left、top-right、bottom-right、bottom-left、top-center、bottom-center（union 外に落ちるコーナーは除外） |
+
+ノードラベルは 4 つのコーナー（TR → BR → BL → TL）→ 上下センター（TC → BC）→ 左右センター（LC → RC）の順で評価されます。各層を抜けても収まらない場合は、リーダー線をさらに引き伸ばした tier 2 / tier 3 の候補（同じ 8 方向の繰り返し）に落ちます。
+
+### デモ：8 方向
+
+下図は 5×5 グリッドの中央 3×3 にだけ 1 文字のラベルを配置し、デモノードごとに **7 方向の候補をコネクタで埋める** ことで、残った 1 方向にラベルが押し出される様子を可視化したものです。矢印の指す向きが、配置器が選んだスロットそのものになっています。
+
+<Example name="label-directions" />
+
+左右中央（`←` / `→`）は、上下のフォールバックでも収まらないときに最後に試される候補で、コーナーや上下センターが全て塞がる縦長レイアウトで効きます。
 
 ### 衝突ルール
 
