@@ -44,6 +44,17 @@ export interface ResolvedConnector {
   /** True when the line could neither go direct nor be routed */
   lineError: boolean
   labelResult?: ConnectorLabelResult
+  /**
+   * Overlap-split rotation applied at the FROM-end's pulled-back point,
+   * in radians. Set when this connector is one of an exactly-2 pair
+   * sharing the same unordered endpoint pair; absent otherwise. The
+   * Connector component and the connector-label placer both feed this
+   * back into `resolveConnectorPath` so the rendered SVG and the label
+   * layout agree on where the line actually sits.
+   */
+  fromAngleOffset?: number
+  /** Same as `fromAngleOffset`, for the TO-end. */
+  toAngleOffset?: number
 }
 
 export interface ResolvedNote {
@@ -84,29 +95,162 @@ interface ConnectorLineRecord {
   crossingNodes?: NormalizedNodeDef[]
 }
 
+/**
+ * Angle (in radians) by which each endpoint of an overlap-split pair
+ * is rotated on its node's circle, away from the canonical centerline.
+ * 15° gives a visible separation (~12% of cellSize for default-radius
+ * nodes) without making the lines look unrelated.
+ */
+const OVERLAP_ENDPOINT_ANGLE = (15 * Math.PI) / 180
+
+/** Canonical (alphabetical) form of an unordered endpoint pair. */
+function canonicalPair(from: string, to: string): { key: string; canonicalFrom: string; canonicalTo: string } {
+  const a = from < to ? from : to
+  const b = from < to ? to : from
+  return { key: `${a}|${b}`, canonicalFrom: a, canonicalTo: b }
+}
+
+/**
+ * Compute the `(fromAngleOffset, toAngleOffset)` pair that shifts a
+ * connector's connection points perpendicular to the canonical
+ * centerline by one full `OVERLAP_ENDPOINT_ANGLE` on each circle.
+ *
+ * The line stays straight; only where it meets each node circle moves.
+ * Both endpoints rotate so they land on the SAME canonical perpendicular
+ * side (CCW from canonical A→B when `side = +1`, CW when `side = -1`).
+ * In local node frames this means the canonical-from end rotates by
+ * `+θ × side` and the canonical-to end rotates by `−θ × side` — they
+ * have opposite signs because the local "toward the other node"
+ * direction is opposite at each end.
+ *
+ * Pair member 0 takes `side = +1`, member 1 takes `side = -1`, so the
+ * two connectors end up on mirrored canonical sides. Direction (A→B vs
+ * B→A) is normalised against the canonical pair, so two members of an
+ * overlap group always come out on opposite sides regardless of which
+ * way each arrow points.
+ */
+function buildOverlapAngleOffsets(
+  conn: NormalizedConnectorDef,
+  canonicalFromId: string,
+  side: 1 | -1,
+): { fromAngleOffset: number; toAngleOffset: number } {
+  const θ = OVERLAP_ENDPOINT_ANGLE
+  // Sign convention in the canonical frame: at the canonical-from end,
+  // +side rotates CCW; at the canonical-to end, +side rotates CW. We
+  // then swap when `conn.from` is the canonical-to id so the per-end
+  // offsets always describe the rotation at THIS connector's from / to.
+  const canonicalFromAngle = +θ * side
+  const canonicalToAngle   = -θ * side
+  return conn.from === canonicalFromId
+    ? { fromAngleOffset: canonicalFromAngle, toAngleOffset: canonicalToAngle }
+    : { fromAngleOffset: canonicalToAngle,   toAngleOffset: canonicalFromAngle }
+}
+
+function buildOverlapDiagnostic(conns: NormalizedConnectorDef[]): PlacementDiagnostic {
+  const extras = conns.slice(2)
+  const a = conns[0].from
+  const b = conns[0].to
+  return {
+    kind: 'connector-overlap',
+    severity: 'warning',
+    element: connectorRef(extras[0]),
+    message:
+      `${conns.length} connectors share endpoint pair "${a}"↔"${b}"; only the first 2 can be auto-split. ` +
+      `The remaining ${extras.length} draw as straight lines through each other and are marked with the error color.`,
+    suggestion:
+      `Keep at most 2 connectors between any pair of nodes, or add \`waypoints: [...]\` ` +
+      `to the surplus connector(s) so they take a deliberate path.`,
+  }
+}
+
 function resolveConnectors(
   connectors: NormalizedConnectorDef[],
   nodeMap: Map<string, NormalizedNodeDef>,
   allNodes: NormalizedNodeDef[],
   layout: GridLayout
-): { records: ConnectorLineRecord[]; lines: LineSeg[] } {
+): { records: ConnectorLineRecord[]; lines: LineSeg[]; overlapDiagnostics: PlacementDiagnostic[] } {
   const records: ConnectorLineRecord[] = []
   const lines: LineSeg[] = []
   const used = new Set<string>()
+  const overlapDiagnostics: PlacementDiagnostic[] = []
 
-  const appendSegments = (conn: NormalizedConnectorDef, pixelWaypoints?: Pixel[]) => {
-    const path = resolveConnectorPath(conn, nodeMap, layout, pixelWaypoints)
+  // Phase 1 — pre-classify each connector. A connector is "straight
+  // eligible" (i.e. would render as a direct line and may participate
+  // in overlap-split) when it has no user waypoints, no node crossings,
+  // and isn't a self-loop. We compute this up front so overlap-pair
+  // grouping happens before any segment emission.
+  interface Phase1 { crossings: NormalizedNodeDef[]; straight: boolean }
+  const phase1: Phase1[] = connectors.map((conn) => {
+    if (conn.from === conn.to) return { crossings: [], straight: false }
+    const hasUserWaypoints = !!conn.waypoints && conn.waypoints.length > 0
+    const crossings = findCrossingNodes(conn, nodeMap, allNodes, layout)
+    const straight = !hasUserWaypoints && crossings.length === 0
+    return { crossings, straight }
+  })
+
+  // Group straight-eligible connectors by unordered endpoint pair.
+  const groups = new Map<string, number[]>()
+  for (let i = 0; i < connectors.length; i++) {
+    if (!phase1[i].straight) continue
+    const { key } = canonicalPair(connectors[i].from, connectors[i].to)
+    let g = groups.get(key)
+    if (!g) groups.set(key, g = [])
+    g.push(i)
+  }
+
+  // Assign endpoint-rotation angles (exactly-2 groups) or mark overflow
+  // (3+ groups) for the segment-emission pass below.
+  const overlapAnglesByIdx = new Map<number, { fromAngleOffset: number; toAngleOffset: number }>()
+  const overlapErrorByIdx = new Set<number>()
+  for (const idxs of groups.values()) {
+    if (idxs.length === 2) {
+      const first = connectors[idxs[0]]
+      const { canonicalFrom } = canonicalPair(first.from, first.to)
+      overlapAnglesByIdx.set(idxs[0], buildOverlapAngleOffsets(connectors[idxs[0]], canonicalFrom, +1))
+      overlapAnglesByIdx.set(idxs[1], buildOverlapAngleOffsets(connectors[idxs[1]], canonicalFrom, -1))
+    } else if (idxs.length >= 3) {
+      for (let i = 2; i < idxs.length; i++) overlapErrorByIdx.add(idxs[i])
+      overlapDiagnostics.push(buildOverlapDiagnostic(idxs.map((i) => connectors[i])))
+    }
+  }
+
+  const appendSegments = (
+    conn: NormalizedConnectorDef,
+    opts?: { pixelWaypoints?: Pixel[]; fromAngleOffset?: number; toAngleOffset?: number },
+  ) => {
+    const path = resolveConnectorPath(conn, nodeMap, layout, opts)
     if (path) lines.push(...polylineToSegments(path.points))
   }
 
-  for (const conn of connectors) {
+  // Phase 2 — emit segments using the normal direct/route logic. Pairs
+  // marked by the overlap pass get their endpoint rotation applied;
+  // everything else falls through to the usual direct / routed logic.
+  for (let i = 0; i < connectors.length; i++) {
+    const conn = connectors[i]
+    const { crossings } = phase1[i]
     const start = lines.length
-    const crossings = findCrossingNodes(conn, nodeMap, allNodes, layout)
+    const overlapAngles = overlapAnglesByIdx.get(i)
+    const overlapErr = overlapErrorByIdx.has(i)
+
+    if (overlapAngles) {
+      appendSegments(conn, overlapAngles)
+      records.push({
+        resolved: {
+          conn,
+          intersections: [],
+          lineError: false,
+          fromAngleOffset: overlapAngles.fromAngleOffset,
+          toAngleOffset: overlapAngles.toAngleOffset,
+        },
+        start, end: lines.length,
+      })
+      continue
+    }
 
     if (crossings.length === 0) {
       appendSegments(conn)
       records.push({
-        resolved: { conn, intersections: [], lineError: false },
+        resolved: { conn, intersections: [], lineError: overlapErr },
         start, end: lines.length,
       })
       continue
@@ -115,7 +259,7 @@ function resolveConnectors(
     const route = routeAroundNodes(conn, nodeMap, allNodes, layout, used)
     if (route) {
       for (const pt of route.intersections) used.add(intPtKey(pt.i, pt.j))
-      appendSegments(conn, route.waypoints)
+      appendSegments(conn, { pixelWaypoints: route.waypoints })
       records.push({
         resolved: {
           conn,
@@ -135,7 +279,7 @@ function resolveConnectors(
     }
   }
 
-  return { records, lines }
+  return { records, lines, overlapDiagnostics }
 }
 
 function buildNoteTargets(
@@ -156,7 +300,11 @@ function buildNoteTargets(
     }
     const connR = connectorById.get(tid)
     if (connR) {
-      const path = resolveConnectorPath(connR.conn, nodeMap, layout, connR.pixelWaypoints)
+      const path = resolveConnectorPath(connR.conn, nodeMap, layout, {
+        pixelWaypoints: connR.pixelWaypoints,
+        fromAngleOffset: connR.fromAngleOffset,
+        toAngleOffset: connR.toAngleOffset,
+      })
       if (path) targets.push({ aim: rawMidpoint(path), stopRadius: 0 })
     }
   }
@@ -481,9 +629,10 @@ export function resolveDiagram(def: NormalizedDiagramDef): DiagramLayout {
   diagnostics.push(...buildGridMismatchDiagnostics(def, layout))
 
   // Step 1
-  const { records: connRecords, lines: connLines } = resolveConnectors(
+  const { records: connRecords, lines: connLines, overlapDiagnostics } = resolveConnectors(
     connectorDefs, nodeMap, def.nodes, layout
   )
+  diagnostics.push(...overlapDiagnostics)
   // Parallel owner array for connLines — one entry per segment.
   const connLineOwners: ElementRef[] = []
   for (const rec of connRecords) {
@@ -579,6 +728,8 @@ export function resolveDiagram(def: NormalizedDiagramDef): DiagramLayout {
       r.resolved.pixelWaypoints,
       bounds,
       allIconCircles,
+      r.resolved.fromAngleOffset,
+      r.resolved.toAngleOffset,
     )
     if (result) {
       if (result.error) {

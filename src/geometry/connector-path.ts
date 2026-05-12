@@ -80,24 +80,66 @@ function rawPolyline(
 }
 
 /**
+ * Optional shaping inputs for `resolveConnectorPath`. Both fields are
+ * "advanced" — the common case (a plain connector with no waypoints)
+ * passes neither.
+ */
+export interface ResolveConnectorPathOpts {
+  /** Pixel waypoints from a routed-path solver. When set, overrides
+   *  the connector's own `waypoints`. */
+  pixelWaypoints?: Pixel[]
+  /**
+   * Rotate the FROM-end's pulled-back endpoint around the source node
+   * center by this many radians (positive = CCW in screen coords).
+   * Used by overlap-split to shift two paired connectors' connection
+   * points to opposite sides of the canonical centerline so the lines
+   * separate visually while staying straight.
+   */
+  fromAngleOffset?: number
+  /** Same as `fromAngleOffset`, applied at the TO end. */
+  toAngleOffset?: number
+}
+
+function rotateAround(p: Pixel, center: Pixel, angle: number): Pixel {
+  if (!angle) return p
+  const dx = p.x - center.x
+  const dy = p.y - center.y
+  const cos = Math.cos(angle)
+  const sin = Math.sin(angle)
+  return { x: center.x + dx * cos - dy * sin, y: center.y + dx * sin + dy * cos }
+}
+
+/**
  * Resolve the rendered polyline of a connector. Returns null when
  * either endpoint is missing from the node map (callers treat this as
  * "skip / nothing to render").
  *
- * `pixelWaypoints` (when given) overrides the connector's own waypoints
- * — used by routed connectors to plug in router output.
+ * Optional `opts.pixelWaypoints` (when given) overrides the connector's
+ * own waypoints — used by routed connectors to plug in router output.
+ * Optional `opts.fromAngleOffset` / `opts.toAngleOffset` rotate the
+ * pulled-back endpoints around their respective node centers (overlap
+ * split uses this to shift connection points perpendicular to the
+ * canonical line).
+ *
+ * Legacy positional `pixelWaypoints` argument is still accepted for
+ * backwards compatibility with the many existing call sites.
  */
 export function resolveConnectorPath(
   conn: NormalizedConnectorDef,
   nodeMap: Map<string, NormalizedNodeDef>,
   layout: GridLayout,
-  pixelWaypoints?: Pixel[]
+  pixelWaypointsOrOpts?: Pixel[] | ResolveConnectorPathOpts
 ): ResolvedPath | null {
   const fromNode = nodeMap.get(conn.from)
   const toNode = nodeMap.get(conn.to)
   if (!fromNode || !toNode) return null
 
-  const raw = rawPolyline(fromNode, toNode, conn, layout, pixelWaypoints)
+  // Normalize the optional arg into a single shape.
+  const opts: ResolveConnectorPathOpts = Array.isArray(pixelWaypointsOrOpts)
+    ? { pixelWaypoints: pixelWaypointsOrOpts }
+    : pixelWaypointsOrOpts ?? {}
+
+  const raw = rawPolyline(fromNode, toNode, conn, layout, opts.pixelWaypoints)
   const points = raw.slice()
 
   if (points.length >= 2) {
@@ -105,6 +147,13 @@ export function resolveConnectorPath(
     points[0] = pullBack(raw[0], points[1], nodeRadius(fromNode, layout) * margin)
     const last = points.length - 1
     points[last] = pullBack(raw[last], points[last - 1], nodeRadius(toNode, layout) * margin)
+
+    if (opts.fromAngleOffset) {
+      points[0] = rotateAround(points[0], raw[0], opts.fromAngleOffset)
+    }
+    if (opts.toAngleOffset) {
+      points[last] = rotateAround(points[last], raw[last], opts.toAngleOffset)
+    }
   }
 
   return { raw, points }

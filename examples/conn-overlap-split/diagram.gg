@@ -1,0 +1,58 @@
+# When two straight connectors share the same unordered endpoint pair
+# (here `a → b` paired with `b → a`), gridgram rotates each line's
+# connection point on the node circles by ±15° so the two arrows emerge
+# as mirrored parallel lines. Works uniformly in all 8 directions.
+
+doc { cellSize: 200, cols: 8, rows: 4 }
+
+# --- Axis-aligned pairs --------------------------------------------------
+icon :a_e @A1 tabler/circle "A"
+icon :b_e @B1 tabler/circle "B"
+
+icon :a_n @D2 tabler/circle "A"
+icon :b_n @D1 tabler/circle "B"
+
+icon :a_w @F1 tabler/circle "A"
+icon :b_w @E1 tabler/circle "B"
+
+icon :a_s @G1 tabler/circle "A"
+icon :b_s @G2 tabler/circle "B"
+
+# --- Diagonal pairs ------------------------------------------------------
+icon :a_ne @A4 tabler/circle "A"
+icon :b_ne @B3 tabler/circle "B"
+
+icon :a_se @C3 tabler/circle "A"
+icon :b_se @D4 tabler/circle "B"
+
+icon :a_sw @F3 tabler/circle "A"
+icon :b_sw @E4 tabler/circle "B"
+
+icon :a_nw @H4 tabler/circle "A"
+icon :b_nw @G3 tabler/circle "B"
+
+# Each pair has one connector each way → auto-split into mirrored
+# parallel lines, regardless of arrow direction.
+a_e --> b_e "req"
+b_e --> a_e "ack"
+
+a_n --> b_n "req"
+b_n --> a_n "ack"
+
+a_w --> b_w "req"
+b_w --> a_w "ack"
+
+a_s --> b_s "req"
+b_s --> a_s "ack"
+
+a_ne --> b_ne "req"
+b_ne --> a_ne "ack"
+
+a_se --> b_se "req"
+b_se --> a_se "ack"
+
+a_sw --> b_sw "req"
+b_sw --> a_sw "ack"
+
+a_nw --> b_nw "req"
+b_nw --> a_nw "ack"

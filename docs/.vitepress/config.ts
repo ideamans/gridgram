@@ -171,6 +171,7 @@ const config: ReturnType<typeof withTheme> = withTheme({
                 { text: "Labels", link: "/en/guide/connector/labels" },
                 { text: "Waypoints", link: "/en/guide/connector/waypoints" },
                 { text: "Styles", link: "/en/guide/connector/styles" },
+                { text: "Overlapping pairs", link: "/en/guide/connector/overlap" },
               ],
             },
             {
@@ -375,6 +376,7 @@ const config: ReturnType<typeof withTheme> = withTheme({
                 { text: "ラベル", link: "/ja/guide/connector/labels" },
                 { text: "中継点", link: "/ja/guide/connector/waypoints" },
                 { text: "スタイル", link: "/ja/guide/connector/styles" },
+                { text: "重なるペア", link: "/ja/guide/connector/overlap" },
               ],
             },
             {

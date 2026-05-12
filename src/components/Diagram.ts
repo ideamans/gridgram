@@ -125,6 +125,8 @@ function buildDiagramInternal(rawDef: DiagramDef, opts: DiagramOptions = {}): In
       theme,
       markerId: `marker-${i}`,
       pixelWaypoints: r.pixelWaypoints,
+      fromAngleOffset: r.fromAngleOffset,
+      toAngleOffset: r.toAngleOffset,
       lineError: mask(r.lineError),
       labelRect: r.labelResult?.rect,
       labelError: mask(r.labelResult?.error),

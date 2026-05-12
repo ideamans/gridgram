@@ -153,6 +153,20 @@ icon :b @B1 tabler/server "Hub" style="label-direction: top-right; leader-length
 
 ---
 
+## Connectors
+
+### Overlapping pairs are auto-split
+
+When **exactly two** connectors share the same unordered endpoint pair — `a → b` and `b → a` count as a duplicate — gridgram rotates the connection point on each node's circle by ±15° in mirrored directions so the two lines emerge as parallel straight arrows rather than stacking on top of each other. No author action is required. Both labels (if present) are placed against the rotated lines using the normal connector-label rules.
+
+This auto-split only fires when both connectors would otherwise render as plain straight lines. A connector that already has explicit `waypoints: [...]`, or one the router bent to dodge an obstacle, opts out of the treatment.
+
+### Three or more is a `connector-overlap` diagnostic
+
+The split geometry only works for exactly two connectors. Three or more sharing the same unordered endpoint pair are all drawn as straight lines (the first two stack on top of each other), the **3rd and beyond** are rendered in the error color, and a `connector-overlap` diagnostic is emitted. Fix it by reducing to ≤ 2 connectors between any pair of nodes, or by giving the surplus connectors explicit `waypoints: [...]`.
+
+---
+
 ## Document settings (`doc { … }`)
 
 Keys accepted inside a `doc { … }` block:

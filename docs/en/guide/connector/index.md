@@ -61,3 +61,4 @@ api  --> db "cold-read" {
 - **[Labels](./labels)** — multi-line, font size, color
 - **[Waypoints](./waypoints)** — routing the line through specific cells
 - **[Styles](./styles)** — dash patterns, stroke width, color overrides
+- **[Overlapping pairs](./overlap)** — two parallel connectors auto-split into mirrored bows
