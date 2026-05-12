@@ -16,6 +16,11 @@ export interface ConnectorProps {
    *  the arrow head is rendered inline as a polygon (no SVG marker). */
   markerId?: string
   pixelWaypoints?: Pixel[]
+  /** Overlap-split endpoint rotations (radians). When set, the rendered
+   *  line's connection points are rotated around each node's center so
+   *  paired connectors emerge on opposite sides of the canonical line. */
+  fromAngleOffset?: number
+  toAngleOffset?: number
   lineError?: boolean
   labelRect?: LabelRect
   labelError?: boolean
@@ -52,9 +57,12 @@ function unitVector(from: Pixel, to: Pixel): { x: number; y: number } {
 
 export function Connector({
   connector, nodes, layout, theme,
-  pixelWaypoints, lineError, labelRect, labelError,
+  pixelWaypoints, fromAngleOffset, toAngleOffset,
+  lineError, labelRect, labelError,
 }: ConnectorProps): any {
-  const path = resolveConnectorPath(connector, nodes, layout, pixelWaypoints)
+  const path = resolveConnectorPath(connector, nodes, layout, {
+    pixelWaypoints, fromAngleOffset, toAngleOffset,
+  })
   if (!path) return null
 
   const baseColor = resolveColor(connector.color, theme) ?? theme.secondary

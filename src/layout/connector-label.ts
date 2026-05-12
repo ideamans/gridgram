@@ -41,42 +41,81 @@ export function hopOrder(n: number): number[] {
 
 /**
  * Candidate rects for a single sub-segment at t-values 0.5, 0.25, 0.75.
- *   - horizontal segment → each t-point yields above + below candidates
- *   - diagonal / vertical → each t-point yields a single overlay candidate
  *
- * Order: t=0.5 is tried first (for horizontal: above then below), then
- * t=0.25, then t=0.75.
+ * For every direction (horizontal, vertical, diagonal) each t-point
+ * yields TWO candidates — one perpendicular-shifted to each side of the
+ * line — so the placer can escape a busy axis by stepping off it. The
+ * rect stays axis-aligned; only its center moves.
+ *
+ * Horizontal lines retain their familiar "above" / "below" labels in
+ * the candidate descriptions; non-horizontal lines say "side-A" /
+ * "side-B" where side-A sits on the perpendicular's +CCW side of the
+ * line direction.
+ *
+ * Order: t=0.5 is tried first (both sides), then t=0.25 (both sides),
+ * then t=0.75 (both sides). 6 candidates per segment.
  */
 export function candidatesForSegment(
   p1: Pixel, p2: Pixel,
   labelWidth: number, labelH: number,
   fontSize: number, strokeWidth: number
 ): AnnotatedRect[] {
-  const dx = Math.abs(p2.x - p1.x)
-  const dy = Math.abs(p2.y - p1.y)
-  const isHorizontal = dy < dx * 0.3
+  const dx = p2.x - p1.x
+  const dy = p2.y - p1.y
+  const len = Math.hypot(dx, dy)
   const gap = Math.max(strokeWidth * 3, fontSize * 0.6)
   const ts = [0.5, 0.25, 0.75]
-
   const result: AnnotatedRect[] = []
+
+  // Degenerate (zero-length) segment: place a single candidate centred
+  // on the point so we still emit something the placer can consider.
+  if (len < 1e-6) {
+    result.push({
+      rect: { x: p1.x - labelWidth / 2, y: p1.y - labelH / 2, w: labelWidth, h: labelH },
+      description: 'degenerate',
+    })
+    return result
+  }
+
+  // Unit along + perpendicular vectors. perpX/perpY = (ux, uy) rotated
+  // 90° CCW.
+  const ux = dx / len
+  const uy = dy / len
+  const perpX = -uy
+  const perpY =  ux
+
+  // Distance from the line at which to plant the rect's center so the
+  // rect's axis-aligned bounding box clears the line by `gap` on the
+  // selected side. For a rect with half-extents (w/2, h/2) projected
+  // onto the perpendicular axis: |w/2 · perpX| + |h/2 · perpY|.
+  const rectProj = Math.abs(labelWidth / 2 * perpX) + Math.abs(labelH / 2 * perpY)
+  const shift = rectProj + gap
+
+  const horizontal = Math.abs(dy) < Math.abs(dx) * 0.3
+
   for (const t of ts) {
-    const px = p1.x + (p2.x - p1.x) * t
-    const py = p1.y + (p2.y - p1.y) * t
-    if (isHorizontal) {
-      result.push({
-        rect: { x: px - labelWidth / 2, y: py - labelH - gap, w: labelWidth, h: labelH },
-        description: `t=${t} above`,
-      })
-      result.push({
-        rect: { x: px - labelWidth / 2, y: py + gap, w: labelWidth, h: labelH },
-        description: `t=${t} below`,
-      })
-    } else {
-      result.push({
-        rect: { x: px - labelWidth / 2, y: py - labelH / 2, w: labelWidth, h: labelH },
-        description: `t=${t} overlay`,
-      })
-    }
+    const cx = p1.x + dx * t
+    const cy = p1.y + dy * t
+
+    // Side A — along +perpendicular. For a horizontal line +perpendicular
+    // is +y (screen-down), so side A naturally maps to "below"; for a
+    // line going up-right the perpendicular points down-right, etc.
+    const aCx = cx + perpX * shift
+    const aCy = cy + perpY * shift
+    const bCx = cx - perpX * shift
+    const bCy = cy - perpY * shift
+
+    const aDesc = horizontal ? `t=${t} below` : `t=${t} side-A`
+    const bDesc = horizontal ? `t=${t} above` : `t=${t} side-B`
+
+    result.push({
+      rect: { x: aCx - labelWidth / 2, y: aCy - labelH / 2, w: labelWidth, h: labelH },
+      description: aDesc,
+    })
+    result.push({
+      rect: { x: bCx - labelWidth / 2, y: bCy - labelH / 2, w: labelWidth, h: labelH },
+      description: bDesc,
+    })
   }
   return result
 }
@@ -90,10 +129,14 @@ export function computeConnectorLabelRect(
   pixelWaypoints?: Pixel[],
   bounds?: CanvasBounds,
   iconCircles?: Circle[],
+  fromAngleOffset?: number,
+  toAngleOffset?: number,
 ): ConnectorLabelResult | null {
   if (!connector.label) return null
 
-  const path = resolveConnectorPath(connector, nodeMap, layout, pixelWaypoints)
+  const path = resolveConnectorPath(connector, nodeMap, layout, {
+    pixelWaypoints, fromAngleOffset, toAngleOffset,
+  })
   if (!path) return null
 
   const labelText = typeof connector.label === 'string' ? connector.label : ''

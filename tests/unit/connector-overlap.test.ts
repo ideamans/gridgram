@@ -1,11 +1,14 @@
 /**
  * Overlap-split tests for connectors that share an unordered endpoint
- * pair. The pipeline turns a 2-connector pair into two mirrored bowed
- * paths; 3-or-more is treated as user error (3rd+ render straight in
- * the error color, plus a `connector-overlap` diagnostic).
+ * pair. The pipeline now rotates each connector's connection point on
+ * the participating node circles by a small angle so paired connectors
+ * stay straight but enter/exit at offset positions. 3-or-more is still
+ * treated as user error (3rd+ render straight in the error color, plus
+ * a `connector-overlap` diagnostic).
  */
 import { describe, expect, test } from 'bun:test'
 import { resolveDiagram } from '../../src/layout/pipeline'
+import { resolveConnectorPath } from '../../src/geometry/connector-path'
 import type { NormalizedDiagramDef } from '../../src/types'
 
 function pair(extra: Partial<NormalizedDiagramDef> = {}): NormalizedDiagramDef {
@@ -22,7 +25,7 @@ function pair(extra: Partial<NormalizedDiagramDef> = {}): NormalizedDiagramDef {
 }
 
 describe('connector overlap-split', () => {
-  test('exactly 2 connectors with the same unordered pair both get meandered', () => {
+  test('exactly 2 connectors with the same unordered pair get mirrored endpoint angles', () => {
     const out = resolveDiagram(pair({
       connectors: [
         { from: 'a', to: 'b' },
@@ -32,20 +35,43 @@ describe('connector overlap-split', () => {
     expect(out.diagnostics).toEqual([])
     expect(out.connectors).toHaveLength(2)
     for (const c of out.connectors) {
-      expect(c.pixelWaypoints).toBeDefined()
-      expect(c.pixelWaypoints!.length).toBe(2)
       expect(c.lineError).toBe(false)
+      expect(c.fromAngleOffset).toBeDefined()
+      expect(c.toAngleOffset).toBeDefined()
+      // Pair members never need waypoints — the line stays straight.
+      expect(c.pixelWaypoints).toBeUndefined()
     }
-    // Bows are mirrored: one above the centerline, one below.
     const [c1, c2] = out.connectors
-    const midY1 = (c1.pixelWaypoints![0].y + c1.pixelWaypoints![1].y) / 2
-    const midY2 = (c2.pixelWaypoints![0].y + c2.pixelWaypoints![1].y) / 2
-    const centerline = out.nodeMap.get('a')!.pos.row // 0
-    // Compare signs of offset relative to the straight-line y (which
-    // for a horizontal pair is the node-center y).
-    const yStraight =
-      (200 * 0.5 + (out.layout.padding)) // approx; use any reference
-    expect(Math.sign(midY1 - yStraight)).not.toBe(Math.sign(midY2 - yStraight))
+    // Mirrored signs at each end.
+    expect(Math.sign(c1.fromAngleOffset!)).not.toBe(Math.sign(c2.fromAngleOffset!))
+    expect(Math.sign(c1.toAngleOffset!)).not.toBe(Math.sign(c2.toAngleOffset!))
+    // Both endpoints of a single connector rotate in OPPOSITE local
+    // senses so the result is a parallel shift in the canonical frame.
+    expect(Math.sign(c1.fromAngleOffset!)).not.toBe(Math.sign(c1.toAngleOffset!))
+  })
+
+  test('rendered paths sit on opposite sides of the canonical centerline', () => {
+    const out = resolveDiagram(pair({
+      connectors: [
+        { from: 'a', to: 'b' },
+        { from: 'a', to: 'b' },
+      ],
+    }))
+    const ya = out.nodeMap.get('a')!.pos.row
+    void ya // unused; we use the actual pixel y instead
+    const yCenter =
+      out.layout.offsetY + (out.nodeMap.get('a')!.pos.row + 0.5) * out.layout.cellSize
+    const paths = out.connectors.map((c) =>
+      resolveConnectorPath(c.conn, out.nodeMap, out.layout, {
+        fromAngleOffset: c.fromAngleOffset,
+        toAngleOffset: c.toAngleOffset,
+      })!
+    )
+    // Each connector's midpoint y should land off the centerline; signs differ.
+    const midYs = paths.map((p) => (p.points[0].y + p.points[p.points.length - 1].y) / 2)
+    expect(Math.sign(midYs[0] - yCenter)).not.toBe(0)
+    expect(Math.sign(midYs[1] - yCenter)).not.toBe(0)
+    expect(Math.sign(midYs[0] - yCenter)).not.toBe(Math.sign(midYs[1] - yCenter))
   })
 
   test('A→B paired with B→A still mirrors around the shared axis', () => {
@@ -56,10 +82,20 @@ describe('connector overlap-split', () => {
       ],
     }))
     expect(out.diagnostics).toEqual([])
-    const ys = out.connectors.map(
-      (c) => (c.pixelWaypoints![0].y + c.pixelWaypoints![1].y) / 2
-    )
-    expect(Math.sign(ys[0] - ys[1])).not.toBe(0)
+    // Resolve each line in the canonical (A→B) frame: for the reversed
+    // connector the "from-end" is B and the "to-end" is A, so we look
+    // at the y of the point that sits on A's circle (it's points[0] for
+    // the A→B connector and points[last] for the B→A one).
+    const yCenter =
+      out.layout.offsetY + (out.nodeMap.get('a')!.pos.row + 0.5) * out.layout.cellSize
+    const aSideYs = out.connectors.map((c) => {
+      const path = resolveConnectorPath(c.conn, out.nodeMap, out.layout, {
+        fromAngleOffset: c.fromAngleOffset,
+        toAngleOffset: c.toAngleOffset,
+      })!
+      return c.conn.from === 'a' ? path.points[0].y : path.points[path.points.length - 1].y
+    })
+    expect(Math.sign(aSideYs[0] - yCenter)).not.toBe(Math.sign(aSideYs[1] - yCenter))
   })
 
   test('a 3rd parallel connector stays straight and is flagged as overlap error', () => {
@@ -70,13 +106,12 @@ describe('connector overlap-split', () => {
         { from: 'a', to: 'b' },
       ],
     }))
-    // None of them split — overlap-error means the bow geometry is off.
+    // None get the auto-split angles — overlap-error means all 3 stack.
     for (const c of out.connectors) {
-      expect(c.pixelWaypoints).toBeUndefined()
+      expect(c.fromAngleOffset).toBeUndefined()
+      expect(c.toAngleOffset).toBeUndefined()
     }
-    // 3rd connector flagged as line error.
     expect(out.connectors[2].lineError).toBe(true)
-    // First two are not error-coloured.
     expect(out.connectors[0].lineError).toBe(false)
     expect(out.connectors[1].lineError).toBe(false)
 
@@ -86,12 +121,13 @@ describe('connector overlap-split', () => {
     expect(overlapDiag!.element.kind).toBe('connector')
   })
 
-  test('a single connector is left as a straight line (no waypoints injected)', () => {
+  test('a single connector is left as a plain straight line', () => {
     const out = resolveDiagram(pair({
       connectors: [{ from: 'a', to: 'b' }],
     }))
     expect(out.diagnostics).toEqual([])
-    expect(out.connectors[0].pixelWaypoints).toBeUndefined()
+    expect(out.connectors[0].fromAngleOffset).toBeUndefined()
+    expect(out.connectors[0].toAngleOffset).toBeUndefined()
   })
 
   test('user-supplied waypoints opt the connector out of overlap-split', () => {
@@ -101,14 +137,10 @@ describe('connector overlap-split', () => {
         { from: 'a', to: 'b', waypoints: [{ col: 1, row: 0.4 }] },
       ],
     }))
-    // The user-routed conn keeps its own waypoint; the other one stays
-    // straight (since the pair is no longer "2 straight-eligible").
-    expect(out.connectors[0].pixelWaypoints).toBeUndefined()
-    // Pipeline normalises user waypoints onto conn.waypoints, not
-    // pixelWaypoints, so the resolved path still has none of the latter.
-    expect(out.connectors[1].pixelWaypoints).toBeUndefined()
-    // And no overlap diagnostic — the explicit routing resolves the
-    // visual ambiguity, so the auto-split isn't needed.
+    for (const c of out.connectors) {
+      expect(c.fromAngleOffset).toBeUndefined()
+      expect(c.toAngleOffset).toBeUndefined()
+    }
     expect(out.diagnostics.find((d) => d.kind === 'connector-overlap')).toBeUndefined()
   })
 })
