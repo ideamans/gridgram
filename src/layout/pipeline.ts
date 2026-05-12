@@ -84,29 +84,191 @@ interface ConnectorLineRecord {
   crossingNodes?: NormalizedNodeDef[]
 }
 
+/**
+ * Fraction of the connector length used as the perpendicular bow offset
+ * when exactly two connectors share the same unordered endpoint pair.
+ * 10% of cellSize keeps the meander visually obvious without dominating
+ * the layout — small enough that the connector still reads as "straight
+ * between A and B," large enough to separate two parallel paths.
+ */
+const OVERLAP_BOW_OFFSET_FRAC = 0.10
+
+/** Canonical (alphabetical) form of an unordered endpoint pair. */
+function canonicalPair(from: string, to: string): { key: string; canonicalFrom: string; canonicalTo: string } {
+  const a = from < to ? from : to
+  const b = from < to ? to : from
+  return { key: `${a}|${b}`, canonicalFrom: a, canonicalTo: b }
+}
+
+/**
+ * Build the two intermediate pixel waypoints that bow a straight
+ * connector to one side of the direct line, for the overlap-split
+ * treatment.
+ *
+ * Geometry: a 45° rise from the start to `w1`, a long horizontal run
+ * from `w1` to `w2` (parallel to the original direct line), then a 45°
+ * fall back to the end. Achieved by offsetting both **along** and
+ * **perpendicular** to the line by `OVERLAP_BOW_OFFSET_FRAC × cellSize`
+ * — equal magnitudes make the diagonals exactly 45°.
+ *
+ * `side` (+1 / -1) picks which side of the line the bow sits on; the
+ * two members of a 2-element group are passed `+1` and `-1` so they
+ * mirror each other around the original axis. The perpendicular is
+ * computed in the **canonical** A→B frame (A and B alphabetically
+ * ordered) so that A→B + B→A pairs still bow on opposite canonical
+ * sides, not on opposite local-direction sides (which would make them
+ * overlap visually).
+ *
+ * When the centerline is shorter than `2 × offsetMag` (very close
+ * nodes) the offset is clamped to half the line length so `w1` and
+ * `w2` don't cross over.
+ */
+function buildOverlapWaypoints(
+  conn: NormalizedConnectorDef,
+  canonicalFromId: string,
+  canonicalToId: string,
+  nodeMap: Map<string, NormalizedNodeDef>,
+  layout: GridLayout,
+  side: 1 | -1,
+): Pixel[] | null {
+  const fromNode = nodeMap.get(canonicalFromId)
+  const toNode = nodeMap.get(canonicalToId)
+  if (!fromNode || !toNode) return null
+  const a = gridToPixel(layout, fromNode.pos)
+  const b = gridToPixel(layout, toNode.pos)
+  const dx = b.x - a.x
+  const dy = b.y - a.y
+  const len = Math.hypot(dx, dy)
+  if (len < 1e-6) return null
+
+  // Perpendicular bow magnitude — per spec, ~10% of cellSize.
+  const perpOffset = layout.cellSize * OVERLAP_BOW_OFFSET_FRAC
+  // Push the waypoint far enough along the line that the connector's
+  // own pull-back (which retracts each endpoint by one node radius)
+  // does not overshoot it; otherwise the visible polyline kinks
+  // backward at each end. For w1 to land outside the node circle we
+  // need `|w1 − center| ≥ radius`, which with a fixed perpendicular
+  // bow reduces to `along ≥ sqrt(radius² − perp²)` (plus a small
+  // margin). For small nodes this collapses to `perpOffset`, giving a
+  // strict 45° rise; for default+ nodes the along-offset grows,
+  // easing the angle below 45° but keeping the bow well-formed.
+  const radiusFrom = (layout.cellSize * resolveNodeSizeFrac(fromNode)) / 2
+  const radiusTo   = (layout.cellSize * resolveNodeSizeFrac(toNode)) / 2
+  const maxRadius = Math.max(radiusFrom, radiusTo)
+  const radiusMargin = Math.sqrt(Math.max(0, maxRadius * maxRadius - perpOffset * perpOffset)) + 4
+  // Cap along-offset to a third of the line so `w1` and `w2` never
+  // cross over for short connectors.
+  const alongOffset = Math.min(Math.max(perpOffset, radiusMargin), len / 3)
+
+  const ux = dx / len
+  const uy = dy / len
+  // Perpendicular: rotate (ux, uy) 90° CCW, signed by `side`.
+  const px = -uy * side
+  const py =  ux * side
+  const w1 = { x: a.x + ux * alongOffset + px * perpOffset, y: a.y + uy * alongOffset + py * perpOffset }
+  const w2 = { x: b.x - ux * alongOffset + px * perpOffset, y: b.y - uy * alongOffset + py * perpOffset }
+  return conn.from === canonicalFromId ? [w1, w2] : [w2, w1]
+}
+
+function buildOverlapDiagnostic(conns: NormalizedConnectorDef[]): PlacementDiagnostic {
+  const extras = conns.slice(2)
+  const a = conns[0].from
+  const b = conns[0].to
+  return {
+    kind: 'connector-overlap',
+    severity: 'warning',
+    element: connectorRef(extras[0]),
+    message:
+      `${conns.length} connectors share endpoint pair "${a}"↔"${b}"; only the first 2 can be auto-split. ` +
+      `The remaining ${extras.length} draw as straight lines through each other and are marked with the error color.`,
+    suggestion:
+      `Keep at most 2 connectors between any pair of nodes, or add \`waypoints: [...]\` ` +
+      `to the surplus connector(s) so they take a deliberate path.`,
+  }
+}
+
 function resolveConnectors(
   connectors: NormalizedConnectorDef[],
   nodeMap: Map<string, NormalizedNodeDef>,
   allNodes: NormalizedNodeDef[],
   layout: GridLayout
-): { records: ConnectorLineRecord[]; lines: LineSeg[] } {
+): { records: ConnectorLineRecord[]; lines: LineSeg[]; overlapDiagnostics: PlacementDiagnostic[] } {
   const records: ConnectorLineRecord[] = []
   const lines: LineSeg[] = []
   const used = new Set<string>()
+  const overlapDiagnostics: PlacementDiagnostic[] = []
+
+  // Phase 1 — pre-classify each connector. A connector is "straight
+  // eligible" (i.e. would render as a direct line and may participate
+  // in overlap-split) when it has no user waypoints, no node crossings,
+  // and isn't a self-loop. We compute this up front so overlap-pair
+  // grouping happens before any segment emission.
+  interface Phase1 { crossings: NormalizedNodeDef[]; straight: boolean }
+  const phase1: Phase1[] = connectors.map((conn) => {
+    if (conn.from === conn.to) return { crossings: [], straight: false }
+    const hasUserWaypoints = !!conn.waypoints && conn.waypoints.length > 0
+    const crossings = findCrossingNodes(conn, nodeMap, allNodes, layout)
+    const straight = !hasUserWaypoints && crossings.length === 0
+    return { crossings, straight }
+  })
+
+  // Group straight-eligible connectors by unordered endpoint pair.
+  const groups = new Map<string, number[]>()
+  for (let i = 0; i < connectors.length; i++) {
+    if (!phase1[i].straight) continue
+    const { key } = canonicalPair(connectors[i].from, connectors[i].to)
+    let g = groups.get(key)
+    if (!g) groups.set(key, g = [])
+    g.push(i)
+  }
+
+  // Assign meander waypoints (exactly-2 groups) or mark overflow
+  // (3+ groups) for the segment-emission pass below.
+  const meanderByIdx = new Map<number, Pixel[]>()
+  const overlapErrorByIdx = new Set<number>()
+  for (const idxs of groups.values()) {
+    if (idxs.length === 2) {
+      const first = connectors[idxs[0]]
+      const { canonicalFrom, canonicalTo } = canonicalPair(first.from, first.to)
+      const w0 = buildOverlapWaypoints(connectors[idxs[0]], canonicalFrom, canonicalTo, nodeMap, layout, +1)
+      const w1 = buildOverlapWaypoints(connectors[idxs[1]], canonicalFrom, canonicalTo, nodeMap, layout, -1)
+      if (w0 && w1) {
+        meanderByIdx.set(idxs[0], w0)
+        meanderByIdx.set(idxs[1], w1)
+      }
+    } else if (idxs.length >= 3) {
+      for (let i = 2; i < idxs.length; i++) overlapErrorByIdx.add(idxs[i])
+      overlapDiagnostics.push(buildOverlapDiagnostic(idxs.map((i) => connectors[i])))
+    }
+  }
 
   const appendSegments = (conn: NormalizedConnectorDef, pixelWaypoints?: Pixel[]) => {
     const path = resolveConnectorPath(conn, nodeMap, layout, pixelWaypoints)
     if (path) lines.push(...polylineToSegments(path.points))
   }
 
-  for (const conn of connectors) {
+  // Phase 2 — emit segments using the normal direct/route logic, with
+  // meander waypoints spliced in where the overlap pass assigned them.
+  for (let i = 0; i < connectors.length; i++) {
+    const conn = connectors[i]
+    const { crossings } = phase1[i]
     const start = lines.length
-    const crossings = findCrossingNodes(conn, nodeMap, allNodes, layout)
+    const meander = meanderByIdx.get(i)
+    const overlapErr = overlapErrorByIdx.has(i)
+
+    if (meander) {
+      appendSegments(conn, meander)
+      records.push({
+        resolved: { conn, pixelWaypoints: meander, intersections: [], lineError: false },
+        start, end: lines.length,
+      })
+      continue
+    }
 
     if (crossings.length === 0) {
       appendSegments(conn)
       records.push({
-        resolved: { conn, intersections: [], lineError: false },
+        resolved: { conn, intersections: [], lineError: overlapErr },
         start, end: lines.length,
       })
       continue
@@ -135,7 +297,7 @@ function resolveConnectors(
     }
   }
 
-  return { records, lines }
+  return { records, lines, overlapDiagnostics }
 }
 
 function buildNoteTargets(
@@ -481,9 +643,10 @@ export function resolveDiagram(def: NormalizedDiagramDef): DiagramLayout {
   diagnostics.push(...buildGridMismatchDiagnostics(def, layout))
 
   // Step 1
-  const { records: connRecords, lines: connLines } = resolveConnectors(
+  const { records: connRecords, lines: connLines, overlapDiagnostics } = resolveConnectors(
     connectorDefs, nodeMap, def.nodes, layout
   )
+  diagnostics.push(...overlapDiagnostics)
   // Parallel owner array for connLines — one entry per segment.
   const connLineOwners: ElementRef[] = []
   for (const rec of connRecords) {

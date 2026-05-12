@@ -126,6 +126,12 @@ export type DiagnosticKind =
    *  best-effort but geometry is broken. (Emitted in addition to the
    *  existing GgError.) */
   | 'region-disjoint'
+  /** Three or more connectors share the same unordered endpoint pair.
+   *  Gridgram auto-splits **exactly two** overlapping connectors into a
+   *  pair of bowed paths; with 3+ that geometry collapses, so the
+   *  surplus connectors (the 3rd onward) draw as straight lines on top
+   *  of each other and render with the error color. */
+  | 'connector-overlap'
   /** The declared `cols` / `rows` don't match how the cells are used —
    *  a node sits outside the declared grid, or the declared grid
    *  reserves empty columns / rows beyond (or before) the content.

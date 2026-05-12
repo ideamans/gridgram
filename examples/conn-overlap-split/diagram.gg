@@ -1,0 +1,56 @@
+# When two straight connectors share the same unordered endpoint pair,
+# gridgram auto-bows them in mirrored directions (10% of cellSize off
+# the centerline). Works uniformly in all 8 directions.
+
+doc { cellSize: 200, cols: 8, rows: 4 }
+
+# --- Axis-aligned pairs --------------------------------------------------
+icon :a_e @A1 tabler/circle "A"
+icon :b_e @B1 tabler/circle "B"
+
+icon :a_n @D2 tabler/circle "A"
+icon :b_n @D1 tabler/circle "B"
+
+icon :a_w @F1 tabler/circle "A"
+icon :b_w @E1 tabler/circle "B"
+
+icon :a_s @G1 tabler/circle "A"
+icon :b_s @G2 tabler/circle "B"
+
+# --- Diagonal pairs ------------------------------------------------------
+icon :a_ne @A4 tabler/circle "A"
+icon :b_ne @B3 tabler/circle "B"
+
+icon :a_se @C3 tabler/circle "A"
+icon :b_se @D4 tabler/circle "B"
+
+icon :a_sw @F3 tabler/circle "A"
+icon :b_sw @E4 tabler/circle "B"
+
+icon :a_nw @H4 tabler/circle "A"
+icon :b_nw @G3 tabler/circle "B"
+
+# Each pair has two connectors → auto-split into mirrored bows.
+a_e --> b_e "req"
+a_e --> b_e "ack"
+
+a_n --> b_n "req"
+a_n --> b_n "ack"
+
+a_w --> b_w "req"
+a_w --> b_w "ack"
+
+a_s --> b_s "req"
+a_s --> b_s "ack"
+
+a_ne --> b_ne "req"
+a_ne --> b_ne "ack"
+
+a_se --> b_se "req"
+a_se --> b_se "ack"
+
+a_sw --> b_sw "req"
+a_sw --> b_sw "ack"
+
+a_nw --> b_nw "req"
+a_nw --> b_nw "ack"
