@@ -1,8 +1,9 @@
 import { tablerOutline as t, type DiagramDef } from 'gridgram'
 
-// When two straight connectors share the same unordered endpoint pair,
-// gridgram auto-bows them in mirrored directions (10% of cellSize off
-// the centerline). Works uniformly in all 8 directions.
+// When two straight connectors share the same unordered endpoint pair
+// (here `a → b` paired with `b → a`), gridgram rotates each line's
+// connection point on the node circles by ±15° so the two arrows
+// emerge as mirrored parallel lines. Works uniformly in all 8 directions.
 export const def: DiagramDef = {
   cellSize: 200,
   columns: 8,
@@ -36,20 +37,20 @@ export const def: DiagramDef = {
   ],
   connectors: [
     { from: 'a_e', to: 'b_e', label: 'req' },
-    { from: 'a_e', to: 'b_e', label: 'ack' },
+    { from: 'b_e', to: 'a_e', label: 'ack' },
     { from: 'a_n', to: 'b_n', label: 'req' },
-    { from: 'a_n', to: 'b_n', label: 'ack' },
+    { from: 'b_n', to: 'a_n', label: 'ack' },
     { from: 'a_w', to: 'b_w', label: 'req' },
-    { from: 'a_w', to: 'b_w', label: 'ack' },
+    { from: 'b_w', to: 'a_w', label: 'ack' },
     { from: 'a_s', to: 'b_s', label: 'req' },
-    { from: 'a_s', to: 'b_s', label: 'ack' },
+    { from: 'b_s', to: 'a_s', label: 'ack' },
     { from: 'a_ne', to: 'b_ne', label: 'req' },
-    { from: 'a_ne', to: 'b_ne', label: 'ack' },
+    { from: 'b_ne', to: 'a_ne', label: 'ack' },
     { from: 'a_se', to: 'b_se', label: 'req' },
-    { from: 'a_se', to: 'b_se', label: 'ack' },
+    { from: 'b_se', to: 'a_se', label: 'ack' },
     { from: 'a_sw', to: 'b_sw', label: 'req' },
-    { from: 'a_sw', to: 'b_sw', label: 'ack' },
+    { from: 'b_sw', to: 'a_sw', label: 'ack' },
     { from: 'a_nw', to: 'b_nw', label: 'req' },
-    { from: 'a_nw', to: 'b_nw', label: 'ack' },
+    { from: 'b_nw', to: 'a_nw', label: 'ack' },
   ],
 }
