@@ -73,8 +73,9 @@ export function DiagramNode({ node, layout, theme, labelCorner, labelTier, label
       h('tspan', {
         key: i,
         x,
-        y: y - H / 2 + (i + 0.5) * fontSize,
-        'dominant-baseline': 'central',
+        // +0.35em shifts baseline so cap-height center aligns with slot center;
+        // avoids dominant-baseline which librsvg (sharp PNG) ignores.
+        y: y - H / 2 + (i + 0.5) * fontSize + fontSize * 0.35,
         textLength: W * (charCounts[i] / maxChars),
         lengthAdjust: 'spacingAndGlyphs',
       }, ln),
@@ -82,7 +83,6 @@ export function DiagramNode({ node, layout, theme, labelCorner, labelTier, label
     children.push(
       h('text', {
         'text-anchor': 'middle',
-        'dominant-baseline': 'central',
         'font-size': fontSize,
         'font-family': 'sans-serif',
         'font-weight': 700,
