@@ -81,6 +81,7 @@
     "typescript": "~6.0.2",
     "vitepress": "^2.0.0-alpha.17",
     "vitepress-daisyui-theme": "^0.2.1",
-    "vue": "^3.5.32"
+    "vue": "^3.5.32",
+    "vitepress-machine-readability": "^0.1.0"
   }
 }
