@@ -1,3 +1,6 @@
+---
+description: 'Declaring a node with the icon command. Covers using it without a glyph, the bare-word shorthand, what happens when an icon does not resolve, and pinning label direction.'
+---
 # Icon Node
 
 Every node in Gridgram is declared with the `icon` command — a small

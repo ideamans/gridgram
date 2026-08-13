@@ -1,3 +1,6 @@
+---
+description: 'Examples for sensor-to-gateway-to-cloud pipelines, robot control loops, smart home topology, and split edge-and-cloud inference.'
+---
 # IoT / hardware
 
 Sensor networks, edge computing, device control loops.

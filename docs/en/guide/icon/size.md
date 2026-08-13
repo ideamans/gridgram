@@ -1,3 +1,6 @@
+---
+description: 'The three attributes that control node size: sizeScale, size, and labelScale. Covers relative versus absolute sizing and how cell size factors in.'
+---
 # Size
 
 A node has three scalars that affect how big things render:

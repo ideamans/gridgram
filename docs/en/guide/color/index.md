@@ -1,3 +1,6 @@
+---
+description: 'One color grammar shared by nodes, connectors, regions, notes, and badges. Covers theme keywords, the /NN alpha suffix, literal colors, and automatic node tinting.'
+---
 # Color
 
 Gridgram exposes color through a small, consistent vocabulary. Every

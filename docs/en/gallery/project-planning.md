@@ -1,3 +1,6 @@
+---
+description: 'Examples for task dependency graphs, sprint cycles, milestone timelines, and release trains. The critical path emerges as the longest chain through the graph.'
+---
 # Project planning
 
 Task dependencies, sprint cycles, and milestone timelines.

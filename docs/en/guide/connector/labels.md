@@ -1,3 +1,6 @@
+---
+description: 'Connector labels sit near the midpoint on a translucent pill background. Covers the positional-argument syntax, line breaks, emphasis, color, and escaping.'
+---
 # Labels
 
 A connector's label sits near the midpoint of the line on a semi-

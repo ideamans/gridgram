@@ -87,6 +87,7 @@ landing:
     secondary:
       text: GitHub
       link: https://github.com/ideamans/gridgram
+description: 'Mermaid ライクなテキスト記法から関係図を生成するツールです。小さな文法、TypeScript ライブラリ、Tabler の5,500以上のアイコン同梱が特長です。'
 ---
 
 <Landing />

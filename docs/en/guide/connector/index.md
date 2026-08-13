@@ -1,3 +1,6 @@
+---
+description: 'How to draw an arrow between two nodes. The operator between the node IDs sets both direction and line style; solid and dotted forms share the same direction semantics.'
+---
 # Connector
 
 A **connector** is an arrow (or plain line) drawn between two nodes.

@@ -1,3 +1,6 @@
+---
+description: 'When exactly two connectors share an endpoint pair, Gridgram fans them apart by shifting the attachment angles symmetrically. Three or more is an error, and you can opt out.'
+---
 # Overlapping pairs
 
 When **exactly two** connectors share the same unordered endpoint pair

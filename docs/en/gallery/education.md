@@ -1,3 +1,6 @@
+---
+description: 'Classroom-style examples: the water cycle, photosynthesis, a history timeline, and learning progression. Regions group inputs and outputs in standard chemistry colors.'
+---
 # Education
 
 Concept maps, processes, timelines — the slide-deck diagrams that

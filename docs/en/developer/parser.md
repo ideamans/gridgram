@@ -1,3 +1,6 @@
+---
+description: 'Going from .gg source to a DiagramDef takes three stages, each exported as a function you can call directly. Also covers which pieces run in a browser and which need Node.'
+---
 # Parser
 
 `.gg` source → `DiagramDef` in three stages, each exposed as a

@@ -1,3 +1,6 @@
+---
+description: 'Every type the library accepts or returns. Also explains the coordinate contract: user-facing positions are 1-based and normalized to 0-based before layout runs.'
+---
 # Types
 
 Every shape the library accepts or produces. All types are exported

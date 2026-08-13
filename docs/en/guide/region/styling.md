@@ -1,3 +1,6 @@
+---
+description: 'How regions stay in the background. Covers the automatic tint applied to theme keywords, setting alpha explicitly, corner radius, and label scale.'
+---
 # Styling
 
 Regions are meant to be quiet — they group cells without stealing

@@ -1,3 +1,6 @@
+---
+description: 'Examples for version timelines, feature rollout from canary to beta to GA, quarterly roadmaps, and deprecation schedules.'
+---
 # Release & roadmap
 
 Version lifecycles, feature rollouts, deprecation timelines.

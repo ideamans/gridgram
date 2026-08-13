@@ -1,3 +1,6 @@
+---
+description: 'Gridgram resolves settings from four layers, lowest priority first. Covers the layer types, resolveSettings, the project config file, and how the doc { } layer fits in.'
+---
 # Configuration
 
 Gridgram resolves settings through four layers, in order of

@@ -1,3 +1,6 @@
+---
+description: '公開APIの最上位にある renderDiagram とその仲間の説明です。SVG文字列・VNodeツリー・JSX要素のどれを返してほしいかだけが違い、内部パイプラインは共通です。'
+---
 # `renderDiagram` と仲間たち
 
 render モジュールは公開 API のトップです — 3 つの関数と 1 つの Preact コンポーネントで、いずれも同じ `DiagramDef` を受け取り、1 つの内部パイプラインを共有します。違いは何を返してほしいかだけ — SVG 文字列、VNode ツリー、あるいはインラインの JSX 要素のいずれか。

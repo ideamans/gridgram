@@ -1,3 +1,6 @@
+---
+description: 'Examples for the test pyramid, an OS-by-version CI matrix, test environments, and coverage feedback, including the inverted ice cream cone anti-pattern.'
+---
 # Testing
 
 Test organisation, CI matrices, and environment topologies.

@@ -1,3 +1,6 @@
+---
+description: 'The doc { … } statement carries diagram-wide settings. Covers using several per file, the five commands, the keys you can set, and the JSON5 syntax it accepts.'
+---
 # Document
 
 "Document" is everything in a `.gg` file that isn't an icon, connector,

@@ -1,3 +1,6 @@
+---
+description: 'Routing a connector through specific cells instead of a straight line. Coordinates accept fractions, which helps when you need to steer around other nodes.'
+---
 # Waypoints
 
 By default a connector is a straight line from source to target.

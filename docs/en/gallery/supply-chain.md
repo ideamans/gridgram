@@ -1,3 +1,6 @@
+---
+description: 'Examples for a three-stage supply chain with returns, multi-tier suppliers, inventory flow, and reverse logistics. Dashed edges carry the reverse paths; notes carry lead times.'
+---
 # Supply chain
 
 Material moving from suppliers to end customers, with reverse flow

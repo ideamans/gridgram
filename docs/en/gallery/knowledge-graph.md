@@ -1,3 +1,6 @@
+---
+description: 'Examples for taxonomies, faceted tags, concept relationships, and knowledge graphs built for agents. Shows where a strict tree stops working and facets take over.'
+---
 # Knowledge graph
 
 Concept hierarchies, taxonomies, and relationship networks.

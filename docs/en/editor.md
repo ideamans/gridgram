@@ -2,6 +2,7 @@
 title: Editor
 aside: false
 outline: false
+description: 'A live .gg playground in the browser. Type on the left and the SVG updates on the right; parse errors and icon resolution warnings appear underneath.'
 ---
 
 # Editor

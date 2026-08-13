@@ -1,3 +1,6 @@
+---
+description: 'Patterns for embedding Gridgram in a host system: HTTP endpoints, MCP tools, headless build steps, PNG rasterization, browser embedding, and worker threads.'
+---
 # Integrations
 
 Patterns for embedding Gridgram in a host system. None of these are

@@ -1,3 +1,6 @@
+---
+description: 'Frames let one diagram hold several merged views. Covers the frames selector, the merge rules, frame-aware integrity checks, and rendering a specific frame.'
+---
 # Frame
 
 Frames let a **single diagram carry multiple merged views**. Any

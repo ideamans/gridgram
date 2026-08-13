@@ -1,3 +1,6 @@
+---
+description: '.gg ファイルを SVG・PNG・JSON に変換する gg コマンドの使い方です。サブコマンド、オプション、設定の解決順序、出力形式の決まり方を説明します。'
+---
 # CLI
 
 `gg` は `.gg` ファイルを SVG / PNG / JSON（マージ済み `DiagramDef` の

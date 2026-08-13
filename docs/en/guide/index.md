@@ -1,3 +1,6 @@
+---
+description: 'Install the gg binary and render your first diagram in under a minute, with the commands for macOS, Linux, and Windows plus a quick verification step.'
+---
 # Quick start
 
 Install the `gg` binary and render your first diagram in under a

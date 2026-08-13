@@ -1,3 +1,6 @@
+---
+description: 'A guided tour of the .gg language, one concept per section next to its rendered result. Read it top to bottom and you have the syntax for everyday diagrams.'
+---
 # First Gridgram
 
 A guided tour of the `.gg` language — one concept per section, with a

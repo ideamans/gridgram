@@ -1,3 +1,6 @@
+---
+description: 'Examples for production lines with quality gates, factory floor zones, kaizen improvement cycles, and OEE inputs. Badges carry pass and fail; regions carve up the floor.'
+---
 # Manufacturing
 
 Production lines, quality gates, and continuous-improvement loops.

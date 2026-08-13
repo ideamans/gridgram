@@ -1,3 +1,6 @@
+---
+description: 'Examples for the OAuth 2 authorization code flow, JWT verification, service-to-service mTLS, and zero trust network access, with trust boundaries drawn out.'
+---
 # Security & auth
 
 Authentication flows, trust boundaries, secret handling.

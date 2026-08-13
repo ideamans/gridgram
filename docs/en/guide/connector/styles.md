@@ -1,3 +1,6 @@
+---
+description: 'Setting connector width, color, and dash pattern. Includes the full attribute table with defaults, plus arrowhead margin tuning.'
+---
 # Styles
 
 The connector's look — line thickness, color, dash pattern — is

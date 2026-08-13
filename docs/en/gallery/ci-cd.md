@@ -1,3 +1,6 @@
+---
+description: 'Examples running from commit to production: color-banded regions with manual gates, matrix build fan-out, feature-branch previews, and deployment topology.'
+---
 # CI / CD
 
 Continuous integration and delivery flows, from a developer's

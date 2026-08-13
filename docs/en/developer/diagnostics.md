@@ -1,3 +1,6 @@
+---
+description: 'Labels that could not be placed and connectors that could not route come back as structured PlacementDiagnostic records. Covers the record shape with worked examples.'
+---
 # Diagnostics
 
 Gridgram's pipeline doesn't just produce an SVG — it produces

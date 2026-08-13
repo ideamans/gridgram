@@ -1,3 +1,6 @@
+---
+description: 'Examples for primary and read replicas, sharding by key, read-through caching, and change data capture. Regions separate the write side from the read side.'
+---
 # Database
 
 Replication, sharding, caching, and change-data-capture topologies.

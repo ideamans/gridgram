@@ -1,3 +1,6 @@
+---
+description: 'Every node sits on an integer column and row. Covers A1 and numeric notation, automatic size inference, cellSize, and how the CLI --width option interacts.'
+---
 # Grid
 
 Gridgram is **grid-first**: every node sits on an integer

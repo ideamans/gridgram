@@ -1,3 +1,6 @@
+---
+description: 'Examples for API gateways with downstream services, queue-mediated communication, sagas for distributed transactions, and the service mesh sidecar pattern.'
+---
 # Microservices
 
 Decomposition patterns for modern service architectures. Size and

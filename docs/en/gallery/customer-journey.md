@@ -1,3 +1,6 @@
+---
+description: 'Examples for AARRR, an ecommerce purchase flow, onboarding, and support journeys. Colored bands separate the stages so the diagram reads as a funnel at a glance.'
+---
 # Customer journey
 
 The path a user takes through a product or brand. Coloured bands

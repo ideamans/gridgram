@@ -1,3 +1,6 @@
+---
+description: 'Examples for purchase approval, invoice processing, support ticket lifecycles, and document sign-off. Regions group the approval tiers and notes carry the SLAs.'
+---
 # Business workflow
 
 Approvals, document flows, tickets — processes that span people and

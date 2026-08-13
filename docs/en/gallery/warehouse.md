@@ -1,3 +1,6 @@
+---
+description: 'Examples for warehouse zone layouts, pick paths pinned with waypoints, pick-and-pack flow, and cycle counting. The diagrams double as floor maps.'
+---
 # Warehouse
 
 Physical zone layouts and pick routes. Regions carve out the

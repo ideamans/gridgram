@@ -1,3 +1,6 @@
+---
+description: 'Small markers pinned to a node corner. Covers the eight semantic presets, position and size, stacking order when there are several, and fully custom badges.'
+---
 # Badge
 
 A **badge** is a small marker placed on one of a node's corners. Badges

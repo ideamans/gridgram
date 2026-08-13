@@ -1,3 +1,6 @@
+---
+description: 'TypeScript API を npm から入れて、最初の図を描くまでの手順です。ESM のみ・Node 22 以上という実行条件と、Preact コンポーネントの使い方も説明します。'
+---
 # クイックスタート（TS API）
 
 TypeScript API は ESM として npm に公開されています。インストールし、必要なものを import し、`renderDiagram` に `DiagramDef` を渡せば SVG が返ってきます。

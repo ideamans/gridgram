@@ -1,3 +1,6 @@
+---
+description: 'How several doc blocks and DSL statements in one .gg file combine. Scalars take the last value, objects deep merge, and arrays concatenate with a duplicate-ID check.'
+---
 # Merging
 
 A `.gg` file is allowed to have **multiple `doc` blocks** and to mix

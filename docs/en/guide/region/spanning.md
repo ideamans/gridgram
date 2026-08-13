@@ -1,3 +1,6 @@
+---
+description: 'A region is not limited to one rectangle. Join rectangles edge to edge to build L, T, and compound shapes; Gridgram draws the union as a single outline.'
+---
 # Spanning
 
 A region isn't limited to a single rectangle. You can join rectangles

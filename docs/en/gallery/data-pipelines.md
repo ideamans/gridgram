@@ -1,3 +1,6 @@
+---
+description: 'Examples for classic ETL, streaming with consumers, lambda architecture, and CDC into a catalog. They build up from a deliberately flat series to richer variants.'
+---
 # Data pipelines
 
 Moving data from where it lands to where analysts and models can

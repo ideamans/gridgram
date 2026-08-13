@@ -1,3 +1,6 @@
+---
+description: 'Examples for the classic marketing funnel, a B2B sales pipeline, customer segmentation, and campaign attribution. Funnel width tracks the conversion rate.'
+---
 # Sales funnel
 
 Prospect-to-customer flows and conversion stages.

@@ -87,6 +87,7 @@ landing:
     secondary:
       text: GitHub
       link: https://github.com/ideamans/gridgram
+description: 'A relationship-diagram generator driven by a Mermaid-like text grammar. Small DSL, TypeScript library, and 5,500+ Tabler icons bundled in.'
 ---
 
 <Landing />

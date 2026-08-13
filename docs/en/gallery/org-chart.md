@@ -1,3 +1,6 @@
+---
+description: 'Examples for headcount and reporting lines: photo avatars, small-org structures, engineering teams, matrix orgs, and squads. Best suited to shallow hierarchies.'
+---
 # Org chart
 
 People and reporting lines. Gridgram's grid layout handles shallow

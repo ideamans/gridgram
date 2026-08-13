@@ -1,3 +1,6 @@
+---
+description: 'Install the TypeScript API from npm and render your first diagram. Covers the ESM-only and Node 22+ requirements, plus using the Preact component.'
+---
 # Quickstart (TS API)
 
 The TypeScript API is published to npm as ESM. Install it, import what

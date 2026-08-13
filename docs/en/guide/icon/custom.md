@@ -1,3 +1,6 @@
+---
+description: 'Three ways to bring in your own icons: a map inside doc, the CLI --icons directory, and path references. Covers the precedence order and clipping for raster images.'
+---
 # Custom icons
 
 Tabler covers most generic glyphs, but sooner or later you'll want your

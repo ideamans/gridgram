@@ -1,3 +1,6 @@
+---
+description: 'An annotation box pinned to a single grid cell, optionally with leader lines. Covers the targets syntax for pointing at nodes or connectors, and the styling options.'
+---
 # Note
 
 A **note** is a small callout box pinned to a grid cell, with optional

@@ -1,3 +1,6 @@
+---
+description: 'Examples for layered, hexagonal, clean, and plugin architectures. The focus is on where the boundaries sit and which way the dependency arrows point.'
+---
 # Software architecture
 
 Layering, boundaries, and dependency direction.

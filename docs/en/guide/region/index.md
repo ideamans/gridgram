@@ -1,3 +1,6 @@
+---
+description: 'A background color block that groups several cells, useful for layers, trust boundaries, and phases. Regions render behind everything else on the canvas.'
+---
 # Region
 
 A **region** is a colored background block that groups a set of cells.

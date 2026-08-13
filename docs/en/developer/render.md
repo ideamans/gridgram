@@ -1,3 +1,6 @@
+---
+description: 'renderDiagram and its siblings sit at the top of the public API. They share one internal pipeline and differ only in what they return: an SVG string, a VNode tree, or JSX.'
+---
 # `renderDiagram` and friends
 
 The render module is the top of the public API — three functions and

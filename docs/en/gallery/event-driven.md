@@ -1,3 +1,6 @@
+---
+description: 'Examples for pub/sub, event sourcing, CQRS with a dead-letter branch, and saga state machines. Region-based fan-out makes the one-to-many shape obvious.'
+---
 # Event-driven
 
 Patterns where the unit of work is an event, not a function call.

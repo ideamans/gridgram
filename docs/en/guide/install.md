@@ -1,3 +1,6 @@
+---
+description: 'Installation methods beyond the one-liner: the install landing page, manual downloads from GitHub Releases, checksum verification, and building from source.'
+---
 # Install
 
 The fastest way to install `gg` is the one-liner shown in the

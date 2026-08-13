@@ -1,3 +1,6 @@
+---
+description: 'Examples for the request lifecycle, middleware chains, path-based versioning, and GraphQL resolvers, including the cases where ordering actually matters.'
+---
 # API design
 
 Request lifecycles, middleware, versioning strategies.
