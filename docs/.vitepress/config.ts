@@ -579,7 +579,8 @@ export default withMachineReadability(config, {
   markdownSource: true,
   lint: {
     level: "warn",
-    // ルートは言語選択だけのページ（/en/ へ送る）。本文も見出しも無くて当然
-    exclude: ["index.html"],
+    // ルートは言語選択だけのページ（/en/ へ送る）。本文も見出しも無くて当然。
+    // 404 は索引の対象ではないので題の長さを問わない
+    exclude: ["index.html", "404.html"],
   },
 });

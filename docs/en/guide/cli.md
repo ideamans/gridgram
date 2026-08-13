@@ -1,4 +1,5 @@
 ---
+title: CLI reference
 description: 'The gg command turns .gg files into SVG, PNG, or JSON. Covers subcommands, options, the settings resolution order, and how the output format is chosen.'
 ---
 # CLI

@@ -290,7 +290,8 @@ const siteLang = computed<string>(() => {
           class="flex flex-col items-start"
         >
           <div class="text-primary mb-3" v-html="iconSvg(f.icon, 36)" />
-          <h3 class="font-semibold text-base md:text-lg">{{ f.title }}</h3>
+          <!-- 見出しなしの機能グリッド。h1 の直後なので h3 だと階層が飛ぶ（L2-20） -->
+          <h2 class="font-semibold text-base md:text-lg">{{ f.title }}</h2>
           <p class="text-sm opacity-70 leading-relaxed mt-1.5">
             {{ f.body }}
             <a

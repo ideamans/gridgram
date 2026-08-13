@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Gridgram
+title: Gridgram — Diagrams for the AI era
 aside: false
 sidebar: false
 description: 'Diagrams for the AI era. Pick English or Japanese to read the Gridgram documentation for the .gg language, the CLI, and the TypeScript API.'

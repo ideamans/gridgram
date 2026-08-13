@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Gridgram
+title: テキストで書く AI 時代の関係図ジェネレータ
 landing:
   hero:
     name: Gridgram

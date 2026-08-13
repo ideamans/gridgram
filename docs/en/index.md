@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Gridgram
+title: A text grammar for relationship diagrams
 landing:
   hero:
     name: Gridgram
