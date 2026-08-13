@@ -1,5 +1,5 @@
 ---
-description: 'How to draw an arrow between two nodes. The operator between the node IDs sets both direction and line style; solid and dotted forms share the same direction semantics.'
+description: 'How to draw an arrow between two nodes. The operator between the node IDs sets both direction and line style, and dotted forms keep the same semantics.'
 ---
 # Connector
 

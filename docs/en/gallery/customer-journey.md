@@ -1,5 +1,5 @@
 ---
-description: 'Examples for AARRR, an ecommerce purchase flow, onboarding, and support journeys. Colored bands separate the stages so the diagram reads as a funnel at a glance.'
+description: 'Examples for AARRR, an ecommerce purchase flow, onboarding, and support journeys. Colored bands separate stages so the diagram reads as a funnel.'
 ---
 # Customer journey
 

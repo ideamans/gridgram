@@ -1,5 +1,5 @@
 ---
-description: 'When exactly two connectors share an endpoint pair, Gridgram fans them apart by shifting the attachment angles symmetrically. Three or more is an error, and you can opt out.'
+description: 'When exactly two connectors share an endpoint pair, Gridgram fans them apart by shifting the attachment angles. Three or more is an error.'
 ---
 # Overlapping pairs
 

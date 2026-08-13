@@ -1,5 +1,5 @@
 ---
-description: 'Examples for taxonomies, faceted tags, concept relationships, and knowledge graphs built for agents. Shows where a strict tree stops working and facets take over.'
+description: 'Examples for taxonomies, faceted tags, concept relationships, and agent-facing knowledge graphs. Shows where a strict tree stops and facets take over.'
 ---
 # Knowledge graph
 

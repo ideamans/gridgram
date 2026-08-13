@@ -1,5 +1,5 @@
 ---
-description: 'Examples for three-tier web architecture, load balancing with read replicas, CDN and origin, and active-passive multi-region. Regions mark public and private trust boundaries.'
+description: 'Examples for three-tier web architecture, load balancing, CDN and origin, and active-passive multi-region. Regions mark public and private boundaries.'
 ---
 # Infrastructure
 

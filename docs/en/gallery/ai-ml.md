@@ -1,5 +1,5 @@
 ---
-description: 'Examples for training pipelines, RAG, agent-and-tool loops, and cached online serving. A purple theme marks the ML domain and sizeScale gives the central node weight.'
+description: 'Examples for training pipelines, RAG, agent-and-tool loops, and cached serving. A purple theme marks the ML domain and sizeScale weights the center.'
 ---
 # AI / ML
 

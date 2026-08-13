@@ -1,5 +1,5 @@
 ---
-description: 'A collection of .gg diagrams organized by application domain, each rendered live at build time. Together they show the DSL reaches well past cloud architecture boxes.'
+description: 'A collection of .gg diagrams organized by domain, each rendered live at build time. Together they show the DSL reaches past cloud architecture boxes.'
 ---
 # Gallery
 

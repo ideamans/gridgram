@@ -1,5 +1,5 @@
 ---
-description: 'Labels that could not be placed and connectors that could not route come back as structured PlacementDiagnostic records. Covers the record shape with worked examples.'
+description: 'Labels that could not be placed and connectors that could not route come back as structured PlacementDiagnostic records. Includes worked examples.'
 ---
 # Diagnostics
 

@@ -1,5 +1,5 @@
 ---
-description: 'The developer guide for driving Gridgram from code. Covers the two entry points, the rendering primitives, a suggested reading order, and why determinism is a contract.'
+description: 'The developer guide for driving Gridgram from code: the two entry points, the rendering primitives, a reading order, and why determinism is a contract.'
 ---
 # Developer Guide
 

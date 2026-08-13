@@ -1,5 +1,5 @@
 ---
-description: 'Three ways to bring in your own icons: a map inside doc, the CLI --icons directory, and path references. Covers the precedence order and clipping for raster images.'
+description: 'Three ways to bring in your own icons: a map inside doc, the CLI --icons directory, and path references. Covers precedence and clipping raster images.'
 ---
 # Custom icons
 

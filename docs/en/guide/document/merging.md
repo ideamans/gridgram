@@ -1,5 +1,5 @@
 ---
-description: 'How several doc blocks and DSL statements in one .gg file combine. Scalars take the last value, objects deep merge, and arrays concatenate with a duplicate-ID check.'
+description: 'How several doc blocks and DSL statements in one .gg file combine: scalars take the last value, objects deep merge, arrays concatenate with an ID check.'
 ---
 # Merging
 

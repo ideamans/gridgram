@@ -1,5 +1,5 @@
 ---
-description: 'An annotation box pinned to a single grid cell, optionally with leader lines. Covers the targets syntax for pointing at nodes or connectors, and the styling options.'
+description: 'An annotation box pinned to one grid cell, optionally with leader lines. Covers the targets syntax for pointing at nodes or connectors, plus styling.'
 ---
 # Note
 

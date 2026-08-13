@@ -1,5 +1,5 @@
 ---
-description: 'Examples for hub-and-spoke networks, last-mile delivery with returns, route optimization, and parcel tracking states. Failed deliveries loop back on dashed edges.'
+description: 'Examples for hub-and-spoke networks, last-mile delivery with returns, route optimization, and parcel tracking states, with returns on dashed edges.'
 ---
 # Delivery
 

@@ -1,5 +1,5 @@
 ---
-description: 'Declaring a node with the icon command. Covers using it without a glyph, the bare-word shorthand, what happens when an icon does not resolve, and pinning label direction.'
+description: 'Declaring a node with the icon command. Covers using it without a glyph, the bare-word shorthand, unresolved icons, and pinning the label direction.'
 ---
 # Icon Node
 

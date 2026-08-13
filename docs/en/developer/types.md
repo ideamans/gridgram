@@ -1,5 +1,5 @@
 ---
-description: 'Every type the library accepts or returns. Also explains the coordinate contract: user-facing positions are 1-based and normalized to 0-based before layout runs.'
+description: 'Every type the library accepts or returns, plus the coordinate contract: user-facing positions are 1-based and normalized to 0-based before layout.'
 ---
 # Types
 

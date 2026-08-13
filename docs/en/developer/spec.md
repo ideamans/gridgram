@@ -1,5 +1,5 @@
 ---
-description: 'The reference that explains why .gg behaves the way it does: the grammar in BNF, the coordinate system, the resolution pipeline, merge rules, and icon lookup order.'
+description: 'Why .gg behaves the way it does: the grammar in BNF, the coordinate system, the resolution pipeline, the merge rules, and the icon lookup order.'
 ---
 # Specification
 

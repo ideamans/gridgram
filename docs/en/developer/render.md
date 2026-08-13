@@ -1,5 +1,5 @@
 ---
-description: 'renderDiagram and its siblings sit at the top of the public API. They share one internal pipeline and differ only in what they return: an SVG string, a VNode tree, or JSX.'
+description: 'renderDiagram and its siblings share one internal pipeline and differ only in what they return: an SVG string, a VNode tree, or an inline JSX element.'
 ---
 # `renderDiagram` and friends
 

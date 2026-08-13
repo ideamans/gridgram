@@ -1,5 +1,5 @@
 ---
-description: 'A theme is the set of colors behind keywords like primary and accent. Covers the defaults, overriding individual slots, transparent canvases, and deep merging across doc blocks.'
+description: 'A theme is the set of colors behind keywords like primary and accent. Covers the defaults, overriding slots, transparent canvases, and deep merging.'
 ---
 # Theme
 
