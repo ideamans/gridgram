@@ -159,3 +159,25 @@ The layout pipeline surfaces placement/routing/icon issues as `PlacementDiagnost
 ## Examples and docs
 
 Every `examples/<name>/` directory holds a **pair**: `diagram.gg` (CLI form) and `diagram.ts` (TS-API form) that must render identically. `scripts/build-docs-examples.ts` batches them into `docs/public/examples/` (both SVGs, both sources) so VitePress's `<Example name="…" />` component can show CLI↔TS-API tabs side by side. When adding a feature that touches the spec, add or update an example pair — the docs loop `bun run docs:examples` runs before dev/build and will surface rendering drift.
+
+## Publishing to npm
+
+Pushing a `v*` tag runs `.github/workflows/publish.yml`, which tests, builds and **publishes to npm directly**
+(no staged approval). It authenticates with npm Trusted Publishing (GitHub Actions OIDC); no `NPM_TOKEN` secret is used,
+and provenance is attached automatically.
+
+```bash
+# after bumping "version" in package.json and pushing the commit
+git tag vX.Y.Z && git push origin vX.Y.Z
+```
+
+The same tag also runs release.yml (binaries). npm is published by publish.yml (it used to be published by hand).
+The tag is also checked against the version in plugins/gridgram/.claude-plugin/plugin.json.
+
+- The job fails if the tag and the version in package.json differ, and does nothing if that version is already on npm.
+- A prerelease (`1.2.0-beta.0`) is published under its identifier as the dist-tag (`beta`), not `latest`.
+- Do not `npm publish` from a local machine (no tokens are kept).
+- To re-run without moving the tag, start "Publish to npm" with workflow_dispatch (it publishes the version in package.json on the chosen branch).
+- A PR that changes `publish.yml` runs the build and `npm pack --dry-run` without publishing.
+- Prerequisite: on npmjs.com, `gridgram` lists GitHub Actions / `ideamans/gridgram` / `publish.yml` with the **publish** permission as its
+  Trusted Publisher. With only the stage-publish permission, `npm publish` fails with `E403 OIDC permission denied`.
