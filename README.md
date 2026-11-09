@@ -206,3 +206,8 @@ PNG output is CLI-only and depends on **[libvips](https://github.com/libvips/lib
 render, `sharp` and a prebuilt libvips for your platform are fetched
 from the npm registry into `~/.cache/gridgram/` and loaded dynamically,
 so the LGPL library remains user-replaceable.
+
+## Releasing (maintainers)
+
+Bump `version` in package.json, commit, then `git tag vX.Y.Z && git push origin vX.Y.Z`.
+GitHub Actions publishes to npm with Trusted Publishing (OIDC); no token is used.
