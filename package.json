@@ -1,6 +1,6 @@
 {
   "name": "gridgram",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "Grid-based diagram rendering library — authored as a DiagramDef or a .gg file, rendered to SVG via Preact SSR.",
   "type": "module",
   "main": "./dist/index.js",
@@ -76,7 +76,7 @@
     "@tailwindcss/vite": "^4.2.2",
     "@types/bun": "latest",
     "daisyui": "^5.5.19",
-    "sharp": "^0.33.2",
+    "sharp": "^0.35.5",
     "tailwindcss": "^4.2.2",
     "typescript": "~6.0.2",
     "vitepress": "^2.0.0-alpha.21",

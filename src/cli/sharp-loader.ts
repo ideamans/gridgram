@@ -12,7 +12,7 @@ import { join } from 'path'
 import { createRequire } from 'module'
 import { spawnSync } from 'child_process'
 
-const SHARP_VERSION = '0.33.5'
+const SHARP_VERSION = '0.35.5'
 const REGISTRY = 'https://registry.npmjs.org'
 
 type Os = 'linux' | 'darwin' | 'win32'
@@ -92,7 +92,7 @@ class Fetcher {
 
 /**
  * Duplicate every top-level transitive dep into `<nm>/sharp/node_modules/`
- * so sharp's own `require('detect-libc')` / `require('color')` /
+ * so sharp's own `require('detect-libc')` / `require('@img/colour')` /
  * `require('semver')` (and their recursive deps) resolve via the standard
  * CJS algorithm WITHOUT having to walk up to the flat parent node_modules.
  *
@@ -107,8 +107,21 @@ function seedNestedDeps(nm: string): void {
   const sharpNm = join(nm, 'sharp', 'node_modules')
   mkdirSync(sharpNm, { recursive: true })
   for (const name of readdirSyncSafe(nm)) {
-    // Skip sharp itself and scoped dirs (which contain native platform packages).
-    if (name === 'sharp' || name.startsWith('.') || name.startsWith('@')) continue
+    // Skip sharp itself. Scoped dirs hold the native platform packages, which
+    // stay flat; only the pure-JS scoped deps (sharp 0.34+ uses @img/colour)
+    // are mirrored.
+    if (name === 'sharp' || name.startsWith('.')) continue
+    if (name.startsWith('@')) {
+      for (const sub of readdirSyncSafe(join(nm, name))) {
+        if (name === '@img' && sub.startsWith('sharp-')) continue
+        const src = join(nm, name, sub)
+        const dst = join(sharpNm, name, sub)
+        if (existsSync(dst)) continue
+        mkdirSync(join(sharpNm, name), { recursive: true })
+        cpRecursiveSync(src, dst)
+      }
+      continue
+    }
     const src = join(nm, name)
     const dst = join(sharpNm, name)
     if (existsSync(dst)) continue
@@ -198,6 +211,9 @@ export async function loadSharp(): Promise<any> {
   // node_modules and finds every transitive dep.
   const anchor = join(sharpDir, 'package.json')
   const cacheRequire = createRequire(anchor)
-  const mod = cacheRequire('./lib/index.js')
+  // sharp 0.34+ ships its CJS entry at dist/index.cjs (0.33 used lib/index.js).
+  // Follow package.json "main" so the entry tracks SHARP_VERSION.
+  const main: string = JSON.parse(readFileSync(anchor, 'utf8')).main ?? './lib/index.js'
+  const mod = cacheRequire(main.startsWith('.') ? main : `./${main}`)
   return (mod as any).default ?? mod
 }
