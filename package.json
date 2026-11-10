@@ -79,9 +79,9 @@
     "sharp": "^0.33.2",
     "tailwindcss": "^4.2.2",
     "typescript": "~6.0.2",
-    "vitepress": "^2.0.0-alpha.17",
-    "vitepress-daisyui-theme": "^0.2.1",
-    "vue": "^3.5.32",
-    "vitepress-machine-readability": "^0.2.0"
+    "vitepress": "^2.0.0-alpha.21",
+    "vitepress-daisyui-theme": "^0.3.2",
+    "vue": "^3.5.45",
+    "vitepress-machine-readability": "^0.2.1"
   }
 }
