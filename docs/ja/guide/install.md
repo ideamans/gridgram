@@ -54,16 +54,17 @@ description: 'ワンライナー以外のインストール方法です。イン
 |----------------------------|---------------------------------------------|
 | Linux x64                  | `gridgram_<version>_linux_amd64.tar.gz`     |
 | Linux ARM64                | `gridgram_<version>_linux_arm64.tar.gz`     |
-| macOS (Intel)              | `gridgram_<version>_darwin_amd64.tar.gz`    |
 | macOS (Apple Silicon)      | `gridgram_<version>_darwin_arm64.tar.gz`    |
 | Windows x64                | `gridgram_<version>_windows_amd64.zip`      |
+
+Intel Mac には対応していません。v0.6.2 より後のリリースには `darwin_amd64` のアーカイブがありません。
 
 ### Linux / macOS
 
 ```sh
 VERSION=0.1.0
-OS=linux       # or darwin
-ARCH=amd64     # or arm64
+OS=linux       # or darwin (Apple Silicon only)
+ARCH=amd64     # or arm64 (darwin is always arm64)
 
 curl -fsSL -o gg.tar.gz \
   "https://github.com/ideamans/gridgram/releases/download/v${VERSION}/gridgram_${VERSION}_${OS}_${ARCH}.tar.gz"

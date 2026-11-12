@@ -44,10 +44,7 @@ jobs:
             os: linux
             arch: arm64
             ext: tar.gz
-          - target: bun-darwin-x64
-            os: darwin
-            arch: amd64
-            ext: tar.gz
+          # No bun-darwin-x64: Intel Macs are no longer supported (2026-11-12).
           - target: bun-darwin-arm64
             os: darwin
             arch: arm64

@@ -43,7 +43,7 @@ bun run docs:dev             # vitepress dev (builds examples, logo, llms.txt fi
 bun run docs:build           # production docs build (same pre-steps)
 ```
 
-CI runs `bun install --frozen-lockfile && bun run sync-tabler && bun run ai:regen && bun run typecheck && bun test` on Ubuntu (see `.github/workflows/test.yml`). Release workflow cross-compiles `gg` for linux/darwin/windows × amd64/arm64 on tag push.
+CI runs `bun install --frozen-lockfile && bun run sync-tabler && bun run ai:regen && bun run typecheck && bun test` on Ubuntu (see `.github/workflows/test.yml`). Release workflow cross-compiles `gg` for linux amd64/arm64, darwin arm64 and windows amd64 on tag push (no Intel Mac build since 2026-11-12).
 
 ## Architecture
 
