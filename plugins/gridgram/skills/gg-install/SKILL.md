@@ -48,6 +48,11 @@ If the user is on `windows-arm64`, currently no prebuilt asset
 exists. Tell the user and stop — direct them to build from source
 (`bun run compile`) instead.
 
+If the user is on `darwin-amd64` (an Intel Mac), stop as well: Intel
+Macs are no longer supported, and releases after v0.6.2 ship no
+`darwin_amd64` archive, so the download would 404. Say "Intel Mac is
+no longer supported" plainly instead of trying another asset.
+
 ### 2. Look up the latest release
 
 Use the GitHub API; no auth needed for public repos:
